@@ -4,6 +4,21 @@
 > Always read `OVERVIEW.md` and `.junie/guidelines.md` before starting any task.
 > Tasks within a phase may be done in any order unless a `Depends on` field says otherwise.
 
+## Project structure reference
+
+> Read this before touching any file path in the tasks below.
+
+- `APPS_DIR` = `iceplunge/` — all project apps live here.
+- Module paths in settings: `"iceplunge.<appname>"` (e.g. `"iceplunge.plunges"`).
+- App code: `iceplunge/<appname>/models.py`, `views.py`, etc.
+- Templates: `iceplunge/templates/<appname>/` — the global template dir; **not** per-app dirs.
+- HTMX partials: `iceplunge/templates/<appname>/partials/_<name>.html`.
+- Static files: `iceplunge/static/<appname>/`.
+- Dependencies: managed with `uv` via `pyproject.toml`. Use `uv add <pkg>` / `uv remove <pkg>`.
+- User model: `iceplunge/users/models.py`, always accessed via `get_user_model()`. Email-only login; has `name` field; no `first_name`/`last_name`.
+
+---
+
 ## Testing policy
 
 Every acceptance criterion must be covered by an automated test **unless it is marked `(manual)`**.
@@ -17,22 +32,30 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ## Phase 0 — Foundation
 
-### T0.1 Django project scaffold
-**Goal:** Create the Django project and app layout that all other tasks build on.
+### T0.1 Complete the scaffold setup
+**Goal:** The cookiecutter-django scaffold is already in place. This task finishes the project-specific setup on top of it.
 
-**Spec refs:** §2 Architecture, §13 Data Models
+**Spec refs:** §2 Architecture, §13 Data Models, `.junie/guidelines.md` Project Scaffold
+
+**What the scaffold already provides (do not recreate):**
+- `config/settings/base.py|local.py|production.py|test.py`, `manage.py`, `pyproject.toml` with `uv`.
+- `iceplunge/users/` app with custom `User` model (`AUTH_USER_MODEL = "users.User"`), email-only login, allauth wired, email verification mandatory.
+- `iceplunge/templates/base.html` (currently Bootstrap-based — to be replaced below).
+- Whitenoise, Redis, django-environ, argon2 passwords, Ruff, pytest.
 
 **Deliverables:**
-- `manage.py`, `config/` package containing `settings/base.py`, `settings/local.py`, `settings/production.py`.
-- Apps created (empty, registered in `INSTALLED_APPS`): `pages`, `accounts`, `plunges`, `tasks`, `covariates`, `notifications`, `dashboard`, `export`.
-- `requirements.txt` (or `pyproject.toml`) with: `django`, `django-allauth`, `django-hijack`, `crispy-forms`, `crispy-bulma`, `django-htmx`, `huey`, `django-rollbar`, `psycopg2-binary`, `python-dotenv`.
-- `pages` app has a minimal `base.html` at `pages/templates/base.html` extending nothing, loading Bulma (self-hosted in static), HTMX (self-hosted), SweetAlert2 (self-hosted), and a `{% block content %}` placeholder.
-- `local.py` uses SQLite; `production.py` uses PostgreSQL. `DJANGO_SETTINGS_MODULE` defaults to `config.settings.local`.
+- Create and register these apps in `LOCAL_APPS` in `config/settings/base.py` (apps live under `iceplunge/`):
+  `iceplunge.pages`, `iceplunge.plunges`, `iceplunge.tasks`, `iceplunge.covariates`, `iceplunge.notifications`, `iceplunge.dashboard`, `iceplunge.export`.
+- Add dependencies via `uv add`: `django-hijack`, `crispy-bulma`, `django-htmx`, `huey`, `django-rollbar`. Remove `crispy-bootstrap5` via `uv remove`.
+- Replace Bootstrap with **Bulma** in `iceplunge/templates/base.html`: remove Bootstrap CDN links/scripts; self-host Bulma CSS in `iceplunge/static/css/`; self-host HTMX and SweetAlert2 in `iceplunge/static/js/`.
+- Update `config/settings/base.py`: `CRISPY_TEMPLATE_PACK = "bulma"`, `CRISPY_ALLOWED_TEMPLATE_PACKS = "bulma"`.
+- `iceplunge/templates/base.html` must include `{% block content %}` and the hijack warning banner (hidden unless `{% if request.user.is_impersonated %}`).
 
 **Acceptance criteria:**
 - `python manage.py check` passes with no errors.
-- `python manage.py runserver` serves a 200 response at `/`.
-- All eight apps appear in `INSTALLED_APPS`.
+- `python manage.py runserver` serves a 200 response at `/`. *(manual)*
+- All seven new apps appear in `INSTALLED_APPS`.
+- No Bootstrap CSS or JS references remain in `base.html`. *(manual)*
 
 ---
 
@@ -46,7 +69,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 - `django-hijack` installed; hijack button visible in Django admin user list/detail; only superusers and `is_staff` with explicit `hijack` permission can hijack.
 - Hijack session banner renders in `base.html` when a session is hijacked.
 - URL patterns for allauth and hijack wired in `config/urls.py`.
-- `accounts` app has a custom `User` model (extend `AbstractUser`) with a `pseudonymised_id` field (`UUIDField`, auto-generated, unique) used in exports.
+- The cookiecutter `users` app already contains the custom `User` model. Add a `pseudonymised_id` field (`UUIDField`, default=`uuid4`, unique) to `iceplunge/users/models.py` — do **not** create a new `accounts` app. Always reference the User model via `get_user_model()`.
 
 **Acceptance criteria:**
 - `python manage.py migrate` completes without error.
@@ -61,11 +84,11 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §19 Ethics, §12 Onboarding
 
 **Deliverables:**
-- `ConsentProfile` model in `accounts` with fields: `user` (OneToOne), `consented_at` (DateTimeField, nullable), `consent_version` (CharField).
-- Django middleware class `accounts/middleware.py::ConsentRequiredMiddleware` that redirects to `accounts:consent` if the user is authenticated but `ConsentProfile.consented_at` is null.
+- `ConsentProfile` model in `iceplunge/users/models.py` with fields: `user` (OneToOne), `consented_at` (DateTimeField, nullable), `consent_version` (CharField).
+- Django middleware class `iceplunge/users/middleware.py::ConsentRequiredMiddleware` that redirects to `users:consent` if the user is authenticated but `ConsentProfile.consented_at` is null.
 - Exempts: allauth URLs, hijack URLs, the consent view itself, static/media.
-- Consent view (`accounts/views.py`): GET renders consent text; POST records `consented_at = now()` and redirects to dashboard.
-- Template at `accounts/templates/accounts/consent.html`.
+- Consent view (`iceplunge/users/views.py`): GET renders consent text; POST records `consented_at = now()` and redirects to dashboard.
+- Template at `iceplunge/templates/users/consent.html`.
 
 **Acceptance criteria:**
 - New user after email verification is redirected to consent before reaching any other page.
@@ -82,7 +105,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §6 Covariates (Baseline), §12 Onboarding, §13 Data Models
 
 **Deliverables:**
-- `BaselineProfile` model in `accounts/models.py`:
+- `BaselineProfile` model in `iceplunge/users/models.py`:
   - `user` (OneToOne → `User`, related_name `baseline_profile`)
   - `age` (PositiveSmallIntegerField)
   - `gender` (CharField, max_length=50)
@@ -109,7 +132,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §5 Plunge Logging, §13 Data Models
 
 **Deliverables:**
-- `PlungeLog` model in `plunges/models.py`:
+- `PlungeLog` model in `iceplunge/plunges/models.py`:
   - `user` (FK → `User`, related_name `plunge_logs`)
   - `timestamp` (DateTimeField, default=now)
   - `duration_minutes` (PositiveSmallIntegerField)
@@ -136,7 +159,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §11 Notification Schedule, §13 Data Models, §16 Compliance
 
 **Deliverables:**
-- `PromptEvent` model in `notifications/models.py`:
+- `PromptEvent` model in `iceplunge/notifications/models.py`:
   - `user` (FK → `User`, related_name `prompt_events`)
   - `scheduled_at` (DateTimeField)
   - `sent_at` (DateTimeField, null=True, blank=True)
@@ -144,7 +167,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
   - `prompt_type` (CharField, choices: reactive/scheduled)
   - `linked_plunge` (FK → `PlungeLog`, null=True, blank=True, on_delete=SET_NULL)
   - `__str__` returns `f"{self.user} – {self.prompt_type} – {self.scheduled_at:%Y-%m-%d %H:%M}"`
-- `CognitiveSession` model in `tasks/models.py`:
+- `CognitiveSession` model in `iceplunge/tasks/models.py`:
   - `id` (UUIDField, primary_key, default=uuid4)
   - `user` (FK → `User`, related_name `cognitive_sessions`)
   - `prompt_event` (FK → `PromptEvent`, null=True, blank=True, on_delete=SET_NULL)
@@ -173,7 +196,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §3 Modularity (payload schema), §4 Battery, §13 Data Models
 
 **Deliverables:**
-- `TaskResult` model in `tasks/models.py`:
+- `TaskResult` model in `iceplunge/tasks/models.py`:
   - `id` (UUIDField, primary_key, default=uuid4)
   - `session` (FK → `CognitiveSession`, related_name `task_results`, on_delete=CASCADE)
   - `task_type` (CharField, max_length=50) — validated against `TASK_REGISTRY` on save
@@ -187,14 +210,14 @@ Every acceptance criterion must be covered by an automated test **unless it is m
   - `is_acclimatisation` (BooleanField, default=False)
   - `is_partial` (BooleanField, default=False) — True when the task was interrupted after the minimum viable threshold but saved anyway (see T4.3)
   - `__str__` returns `f"{self.task_type} v{self.task_version} – {self.session}"`
-- `MoodRating` model in `tasks/models.py`:
+- `MoodRating` model in `iceplunge/tasks/models.py`:
   - `session` (OneToOne → `CognitiveSession`, related_name `mood_rating`)
   - `valence` (PositiveSmallIntegerField, choices 1–5)
   - `arousal` (PositiveSmallIntegerField, choices 1–5)
   - `stress` (PositiveSmallIntegerField, choices 1–5)
   - `sharpness` (PositiveSmallIntegerField, choices 1–5)
   - `__str__` returns `f"Mood – {self.session}"`
-- `TASK_REGISTRY` dict defined in `tasks/registry.py` with all five task types; each entry gains a `minimum_viable_ms` key (e.g. PVT: 30 000, SART: 30 000, flanker: 30 000, digit_symbol: 30 000, mood: 0 — mood has no meaningful partial).
+- `TASK_REGISTRY` dict defined in `iceplunge/tasks/registry.py` with all five task types; each entry gains a `minimum_viable_ms` key (e.g. PVT: 30 000, SART: 30 000, flanker: 30 000, digit_symbol: 30 000, mood: 0 — mood has no meaningful partial).
 - `TaskResult.clean()` raises `ValidationError` if `task_type` not in `TASK_REGISTRY`.
 - Migrations.
 
@@ -210,7 +233,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §6 Covariates (Daily, Weekly), §13 Data Models
 
 **Deliverables:**
-- `DailyCovariate` model in `covariates/models.py`:
+- `DailyCovariate` model in `iceplunge/covariates/models.py`:
   - `user` (FK → `User`, related_name `daily_covariates`)
   - `date` (DateField)
   - `sleep_duration_hours` (DecimalField, max_digits=4, decimal_places=1, null=True, blank=True)
@@ -219,7 +242,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
   - `exercise_today` (BooleanField, null=True, blank=True)
   - `unique_together`: `(user, date)`
   - `__str__` returns `f"Daily: {self.user} – {self.date}"`
-- `WeeklyCovariate` model in `covariates/models.py`:
+- `WeeklyCovariate` model in `iceplunge/covariates/models.py`:
   - `user` (FK → `User`, related_name `weekly_covariates`)
   - `week_start` (DateField) — Monday of the week
   - `gi_severity` (PositiveSmallIntegerField, choices 1–5, null=True, blank=True)
@@ -243,14 +266,14 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §5 Plunge Logging, `.junie/guidelines.md` HTMX, Views
 
 **Deliverables:**
-- `plunges/views.py`:
+- `iceplunge/plunges/views.py`:
   - `PlungeListView` (login required) — lists user's own plunges, paginated (20/page).
   - `PlungeCreateView` — ModelForm; HTMX request returns `_plunge_row.html` partial prepended to list; full request returns the list page.
   - `PlungeDeleteView` — requires `user == request.user`; on HTMX request returns empty 200 to trigger row removal.
 - Templates:
-  - `plunges/templates/plunges/plunge_list.html`
-  - `plunges/templates/plunges/partials/_plunge_form.html`
-  - `plunges/templates/plunges/partials/_plunge_row.html`
+  - `iceplunge/templates/plunges/plunge_list.html`
+  - `iceplunge/templates/plunges/partials/_plunge_form.html`
+  - `iceplunge/templates/plunges/partials/_plunge_row.html`
 - URL names: `plunges:list`, `plunges:create`, `plunges:delete`.
 
 **Acceptance criteria:**
@@ -266,13 +289,13 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §7 Derived Variables, §13 Derived Variables
 
 **Deliverables:**
-- `plunges/helpers/derived.py` with pure functions (no Django ORM calls):
+- `iceplunge/plunges/helpers/derived.py` with pure functions (no Django ORM calls):
   - `time_since_last_plunge(plunge_logs, session_dt)` → `timedelta | None`
   - `proximity_bin(delta)` → one of: `"pre"`, `"0-15m"`, `"15-60m"`, `"1-3h"`, `">3h"`, `"no_plunge"`
   - `same_day_plunge_count(plunge_logs, session_date)` → `int`
   - `rolling_frequency(plunge_logs, session_dt, days)` → `float` (plunges per day over window)
   - `season(dt)` → one of: `"spring"`, `"summer"`, `"autumn"`, `"winter"` (northern hemisphere)
-- `plunges/helpers/session_derived.py`:
+- `iceplunge/plunges/helpers/session_derived.py`:
   - `compute_session_derived(user, session_dt)` → dict with all derived variable values; queries DB internally.
 - `CognitiveSession.derived_variables` (JSONField, default=dict) — add field + migration.
 - `tasks/signals.py` — `post_save` on `CognitiveSession` (status transitions to `in_progress`) calls `compute_session_derived` and stores result.
@@ -291,15 +314,15 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §6 Covariates, §12 Onboarding
 
 **Deliverables:**
-- `covariates/forms.py`: `DailyCovariateForm`, `WeeklyCovariateForm` (ModelForms, crispy-bulma).
-- `covariates/views.py`:
+- `iceplunge/covariates/forms.py`: `DailyCovariateForm`, `WeeklyCovariateForm` (ModelForms, crispy-bulma).
+- `iceplunge/covariates/views.py`:
   - `DailyCovariateView` — creates or updates today's record for the user; HTMX-aware (returns partial on HTMX, redirect on full).
   - `WeeklyCovariateView` — same pattern for the current week.
 - Templates:
-  - `covariates/templates/covariates/partials/_daily_form.html`
-  - `covariates/templates/covariates/partials/_weekly_form.html`
-- Helper `covariates/helpers.py::needs_daily_covariate(user)` → bool (true if no record for today).
-- Helper `covariates/helpers.py::needs_weekly_covariate(user)` → bool (true if no record for current week).
+  - `iceplunge/templates/covariates/partials/_daily_form.html`
+  - `iceplunge/templates/covariates/partials/_weekly_form.html`
+- Helper `iceplunge/covariates/helpers.py::needs_daily_covariate(user)` → bool (true if no record for today).
+- Helper `iceplunge/covariates/helpers.py::needs_weekly_covariate(user)` → bool (true if no record for current week).
 - URL names: `covariates:daily`, `covariates:weekly`.
 
 **Acceptance criteria:**
@@ -314,14 +337,14 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §6 Covariates (Per Session), §13 Data Models
 
 **Deliverables:**
-- `SessionCovariate` model in `covariates/models.py`:
+- `SessionCovariate` model in `iceplunge/covariates/models.py`:
   - `session` (OneToOne → `CognitiveSession`, related_name `session_covariate`)
   - `caffeine_since_last_session` (BooleanField, null=True, blank=True)
   - `minutes_since_last_meal` (PositiveSmallIntegerField, null=True, blank=True)
   - `cold_hands` (BooleanField, null=True, blank=True) — hands feeling cold at session start; confound for touch RT
   - `wet_hands` (BooleanField, null=True, blank=True) — hands wet at session start (e.g. immediately post-plunge); confound for touch RT
   - `__str__` returns `f"SessionCovariate – {self.session}"`
-- `SessionCovariateForm` in `covariates/forms.py`.
+- `SessionCovariateForm` in `iceplunge/covariates/forms.py`.
 - Migration.
 - The session start view (Phase 5) will render this form before the first task loads.
 
@@ -339,12 +362,12 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §3 Modularity (Backend Task Registry, Randomisation), §13 Models
 
 **Deliverables:**
-- `tasks/registry.py` containing `TASK_REGISTRY` dict (five entries from §3).
-- `tasks/helpers/session_helpers.py`:
+- `iceplunge/tasks/registry.py` containing `TASK_REGISTRY` dict (five entries from §3).
+- `iceplunge/tasks/helpers/session_helpers.py`:
   - `create_session(user, prompt_event=None, is_practice=False)` → `CognitiveSession`; randomises task order per §3 Randomisation; stores seed and task order on the session; computes derived variables via Phase 2.
   - `next_task(session)` → task_type string of the next uncompleted task, or `None` if all done.
   - `increment_session_indices(user, task_type)` → `(overall_index, per_task_index)`.
-- `tasks/views.py`:
+- `iceplunge/tasks/views.py`:
   - `SessionStartView` — creates session (calls `create_session`), renders session-covariate form if not already submitted today, then redirects to first task.
   - `SessionTaskView` — loads the correct task partial via HTMX; determines which task is next using `next_task(session)`.
   - `SessionCompleteView` — marks session as complete; redirects to dashboard.
@@ -363,7 +386,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §3 Modularity (JS Interface Contract, Lifecycle Event Handling, Payload Schema)
 
 **Deliverables:**
-- `tasks/static/tasks/js/task_core.js` — plain JS module (no bundler required), exported as `window.TaskCore`.
+- `iceplunge/static/tasks/js/task_core.js` — plain JS module (no bundler required), exported as `window.TaskCore`.
 - Public API:
   - `TaskCore.init(sessionId, csrfToken)` — called once per page load; captures `new Date().getTimezoneOffset()` and POSTs it to `tasks:session_meta` alongside OS/device info so the server can store it on `CognitiveSession.timezone_offset_minutes`.
   - `TaskCore.submit(payload)` — validates the mandatory envelope fields, POSTs to `tasks:submit_result` via `fetch`, returns a Promise; rejects if any mandatory field is missing; on 422 response throws a descriptive error.
@@ -386,7 +409,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §3 (Payload Schema), §18 Data Integrity
 
 **Deliverables:**
-- `tasks/views.py::TaskResultSubmitView` (POST only, login required):
+- `iceplunge/tasks/views.py::TaskResultSubmitView` (POST only, login required):
   - Validates envelope fields (session_id, task_type, task_version, started_at, ended_at, duration_ms, input_modality, trials, summary); returns 422 with error detail if invalid.
   - Rejects if `task_type` not in `TASK_REGISTRY`; returns 422.
   - Rejects if session does not belong to the requesting user; returns 403.
@@ -418,13 +441,13 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §4 Core Battery (PVT), §3 (all contracts)
 
 **Deliverables:**
-- `tasks/static/tasks/js/pvt.js` — implements the JS interface contract:
+- `iceplunge/static/tasks/js/pvt.js` — implements the JS interface contract:
   - Displays a black screen with a red countdown timer that appears at random inter-stimulus intervals (2–10 s, seeded from `config.seed`).
   - Participant taps/clicks to respond; RT recorded in ms via `TaskCore.now()`.
   - Tracks anticipations (RT < 100 ms) and non-responses (>2000 ms treated as lapse).
   - Runs for `config.durationMs` (default 60 000 ms) then auto-submits.
-- `tasks/templates/tasks/partials/_pvt.html` — root div, minimal UI, loads `pvt.js`.
-- `tasks/helpers/metrics/pvt.py`:
+- `iceplunge/templates/tasks/partials/_pvt.html` — root div, minimal UI, loads `pvt.js`.
+- `iceplunge/tasks/helpers/metrics/pvt.py`:
   - `compute_pvt_summary(trials)` → dict with: `median_rt`, `mean_rt`, `rt_sd`, `lapse_count` (RT > 500 ms), `anticipation_count` (RT < 100 ms), `valid_trial_count`.
 - Summary computed server-side in `TaskResultSubmitView` and stored in `TaskResult.summary_metrics`.
 
@@ -441,14 +464,14 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §4 Core Battery (SART)
 
 **Deliverables:**
-- `tasks/static/tasks/js/sart.js`:
+- `iceplunge/static/tasks/js/sart.js`:
   - Displays digits 1–9 in rapid succession (approx. 250 ms stimulus, 900 ms ISI).
   - No-go target: digit 3 (appears ~11% of trials, seeded random).
   - Participant taps for every digit except 3.
   - Correct go: response detected within response window.  Commission error: response on digit 3.  Omission: no response to go digit.
   - Runs for `config.durationMs` (60–90 s, default 75 000 ms).
-- `tasks/templates/tasks/partials/_sart.html`.
-- `tasks/helpers/metrics/sart.py`:
+- `iceplunge/templates/tasks/partials/_sart.html`.
+- `iceplunge/tasks/helpers/metrics/sart.py`:
   - `compute_sart_summary(trials)` → dict with: `commission_errors`, `omission_errors`, `go_median_rt`, `go_rt_sd`, `post_error_slowing` (mean RT on trial after error vs overall, null if < 3 errors).
 
 **Acceptance criteria:**
@@ -463,13 +486,13 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §4 Core Battery (Mood), §13 MoodRating model
 
 **Deliverables:**
-- `tasks/static/tasks/js/mood.js`:
+- `iceplunge/static/tasks/js/mood.js`:
   - Renders four 5-point scales (valence, arousal, stress, sharpness) as horizontal icon-anchored sliders.
   - Submit button enabled only after all four are rated.
   - Completes in < 15 s; records `started_at` and `ended_at`.
-- `tasks/templates/tasks/partials/_mood.html`.
+- `iceplunge/templates/tasks/partials/_mood.html`.
 - On submission, in addition to creating a `TaskResult`, the submit view creates a `MoodRating` record using the summary values.
-- `tasks/helpers/metrics/mood.py`:
+- `iceplunge/tasks/helpers/metrics/mood.py`:
   - `compute_mood_summary(trials)` → dict with keys `valence`, `arousal`, `stress`, `sharpness` (integers 1–5).
 
 **Acceptance criteria:**
@@ -485,14 +508,14 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §4 Rotating Modules (Flanker)
 
 **Deliverables:**
-- `tasks/static/tasks/js/flanker.js`:
+- `iceplunge/static/tasks/js/flanker.js`:
   - Displays rows of five arrows (e.g., `< < < < <` or `< < > < <`).
   - Congruent (all same direction) and incongruent (centre differs) trials in ~50/50 ratio, seeded.
   - Participant responds with left/right key or on-screen button.
   - 500 ms response window; 500 ms blank ISI.
   - Runs for `config.durationMs` (default 75 000 ms).
-- `tasks/templates/tasks/partials/_flanker.html`.
-- `tasks/helpers/metrics/flanker.py`:
+- `iceplunge/templates/tasks/partials/_flanker.html`.
+- `iceplunge/tasks/helpers/metrics/flanker.py`:
   - `compute_flanker_summary(trials)` → dict with: `congruent_median_rt`, `incongruent_median_rt`, `conflict_effect_ms`, `congruent_accuracy`, `incongruent_accuracy`.
 
 **Acceptance criteria:**
@@ -507,13 +530,13 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §4 Rotating Modules (Digit Symbol)
 
 **Deliverables:**
-- `tasks/static/tasks/js/digit_symbol.js`:
+- `iceplunge/static/tasks/js/digit_symbol.js`:
   - Displays a fixed key (digits 1–9 mapped to unique symbols) at the top.
   - One digit shown at a time; participant selects the matching symbol from 4 options.
   - Seeded randomisation of digit order and distractor symbols.
   - Runs for `config.durationMs` (default 75 000 ms).
-- `tasks/templates/tasks/partials/_digit_symbol.html`.
-- `tasks/helpers/metrics/digit_symbol.py`:
+- `iceplunge/templates/tasks/partials/_digit_symbol.html`.
+- `iceplunge/tasks/helpers/metrics/digit_symbol.py`:
   - `compute_digit_symbol_summary(trials)` → dict with: `correct_per_minute`, `total_correct`, `total_errors`, `error_rate`.
 
 **Acceptance criteria:**
@@ -531,12 +554,12 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 **Deliverables:**
 - `ONESIGNAL_APP_ID` and `ONESIGNAL_API_KEY` read from env vars in `settings/base.py`.
-- `notifications/onesignal.py`:
+- `iceplunge/notifications/onesignal.py`:
   - `send_push(user, title, body, data=None)` → sends a notification to the user's OneSignal external user ID; returns response dict.
   - `register_device(user, onesignal_player_id)` — stores player ID on user's `NotificationProfile`.
-- `NotificationProfile` model in `notifications/models.py`:
+- `NotificationProfile` model in `iceplunge/notifications/models.py`:
   - `user` (OneToOne), `onesignal_player_id` (CharField, blank=True), `push_enabled` (BooleanField, default=True), `morning_window_start` (TimeField, default=08:00), `evening_window_start` (TimeField, default=18:00).
-- `notifications/views.py::RegisterDeviceView` — receives player ID from Capacitor JS and saves it.
+- `iceplunge/notifications/views.py::RegisterDeviceView` — receives player ID from Capacitor JS and saves it.
 - Migration.
 
 **Acceptance criteria:**
@@ -551,13 +574,13 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §11 Notification Schedule (Reactive prompts), §16 Compliance
 
 **Deliverables:**
-- `notifications/helpers/scheduling.py`:
+- `iceplunge/notifications/helpers/scheduling.py`:
   - `schedule_reactive_prompts(plunge_log)` — creates two `PromptEvent` records (15–30 min post-plunge, 2–3 h post-plunge) and enqueues Huey tasks to send them; respects daily cap and 45-minute gap rule.
   - `daily_prompt_count(user, date)` → int.
   - `minutes_since_last_prompt(user)` → int | None.
-- `notifications/tasks.py`:
+- `iceplunge/notifications/tasks.py`:
   - `send_prompt_task(prompt_event_id)` — Huey-decorated; calls `send_push`; records `sent_at` on `PromptEvent`.
-- `plunges/signals.py` — `post_save` on `PlungeLog` (created=True) calls `schedule_reactive_prompts`.
+- `iceplunge/plunges/signals.py` — `post_save` on `PlungeLog` (created=True) calls `schedule_reactive_prompts`.
 
 **Acceptance criteria:**
 - Unit test: calling `schedule_reactive_prompts` when the user is already at the daily cap creates no new `PromptEvent` records.
@@ -571,12 +594,12 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §11 Notification Schedule (Scheduled prompts)
 
 **Deliverables:**
-- `notifications/helpers/scheduling.py`:
+- `iceplunge/notifications/helpers/scheduling.py`:
   - `schedule_daily_prompts_for_user(user, date)` — creates morning and evening `PromptEvent` records if the user hasn't hit the daily cap; enqueues Huey tasks at the correct local times.
   - `should_send_scheduled_prompt(user, prompt_type)` → bool (checks cap, gap, push_enabled).
-- `notifications/tasks.py`:
+- `iceplunge/notifications/tasks.py`:
   - `dispatch_daily_prompts_task()` — Huey periodic task (runs once at midnight UTC); iterates all users with `push_enabled=True` and calls `schedule_daily_prompts_for_user`.
-- `notifications/management/commands/dispatch_daily_prompts.py` — management command wrapper for manual triggering.
+- `iceplunge/notifications/management/commands/dispatch_daily_prompts.py` — management command wrapper for manual triggering.
 
 **Acceptance criteria:**
 - Unit test: `dispatch_daily_prompts_task` does not create prompts for users with `push_enabled=False`.
@@ -592,7 +615,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §18 Data Integrity (Quality Flags)
 
 **Deliverables:**
-- `tasks/helpers/quality.py`:
+- `iceplunge/tasks/helpers/quality.py`:
   - `flag_anticipation_bursts(trials)` → bool (3+ anticipation responses in a single task).
   - `flag_excessive_misses(trials, threshold=0.5)` → bool (> 50% of trials have no response).
   - `flag_rapid_resubmission(user, session)` → bool (another completed session within 10 minutes).
@@ -612,7 +635,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §18 Session Limits
 
 **Deliverables:**
-- `tasks/helpers/rate_limits.py`:
+- `iceplunge/tasks/helpers/rate_limits.py`:
   - `MAX_VOLUNTARY_SESSIONS_PER_HOUR` = 2 (configurable via Django setting).
   - `MAX_VOLUNTARY_SESSIONS_PER_DAY` = 8 (configurable).
   - `check_voluntary_rate_limit(user)` → `(allowed: bool, reason: str | None)`.
@@ -632,7 +655,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §9 Participant Dashboard, §14 (access controls: participants see only their own data)
 
 **Deliverables:**
-- `dashboard/views.py` JSON endpoints (all login-required; return only the requesting user's data):
+- `iceplunge/dashboard/views.py` JSON endpoints (all login-required; return only the requesting user's data):
   - `GET /api/dashboard/rt-trend/` → `[{ date, median_rt, lapse_count }]` (one point per completed session with PVT).
   - `GET /api/dashboard/mood-trend/` → `[{ date, valence, arousal, stress, sharpness }]`.
   - `GET /api/dashboard/plunge-performance/` → `[{ proximity_bin, median_rt, n }]` (aggregated by proximity bin).
@@ -652,8 +675,8 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §9 Participant Dashboard
 
 **Deliverables:**
-- `dashboard/views.py::DashboardView` — renders `dashboard/templates/dashboard/dashboard.html`.
-- Self-hosted Chart.js loaded from `dashboard/static/dashboard/js/chart.min.js`.
+- `iceplunge/dashboard/views.py::DashboardView` — renders `iceplunge/templates/dashboard/dashboard.html`.
+- Self-hosted Chart.js loaded from `iceplunge/static/dashboard/js/chart.min.js`.
 - Four charts rendered on the dashboard page using vanilla JS + Chart.js consuming the API endpoints from T8.1:
   - Reaction time trend (line chart, x=date, y=median RT, secondary y=lapse count).
   - Mood trajectory (multi-line, one line per dimension).
@@ -677,13 +700,13 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §14 Research Data Export
 
 **Deliverables:**
-- `export/views.py::SessionExportView` (requires `export_data` permission):
+- `iceplunge/export/views.py::SessionExportView` (requires `export_data` permission):
   - Accepts query params: `date_from`, `date_to`.
   - Streams a CSV response (use `StreamingHttpResponse` + `csv.writer`).
   - Columns: `pseudonymised_id`, `session_id`, `started_at`, `completed_at`, `completion_status`, `task_order`, all `derived_variables` keys flattened, all `DailyCovariate` fields for the session date, all `WeeklyCovariate` fields for the session week, mood ratings, per-task summary metrics.
   - No PII columns (no email, no name).
-- `export/helpers/audit.py::log_export(user, export_type, date_from, date_to)` — creates an `ExportAuditLog` model entry.
-- `ExportAuditLog` model in `export/models.py`: `user`, `export_type`, `exported_at`, `date_from`, `date_to`, `row_count`.
+- `iceplunge/export/helpers/audit.py::log_export(user, export_type, date_from, date_to)` — creates an `ExportAuditLog` model entry.
+- `ExportAuditLog` model in `iceplunge/export/models.py`: `user`, `export_type`, `exported_at`, `date_from`, `date_to`, `row_count`.
 - URL name: `export:sessions_csv`.
 
 **Acceptance criteria:**
@@ -700,10 +723,10 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §14 Research Data Export
 
 **Deliverables:**
-- `export/views.py::TrialExportView` (requires `export_data` permission):
+- `iceplunge/export/views.py::TrialExportView` (requires `export_data` permission):
   - Streams a CSV with one row per trial across all `TaskResult.trial_data` entries.
   - Columns: `pseudonymised_id`, `session_id`, `task_type`, `task_version`, `trial_index`, `stimulus_at_ms`, `response_at_ms`, `correct`, plus task-specific fields.
-- `export/views.py::FullJsonExportView` (requires `export_data` permission):
+- `iceplunge/export/views.py::FullJsonExportView` (requires `export_data` permission):
   - Streams a JSON array of all sessions with nested task results and trials; uses `pseudonymised_id` throughout.
 - URL names: `export:trials_csv`, `export:full_json`.
 
@@ -722,14 +745,14 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §19 Withdrawal and Deletion
 
 **Deliverables:**
-- `accounts/views.py::DataDeletionRequestView`:
+- `iceplunge/users/views.py::DataDeletionRequestView`:
   - GET: renders a confirmation page explaining what will be deleted.
   - POST: requires SweetAlert2 confirmation on the client side before submitting.
   - On confirmed POST: deletes `PlungeLog`, `CognitiveSession` (cascades to `TaskResult`, `MoodRating`, `SessionCovariate`), `DailyCovariate`, `WeeklyCovariate`, `BaselineProfile`, `ConsentProfile`, `NotificationProfile` for the user; flags the `User` record as `is_active=False`; queues a confirmation email via Huey.
-- `accounts/tasks.py::send_deletion_confirmation_email(user_email)` — Huey task sends confirmation.
-- `accounts/helpers/deletion.py::delete_participant_data(user)` — contains all deletion logic; called by the view.
-- Template at `accounts/templates/accounts/data_deletion.html`.
-- URL name: `accounts:data_deletion`.
+- `iceplunge/users/tasks.py::send_deletion_confirmation_email(user_email)` — Huey task sends confirmation.
+- `iceplunge/users/helpers/deletion.py::delete_participant_data(user)` — contains all deletion logic; called by the view.
+- Template at `iceplunge/templates/users/data_deletion.html`.
+- URL name: `users:data_deletion`.
 
 **Acceptance criteria:**
 - Unit test: `delete_participant_data` removes all linked records and deactivates the user.
@@ -744,10 +767,10 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 **Spec refs:** §19 Withdrawal and Deletion (first bullet)
 
 **Deliverables:**
-- `notifications/views.py::NotificationPreferencesView`:
+- `iceplunge/notifications/views.py::NotificationPreferencesView`:
   - GET: renders form showing current `push_enabled`, `morning_window_start`, `evening_window_start`.
   - POST: updates `NotificationProfile`; HTMX-aware.
-- Partial template at `notifications/templates/notifications/partials/_notification_prefs.html`.
+- Partial template at `iceplunge/templates/notifications/partials/_notification_prefs.html`.
 - URL name: `notifications:preferences`.
 
 **Acceptance criteria:**

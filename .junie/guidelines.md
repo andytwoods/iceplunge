@@ -19,19 +19,30 @@ You are an expert in Python, Django, and scalable web apps. Write secure, mainta
 
 ## Project Scaffold
 
-- **All Django projects start from [cookiecutter-django](https://github.com/cookiecutter/cookiecutter-django).**
-  ```
-  cookiecutter gh:cookiecutter/cookiecutter-django
-  ```
-- Do **not** hand-roll a project structure; the cookiecutter output is the baseline.
-- The cookiecutter already provides — do not recreate these:
-  - Split settings (`config/settings/base.py`, `local.py`, `production.py`).
-  - Custom `User` model in the `users` app (`users/models.py`), with `AUTH_USER_MODEL = "users.User"` already set.
-  - `requirements/` split (`base.txt`, `local.txt`, `production.txt`).
-  - Whitenoise for static files.
-  - Basic `Makefile` and `docker-compose` stubs.
-- When referencing the User model in code, always use `get_user_model()` — never import `User` directly.
-- New user-related fields and profile models belong in the `users` app, extending what cookiecutter already created.
+- **This project was bootstrapped from [cookiecutter-django](https://github.com/cookiecutter/cookiecutter-django).** Do not hand-roll structure that the scaffold already provides.
+- **The scaffold is already in place.** Do not recreate:
+  - Split settings: `config/settings/base.py`, `local.py`, `production.py`, `test.py`.
+  - Custom `User` model at `iceplunge/users/models.py`; `AUTH_USER_MODEL = "users.User"` already set.
+  - Global template directory: `iceplunge/templates/` — already wired into `TEMPLATES[DIRS]`.
+  - Whitenoise, Redis, django-allauth (with email verification), django-environ, argon2 passwords.
+  - `pyproject.toml` with `uv` for dependency management (no `requirements/` folder).
+
+### Project layout
+- The Django apps directory is `iceplunge/` (`APPS_DIR = BASE_DIR / "iceplunge"`).
+- All project apps live under `iceplunge/`: e.g. `iceplunge/plunges/`, `iceplunge/tasks/`.
+- Register apps in `LOCAL_APPS` in `config/settings/base.py` as `"iceplunge.<appname>"`.
+- Add new dependencies with `uv add <package>` (updates `pyproject.toml`).
+
+### User model
+- Login is **email-only** — there is no `username` field.
+- The model has a `name` CharField; there is no `first_name` or `last_name`.
+- Always reference the User model via `get_user_model()` — never import it directly.
+- New user-related profile models belong in `iceplunge/users/models.py`.
+
+### Templates
+- Templates live in `iceplunge/templates/<appname>/` (inside the global template dir).
+- Do **not** create per-app `templates/` subdirectories — use the global dir.
+- HTMX partials: `iceplunge/templates/<appname>/partials/_<name>.html`.
 
 ## Django
 - Use built-ins before third-party.
@@ -93,19 +104,15 @@ You are an expert in Python, Django, and scalable web apps. Write secure, mainta
 - Do **not** create JSON endpoints for anything that could be an HTMX partial swap instead.
 
 ## Templates
-- **App-local templates only.** Every app's templates live in `<app>/templates/<app>/`, never in a global `templates/` directory.
-  - Base templates (`base.html`, `navbar.html`, etc.) live in the `pages` app: `pages/templates/base.html`.
-  - All other apps extend `base.html`.
-  - Example: `challenges/templates/challenges/challenge_detail.html`
-- **HTMX partials** live in a `partials/` subdirectory within the app's template directory.
-  - Prefix partial filenames with `_` (e.g. `_challenge_detail.html`).
-  - Example: `challenges/templates/challenges/partials/_challenge_detail.html`
+- All templates live in `iceplunge/templates/<appname>/` — the global template dir already configured by the scaffold.
+- `base.html` is at `iceplunge/templates/base.html`; all app templates extend it.
+- **HTMX partials** go in `iceplunge/templates/<appname>/partials/_<name>.html`.
 - Use template inheritance. Keep logic minimal.
 - Always `{% load static %}`, enable CSRF.
 
 ## Forms
 - Prefer ModelForms.
-- Use crispy-forms with the Bulma template pack (`crispy-bulma`).
+- Use crispy-forms with the Bulma template pack (`crispy-bulma`). The scaffold ships with `crispy-bootstrap5` — this must be replaced: `uv remove crispy-bootstrap5 && uv add crispy-bulma`, and update `CRISPY_TEMPLATE_PACK` / `CRISPY_ALLOWED_TEMPLATE_PACKS` in `base.py`.
 
 ## Settings
 - Use env vars, never commit secrets.
