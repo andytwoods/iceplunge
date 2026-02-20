@@ -17,6 +17,22 @@ You are an expert in Python, Django, and scalable web apps. Write secure, mainta
     - `except Exception:`
     - unused exception variables
 
+## Project Scaffold
+
+- **All Django projects start from [cookiecutter-django](https://github.com/cookiecutter/cookiecutter-django).**
+  ```
+  cookiecutter gh:cookiecutter/cookiecutter-django
+  ```
+- Do **not** hand-roll a project structure; the cookiecutter output is the baseline.
+- The cookiecutter already provides — do not recreate these:
+  - Split settings (`config/settings/base.py`, `local.py`, `production.py`).
+  - Custom `User` model in the `users` app (`users/models.py`), with `AUTH_USER_MODEL = "users.User"` already set.
+  - `requirements/` split (`base.txt`, `local.txt`, `production.txt`).
+  - Whitenoise for static files.
+  - Basic `Makefile` and `docker-compose` stubs.
+- When referencing the User model in code, always use `get_user_model()` — never import `User` directly.
+- New user-related fields and profile models belong in the `users` app, extending what cookiecutter already created.
+
 ## Django
 - Use built-ins before third-party.
 - Prioritise security; use ORM over raw SQL.
@@ -93,7 +109,7 @@ You are an expert in Python, Django, and scalable web apps. Write secure, mainta
 
 ## Settings
 - Use env vars, never commit secrets.
-- Split settings: `base.py`, `local.py`, `production.py`.
+- Settings are split into `base.py` / `local.py` / `production.py` by the cookiecutter scaffold — do not collapse them.
 - **Local dev (`local.py`):** use SQLite — no need for PostgreSQL locally.
 - **Production (`production.py`):** use PostgreSQL.
 - **Error tracking:** use **Rollbar** in production (`django-rollbar`). Configure via `ROLLBAR_ACCESS_TOKEN` env var. Do not enable in local dev.
@@ -128,23 +144,6 @@ You are an expert in Python, Django, and scalable web apps. Write secure, mainta
   - clear about side-effects;
   - written to be as idempotent as reasonably possible (safe for retries).
 
-## Challenge Fixtures — Scientific Integrity
-
-Challenge fixtures in `challenges/fixtures/` are derived from **published research datasets** (MBPP, HumanEval, etc.). They are research instruments, not ordinary application data.
-
-### Rules
-- **Never edit a fixture file directly.** Descriptions, test cases, skeleton code, and metadata must remain faithful to the original published source so results are reproducible and comparable to prior literature.
-- **All deviations must be logged.** If a challenge description is ambiguous, a test case is incorrect, or any modification is genuinely necessary, it must be recorded in a structured deviation log (e.g. `challenges/fixtures/DEVIATIONS.md`) with:
-  - The fixture file and `external_id` affected.
-  - What was changed and why.
-  - The original value (verbatim).
-  - The new value.
-  - Who approved the change and the date.
-- **Prefer additive changes over edits.** If extra context is needed (e.g. a clarifying example), add a `"clarification"` field to the fixture JSON or display supplementary text in the UI — do not overwrite the original `"description"`.
-- **Attribute the source.** Every fixture must retain its `source` block (dataset, paper citation, license, repository, dataset_id).
-
-### Rationale
-This study measures coding skill using standardised problems. If we silently alter those problems, our results become incomparable to other studies using the same benchmarks, and reviewers or replicators cannot verify what participants actually saw.
 
 ## Testing
 - Write unit tests for new features.
