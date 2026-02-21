@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Session complete" %}{% endblock title %}
+
+{% block content %}
+<div class="columns is-centered">
+  <div class="column is-half">
+
+    <div class="has-text-centered mb-5">
+      <h1 class="title">{% translate "Well done!" %}</h1>
+      <p class="subtitle">
+        {% translate "Your session has been recorded. Thank you for your participation." %}
+      </p>
+      <a href="{% url 'home' %}" class="button is-primary">
+        {% translate "Return to home" %}
+      </a>
+    </div>
+
+    <div class="box">
+      <h2 class="title is-5 mb-1">{% translate "A few quick questions" %}</h2>
+      <p class="is-size-7 has-text-grey mb-4">
+        {% translate "This helps us understand the context around your session. Answers from today are pre-filled." %}
+      </p>
+      <div hx-get="{% url 'covariates:more_info' %}"
+           hx-trigger="load"
+           hx-target="this"
+           hx-swap="innerHTML">
+        <p class="has-text-grey is-size-7">{% translate "Loading…" %}</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock content %}

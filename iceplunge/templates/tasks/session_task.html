@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ task_label }}{% endblock title %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script src="{% static 'tasks/js/task_core.js' %}"></script>
+{% endblock javascript %}
+
+{% block content %}
+<div class="columns is-centered">
+  <div class="column is-full">
+    <h2 class="title is-4">{{ task_label }}</h2>
+
+    {% if task_type == "pvt" %}
+      {% include "tasks/partials/_pvt.html" %}
+    {% elif task_type == "sart" %}
+      {% include "tasks/partials/_sart.html" %}
+    {% elif task_type == "mood" %}
+      {% include "tasks/partials/_mood.html" %}
+    {% elif task_type == "flanker" %}
+      {% include "tasks/partials/_flanker.html" %}
+    {% elif task_type == "digit_symbol" %}
+      {% include "tasks/partials/_digit_symbol.html" %}
+    {% else %}
+      <div class="notification is-warning">
+        {% blocktranslate with task=task_label %}Unknown task: {{ task }}.{% endblocktranslate %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock content %}
+
+{% block inline_javascript %}
+<script>
+  var TASK_SUBMIT_URL = "{% url 'tasks:submit_result' %}";
+  var SESSION_META_URL = "{% url 'tasks:session_meta' %}";
+  var TASK_COMPLETE_URL = "{% url 'tasks:complete' session_id=session.id %}";
+  var TASK_TASK_URL = "{% url 'tasks:task' session_id=session.id %}";
+  var TASK_CONFIG = {
+    seed: "{{ session.random_seed }}",
+    taskType: "{{ task_type }}",
+    taskVersion: "1.0"
+  };
+  TaskCore.init("{{ session.id }}", "{{ csrf_token }}");
+</script>
+{% endblock inline_javascript %}

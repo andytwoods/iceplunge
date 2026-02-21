@@ -1,0 +1,151 @@
+{% load i18n %}
+<div class="more-info-fields">
+
+{# ── Sleep ─────────────────────────────────────────────────────────────── #}
+<p class="has-text-weight-semibold is-size-7 has-text-grey-dark mb-2 mt-1">
+  {% translate "SLEEP (LAST NIGHT)" %}
+</p>
+
+<div class="columns is-mobile mb-0">
+  <div class="column is-narrow">
+    <div class="field">
+      <label class="label is-small" for="{{ daily_form.sleep_duration_hours.id_for_label }}">
+        {% translate "Hours slept" %}
+      </label>
+      {% if daily_form.sleep_duration_hours.errors %}
+        <p class="help is-danger">{{ daily_form.sleep_duration_hours.errors.0 }}</p>
+      {% endif %}
+      <div class="control">
+        <input class="input is-small{% if daily_form.sleep_duration_hours.errors %} is-danger{% endif %}"
+               type="number" step="0.5" min="0" max="24"
+               name="sleep_duration_hours"
+               id="{{ daily_form.sleep_duration_hours.id_for_label }}"
+               placeholder="e.g. 7.5"
+               value="{{ daily_form.sleep_duration_hours.value|default:'' }}"
+               style="width:6rem;">
+      </div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="field">
+      <label class="label is-small">{% translate "Sleep quality" %}</label>
+      {% if daily_form.sleep_quality.errors %}
+        <p class="help is-danger mb-1">{{ daily_form.sleep_quality.errors.0 }}</p>
+      {% endif %}
+      <div class="plunge-radio-group">
+        {% with cur=daily_form.sleep_quality.value|stringformat:"s" %}
+          {% for val, lbl in daily_form.sleep_quality.field.choices %}
+            <input type="radio" name="sleep_quality" id="sq_{{ val }}" value="{{ val }}"
+                   {% if val|stringformat:"s" == cur %}checked{% endif %}>
+            <label for="sq_{{ val }}"><span class="radio-main is-size-7">{{ lbl }}</span></label>
+          {% endfor %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Today ─────────────────────────────────────────────────────────────── #}
+<p class="has-text-weight-semibold is-size-7 has-text-grey-dark mb-2 mt-3">
+  {% translate "TODAY" %}
+</p>
+
+<div class="columns is-mobile mb-0">
+  <div class="column">
+    <div class="field">
+      <label class="label is-small">{% translate "Alcohol in last 24 h?" %}</label>
+      {% if daily_form.alcohol_last_24h.errors %}
+        <p class="help is-danger mb-1">{{ daily_form.alcohol_last_24h.errors.0 }}</p>
+      {% endif %}
+      <div class="plunge-radio-group">
+        {% with cur=daily_form.alcohol_last_24h.value|stringformat:"s" %}
+          <input type="radio" name="alcohol_last_24h" id="alc_yes" value="True"
+                 {% if cur == "True" %}checked{% endif %}>
+          <label for="alc_yes"><span class="radio-main is-size-7">{% translate "Yes" %}</span></label>
+          <input type="radio" name="alcohol_last_24h" id="alc_no" value="False"
+                 {% if cur == "False" %}checked{% endif %}>
+          <label for="alc_no"><span class="radio-main is-size-7">{% translate "No" %}</span></label>
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+  <div class="column">
+    <div class="field">
+      <label class="label is-small">{% translate "Exercise today?" %}</label>
+      {% if daily_form.exercise_today.errors %}
+        <p class="help is-danger mb-1">{{ daily_form.exercise_today.errors.0 }}</p>
+      {% endif %}
+      <div class="plunge-radio-group">
+        {% with cur=daily_form.exercise_today.value|stringformat:"s" %}
+          <input type="radio" name="exercise_today" id="ex_yes" value="True"
+                 {% if cur == "True" %}checked{% endif %}>
+          <label for="ex_yes"><span class="radio-main is-size-7">{% translate "Yes" %}</span></label>
+          <input type="radio" name="exercise_today" id="ex_no" value="False"
+                 {% if cur == "False" %}checked{% endif %}>
+          <label for="ex_no"><span class="radio-main is-size-7">{% translate "No" %}</span></label>
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── This week ─────────────────────────────────────────────────────────── #}
+<p class="has-text-weight-semibold is-size-7 has-text-grey-dark mb-2 mt-3">
+  {% translate "THIS WEEK" %}
+</p>
+
+<div class="field mb-3">
+  <label class="label is-small">{% translate "Currently unwell / ill?" %}</label>
+  {% if weekly_form.illness_status.errors %}
+    <p class="help is-danger mb-1">{{ weekly_form.illness_status.errors.0 }}</p>
+  {% endif %}
+  <div class="plunge-radio-group">
+    {% with cur=weekly_form.illness_status.value|stringformat:"s" %}
+      <input type="radio" name="illness_status" id="ill_yes" value="True"
+             {% if cur == "True" %}checked{% endif %}>
+      <label for="ill_yes"><span class="radio-main is-size-7">{% translate "Yes" %}</span></label>
+      <input type="radio" name="illness_status" id="ill_no" value="False"
+             {% if cur == "False" %}checked{% endif %}>
+      <label for="ill_no"><span class="radio-main is-size-7">{% translate "No" %}</span></label>
+    {% endwith %}
+  </div>
+</div>
+
+<div class="field mb-3">
+  <label class="label is-small">{% translate "GI / gut discomfort this week" %}</label>
+  {% if weekly_form.gi_severity.errors %}
+    <p class="help is-danger mb-1">{{ weekly_form.gi_severity.errors.0 }}</p>
+  {% endif %}
+  <div class="plunge-radio-group">
+    {% with cur=weekly_form.gi_severity.value|stringformat:"s" %}
+      {% for val, lbl in weekly_form.gi_severity.field.choices %}
+        <input type="radio" name="gi_severity" id="gis_{{ val }}" value="{{ val }}"
+               {% if val|stringformat:"s" == cur %}checked{% endif %}>
+        <label for="gis_{{ val }}"><span class="radio-main is-size-7">{{ lbl }}</span></label>
+      {% endfor %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="field mb-3">
+  <label class="label is-small">
+    {% translate "GI symptoms" %}
+    <span class="has-text-weight-normal has-text-grey">({% translate "optional" %})</span>
+  </label>
+  {% if weekly_form.gi_symptoms.errors %}
+    <p class="help is-danger mb-1">{{ weekly_form.gi_symptoms.errors.0 }}</p>
+  {% endif %}
+  <div class="is-flex is-flex-wrap-wrap" style="gap:.5rem .75rem;">
+    {% with cur=weekly_form.gi_symptoms.value %}
+      {% for val, lbl in weekly_form.gi_symptoms.field.choices %}
+        <label class="checkbox is-size-7">
+          <input type="checkbox" name="gi_symptoms" value="{{ val }}"
+                 {% if val in cur %}checked{% endif %}>
+          {{ lbl }}
+        </label>
+      {% endfor %}
+    {% endwith %}
+  </div>
+</div>
+
+</div>{# /more-info-fields #}

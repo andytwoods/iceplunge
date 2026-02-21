@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Delete My Data" %}{% endblock title %}
+
+{% block content %}
+<section class="section">
+  <div class="columns is-centered">
+    <div class="column is-half">
+      <h1 class="title has-text-danger">{% translate "Permanently Delete My Data" %}</h1>
+
+      {% if error %}
+        <div class="notification is-danger is-light">
+          {% translate "Please confirm your intention to delete your data by ticking the box below." %}
+        </div>
+      {% endif %}
+
+      <div class="notification is-warning">
+        <p class="has-text-weight-bold">{% translate "This action is permanent and cannot be undone." %}</p>
+        <p>{% translate "The following will be permanently deleted:" %}</p>
+        <ul class="mt-2 ml-4">
+          <li>{% translate "Your account and login credentials" %}</li>
+          <li>{% translate "All plunge logs" %}</li>
+          <li>{% translate "All cognitive session data and task results" %}</li>
+          <li>{% translate "All questionnaire responses and covariates" %}</li>
+          <li>{% translate "Notification settings and preferences" %}</li>
+        </ul>
+        <p class="mt-3">
+          {% translate "Aggregate or anonymised results already included in published analyses will not be retroactively altered, in line with standard research ethics practice. This is disclosed in the consent form you signed." %}
+        </p>
+      </div>
+
+      <div class="box">
+        <form method="post">
+          {% csrf_token %}
+          <div class="field">
+            <div class="control">
+              <label class="checkbox">
+                <input type="checkbox" name="confirm" value="yes" required>
+                {% translate "I understand that this will permanently delete all my data and this cannot be undone." %}
+              </label>
+            </div>
+          </div>
+          <div class="field is-grouped mt-4">
+            <div class="control">
+              <button type="submit" class="button is-danger">
+                {% translate "Delete All My Data" %}
+              </button>
+            </div>
+            <div class="control">
+              <a href="{% url 'home' %}" class="button is-light">{% translate "Cancel" %}</a>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endblock content %}

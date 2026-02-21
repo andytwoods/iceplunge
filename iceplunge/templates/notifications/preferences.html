@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}{% translate "Notification preferences" %}{% endblock title %}
+
+{% block content %}
+<div class="columns is-centered">
+  <div class="column is-half">
+    <h1 class="title">{% translate "Notification preferences" %}</h1>
+    {% if saved %}
+      <div class="notification is-success is-light">{% translate "Preferences saved." %}</div>
+    {% endif %}
+    <div class="box"
+         hx-post="{% url 'notifications:preferences' %}"
+         hx-target="this"
+         hx-swap="outerHTML">
+      <form method="post">
+        {% csrf_token %}
+        {% crispy form %}
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock content %}

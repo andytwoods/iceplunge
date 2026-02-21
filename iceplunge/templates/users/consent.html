@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static i18n %}
+
+{% block title %}{% translate "Research Consent" %} – iceplunge{% endblock title %}
+
+{% block content %}
+  <div class="columns is-centered">
+    <div class="column is-8-tablet is-6-desktop">
+
+      <h1 class="title">{% translate "Research Participation Consent" %}</h1>
+
+      <div class="content">
+        <h2 class="subtitle">{% translate "Purpose" %}</h2>
+        <p>
+          {% blocktranslate %}
+          This study investigates how cold plunging affects cognitive performance.
+          You will be asked to complete brief cognitive tasks and log your cold plunge activity.
+          {% endblocktranslate %}
+        </p>
+
+        <h2 class="subtitle">{% translate "What data we collect" %}</h2>
+        <ul>
+          <li>{% translate "Cognitive task responses (reaction times, accuracy)" %}</li>
+          <li>{% translate "Cold plunge logs (timing, duration, temperature)" %}</li>
+          <li>{% translate "Self-reported mood and health covariates" %}</li>
+          <li>{% translate "Device metadata (OS, screen size) for data quality modelling" %}</li>
+        </ul>
+
+        <h2 class="subtitle">{% translate "Risks and benefits" %}</h2>
+        <p>
+          {% blocktranslate %}
+          There are no known risks from participation. You will be able to view your own
+          performance data on your personal dashboard throughout the study.
+          {% endblocktranslate %}
+        </p>
+
+        <h2 class="subtitle">{% translate "Withdrawal" %}</h2>
+        <p>
+          {% blocktranslate %}
+          You may withdraw at any time via your account settings. You may also request
+          deletion of all your raw data. Aggregate or anonymised results already included
+          in published analyses cannot be retroactively removed, in line with standard
+          research ethics practice.
+          {% endblocktranslate %}
+        </p>
+
+        <h2 class="subtitle">{% translate "Contact" %}</h2>
+        <p>andytwoods@gmail.com</p>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="field">
+          <label class="checkbox">
+            <input type="checkbox" id="confirm-checkbox" required />
+            {% translate "I have read the above information and consent to participate." %}
+          </label>
+        </div>
+        <div class="field">
+          <button type="submit" class="button is-primary" id="consent-submit" disabled>
+            {% translate "I consent – continue" %}
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+{% endblock content %}
+
+{% block inline_javascript %}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cb = document.getElementById('confirm-checkbox');
+      const btn = document.getElementById('consent-submit');
+      cb.addEventListener('change', () => { btn.disabled = !cb.checked; });
+    });
+  </script>
+{% endblock inline_javascript %}

@@ -1,0 +1,22 @@
+{% load i18n %}
+<form hx-post="{% url 'covariates:more_info' %}"
+      hx-target="this"
+      hx-swap="outerHTML">
+  {% csrf_token %}
+
+  {% include "covariates/partials/_more_info_fields.html" %}
+
+  {# ── Actions ───────────────────────────────────────────────────────────── #}
+  <div class="field is-grouped mt-4">
+    <div class="control">
+      <button class="button is-primary is-small" type="submit">{% translate "Save" %}</button>
+    </div>
+    <div class="control">
+      <button class="button is-light is-small" type="button"
+              onclick="clearMoreInfo(this.closest('form').querySelector('.more-info-fields'))">
+        {% translate "Clear answers" %}
+      </button>
+    </div>
+  </div>
+
+</form>

@@ -1,0 +1,9 @@
+{% load i18n static %}
+<p class="has-text-centered mb-4">
+  {% translate "Tap for every digit EXCEPT 3. The task will last about 75 seconds." %}
+</p>
+<div id="task-container"></div>
+<script src="{% static 'tasks/js/sart.js' %}"></script>
+<script>
+  SartTask.init(Object.assign({}, TASK_CONFIG, { durationMs: 75000 }));
+</script>

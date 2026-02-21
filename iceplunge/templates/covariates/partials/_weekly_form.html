@@ -1,0 +1,7 @@
+{% load i18n crispy_forms_tags %}
+<form hx-post="{% url 'covariates:weekly' %}"
+      hx-target="this"
+      hx-swap="outerHTML">
+  {% csrf_token %}
+  {% crispy form %}
+</form>

@@ -1,0 +1,9 @@
+{% load i18n static %}
+<p class="mb-4">
+  {% translate "Rate how you feel right now on each scale. All four must be answered before you can submit." %}
+</p>
+<div id="task-container"></div>
+<script src="{% static 'tasks/js/mood.js' %}"></script>
+<script>
+  MoodTask.init(TASK_CONFIG);
+</script>

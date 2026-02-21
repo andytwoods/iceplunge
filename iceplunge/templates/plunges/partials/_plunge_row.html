@@ -1,0 +1,39 @@
+{% load i18n %}
+<tr id="plunge-{{ plunge.pk }}">
+  <td style="white-space:nowrap;">
+    <span>{{ plunge.timestamp|date:"d M" }}</span><br>
+    <span class="is-size-7 has-text-grey">{{ plunge.timestamp|date:"H:i" }}</span>
+  </td>
+  <td>
+    <span class="tag is-light">{{ plunge.get_context_display }}</span>
+  </td>
+  <td style="white-space:nowrap;">{{ plunge.duration_minutes }}&thinsp;{% translate "min" %}</td>
+  <td>
+    <span class="tag is-light">{{ plunge.get_immersion_depth_display }}</span>
+  </td>
+  <td>
+    {% if plunge.water_temp_celsius %}
+      {{ plunge.water_temp_celsius }}&thinsp;°C
+      {% if plunge.temp_measured %}
+        <span class="tag is-success is-light is-size-7 ml-1" title="{% translate 'Measured' %}">✓</span>
+      {% endif %}
+    {% else %}
+      <span class="has-text-grey-light">–</span>
+    {% endif %}
+  </td>
+  <td>
+    <span class="tag {% if plunge.perceived_intensity <= 2 %}is-success{% elif plunge.perceived_intensity == 3 %}is-warning{% else %}is-danger{% endif %} is-light">
+      {{ plunge.perceived_intensity }}/5 {{ plunge.get_perceived_intensity_display }}
+    </span>
+  </td>
+  <td>
+    <button class="button is-small is-danger is-outlined"
+            hx-post="{% url 'plunges:delete' plunge.pk %}"
+            hx-target="#plunge-{{ plunge.pk }}"
+            hx-swap="outerHTML swap:0.3s"
+            hx-confirm="{% translate 'Delete this plunge log?' %}"
+            {% csrf_token %}>
+      {% translate "Delete" %}
+    </button>
+  </td>
+</tr>

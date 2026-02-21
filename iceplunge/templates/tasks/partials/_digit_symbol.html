@@ -1,0 +1,9 @@
+{% load i18n static %}
+<p class="mb-4">
+  {% translate "Match each digit to its symbol using the key at the top. Work as quickly and accurately as you can. The task will last about 75 seconds." %}
+</p>
+<div id="task-container"></div>
+<script src="{% static 'tasks/js/digit_symbol.js' %}"></script>
+<script>
+  DigitSymbolTask.init(Object.assign({}, TASK_CONFIG, { durationMs: 75000 }));
+</script>

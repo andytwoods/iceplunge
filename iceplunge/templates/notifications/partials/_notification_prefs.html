@@ -1,0 +1,13 @@
+{% load crispy_forms_tags i18n %}
+{% if saved %}
+  <div class="notification is-success is-light">{% translate "Preferences saved." %}</div>
+{% endif %}
+<div class="box"
+     hx-post="{% url 'notifications:preferences' %}"
+     hx-target="this"
+     hx-swap="outerHTML">
+  <form method="post">
+    {% csrf_token %}
+    {% crispy form %}
+  </form>
+</div>

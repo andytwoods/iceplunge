@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static i18n crispy_forms_tags %}
+
+{% block title %}{% translate "Baseline Profile" %} – iceplunge{% endblock title %}
+
+{% block content %}
+  <div class="columns is-centered">
+    <div class="column is-8-tablet is-6-desktop">
+
+      <h1 class="title">{% translate "Your Baseline Profile" %}</h1>
+      <p class="subtitle">
+        {% blocktranslate %}
+        Please complete the following once-off background information. This helps us
+        accurately model your cognitive performance data.
+        {% endblocktranslate %}
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        {% crispy form %}
+      </form>
+
+    </div>
+  </div>
+{% endblock content %}

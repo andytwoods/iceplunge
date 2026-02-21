@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% translate "My Dashboard" %}{% endblock title %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">{% translate "My Performance Dashboard" %}</h1>
+    <p class="subtitle">
+      {% blocktranslate with count=session_count %}
+        You have completed {{ count }} session(s).
+      {% endblocktranslate %}
+    </p>
+
+    {% if session_count == 0 %}
+      <div class="notification is-info is-light">
+        <p>{% translate "Complete your first cognitive session to see your performance trends here." %}</p>
+      </div>
+    {% else %}
+
+      <!-- Reaction Time Trend -->
+      <div class="box mb-5">
+        <h2 class="title is-5">{% translate "Reaction Time Trend (PVT)" %}</h2>
+        <canvas id="rtChart" height="100"></canvas>
+      </div>
+
+      <!-- Lapse Count Trend -->
+      <div class="box mb-5">
+        <h2 class="title is-5">{% translate "Lapses per Session (PVT)" %}</h2>
+        <canvas id="lapseChart" height="100"></canvas>
+      </div>
+
+      <!-- Mood Trend -->
+      <div class="box mb-5">
+        <h2 class="title is-5">{% translate "Mood & Subjective State" %}</h2>
+        <canvas id="moodChart" height="120"></canvas>
+      </div>
+
+    {% endif %}
+  </div>
+</section>
+
+{% if session_count > 0 %}
+<script src="{% static 'js/chart.umd.min.js' %}"></script>
+<script>
+(function () {
+  const CHART_DATA_URL = "{% url 'dashboard:chart_data' %}";
+
+  fetch(CHART_DATA_URL, {
+    headers: {"X-Requested-With": "XMLHttpRequest"},
+    credentials: "same-origin",
+  })
+  .then(function (r) { return r.json(); })
+  .then(function (data) {
+    buildRtChart(data.rt_trend || []);
+    buildLapseChart(data.rt_trend || []);
+    buildMoodChart(data.mood_trend || []);
+  });
+
+  function buildRtChart(points) {
+    const labels = points.map(function (p) { return p.date; });
+    const values = points.map(function (p) { return p.median_rt; });
+    new Chart(document.getElementById("rtChart"), {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Median RT (ms)",
+          data: values,
+          tension: 0.3,
+          borderColor: "rgb(54, 162, 235)",
+          backgroundColor: "rgba(54, 162, 235, 0.1)",
+          fill: true,
+          spanGaps: true,
+        }],
+      },
+      options: {
+        plugins: {legend: {display: false}},
+        scales: {
+          y: {title: {display: true, text: "ms"}},
+          x: {title: {display: true, text: "Date"}},
+        },
+      },
+    });
+  }
+
+  function buildLapseChart(points) {
+    const labels = points.map(function (p) { return p.date; });
+    const values = points.map(function (p) { return p.lapse_count; });
+    new Chart(document.getElementById("lapseChart"), {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Lapses",
+          data: values,
+          backgroundColor: "rgba(255, 99, 132, 0.6)",
+        }],
+      },
+      options: {
+        plugins: {legend: {display: false}},
+        scales: {
+          y: {beginAtZero: true, title: {display: true, text: "Lapses"}},
+          x: {title: {display: true, text: "Date"}},
+        },
+      },
+    });
+  }
+
+  function buildMoodChart(points) {
+    const labels = points.map(function (p) { return p.date; });
+    const datasets = [
+      {label: "Valence",   data: points.map(function (p) { return p.valence; }),   borderColor: "rgb(75, 192, 192)"},
+      {label: "Arousal",   data: points.map(function (p) { return p.arousal; }),   borderColor: "rgb(255, 159, 64)"},
+      {label: "Stress",    data: points.map(function (p) { return p.stress; }),    borderColor: "rgb(255, 99, 132)"},
+      {label: "Sharpness", data: points.map(function (p) { return p.sharpness; }), borderColor: "rgb(153, 102, 255)"},
+    ].map(function (ds) {
+      return Object.assign({tension: 0.3, fill: false, spanGaps: true}, ds);
+    });
+    new Chart(document.getElementById("moodChart"), {
+      type: "line",
+      data: {labels: labels, datasets: datasets},
+      options: {
+        scales: {
+          y: {min: 1, max: 5, title: {display: true, text: "Score (1–5)"}},
+          x: {title: {display: true, text: "Date"}},
+        },
+      },
+    });
+  }
+})();
+</script>
+{% endif %}
+{% endblock content %}

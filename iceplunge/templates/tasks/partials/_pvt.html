@@ -1,0 +1,9 @@
+{% load i18n static %}
+<p class="has-text-centered mb-4">
+  {% translate "Tap the screen as quickly as possible when the red timer appears. The task will last 60 seconds." %}
+</p>
+<div id="task-container"></div>
+<script src="{% static 'tasks/js/pvt.js' %}"></script>
+<script>
+  PvtTask.init(Object.assign({}, TASK_CONFIG, { durationMs: 60000 }));
+</script>
