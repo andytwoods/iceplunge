@@ -1,0 +1,8 @@
+{% load i18n %}
+<button class="button is-primary"
+        hx-get="{% url 'plunges:form' %}"
+        hx-target="#log-plunge-box-body"
+        hx-swap="innerHTML'"
+        onclick="openPlungeModal()">
+  {% translate "Log a plunge" %}
+</button>

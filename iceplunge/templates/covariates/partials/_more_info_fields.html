@@ -1,9 +1,10 @@
 {% load i18n %}
 <div class="more-info-fields">
 
-{# ── Sleep ─────────────────────────────────────────────────────────────── #}
-<p class="has-text-weight-semibold is-size-7 has-text-grey-dark mb-2 mt-1">
-  {% translate "SLEEP (LAST NIGHT)" %}
+{# ── Sleep (last night) ─────────────────────────────────────────────────── #}
+<p class="has-text-weight-bold is-size-7 has-text-grey-dark mb-3 mt-1"
+   style="text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #dbdbdb;padding-bottom:.4rem;">
+  {% translate "Sleep (last night)" %}
 </p>
 
 <div class="columns is-mobile mb-0">
@@ -46,11 +47,12 @@
 </div>
 
 {# ── Today ─────────────────────────────────────────────────────────────── #}
-<p class="has-text-weight-semibold is-size-7 has-text-grey-dark mb-2 mt-3">
-  {% translate "TODAY" %}
+<p class="has-text-weight-bold is-size-7 has-text-grey-dark mb-3 mt-4"
+   style="text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #dbdbdb;padding-bottom:.4rem;">
+  {% translate "Today" %}
 </p>
 
-<div class="columns is-mobile mb-0">
+<div class="columns is-mobile mb-2">
   <div class="column">
     <div class="field">
       <label class="label is-small">{% translate "Alcohol in last 24 h?" %}</label>
@@ -89,9 +91,26 @@
   </div>
 </div>
 
+<div class="field mb-0">
+  <label class="label is-small">{% translate "Currently menstruating?" %}</label>
+  {% if daily_form.menstruation_today.errors %}
+    <p class="help is-danger mb-1">{{ daily_form.menstruation_today.errors.0 }}</p>
+  {% endif %}
+  <div class="plunge-radio-group">
+    {% with cur=daily_form.menstruation_today.value|default:"" %}
+      {% for val, lbl in daily_form.menstruation_today.field.choices %}
+        <input type="radio" name="menstruation_today" id="men_{{ val }}" value="{{ val }}"
+               {% if val == cur %}checked{% endif %}>
+        <label for="men_{{ val }}"><span class="radio-main is-size-7">{{ lbl }}</span></label>
+      {% endfor %}
+    {% endwith %}
+  </div>
+</div>
+
 {# ── This week ─────────────────────────────────────────────────────────── #}
-<p class="has-text-weight-semibold is-size-7 has-text-grey-dark mb-2 mt-3">
-  {% translate "THIS WEEK" %}
+<p class="has-text-weight-bold is-size-7 has-text-grey-dark mb-3 mt-4"
+   style="text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid #dbdbdb;padding-bottom:.4rem;">
+  {% translate "This week" %}
 </p>
 
 <div class="field mb-3">
@@ -127,7 +146,7 @@
   </div>
 </div>
 
-<div class="field mb-3">
+<div class="field mb-0">
   <label class="label is-small">
     {% translate "GI symptoms" %}
     <span class="has-text-weight-normal has-text-grey">({% translate "optional" %})</span>

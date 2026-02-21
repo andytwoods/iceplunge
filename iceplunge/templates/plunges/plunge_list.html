@@ -4,61 +4,64 @@
 {% block title %}{% translate "My Plunges" %} – Cold Cognition Project{% endblock title %}
 
 {% block content %}
-<div class="columns is-variable is-6">
 
-  {# ── Log form ──────────────────────────────────────────────────────────── #}
-  <div class="column is-5">
-    <div class="box">
-      <h2 class="title is-5 mb-4">{% translate "Log a plunge" %}</h2>
-      {% include "plunges/partials/_plunge_form.html" %}
-    </div>
-
+{# ── Log-plunge modal ───────────────────────────────────────────────────── #}
+<div id="plunge-modal" class="modal">
+  <div class="modal-background" onclick="closePlungeModal()"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">{% translate "Log a plunge" %}</p>
+      <button class="delete" aria-label="close" onclick="closePlungeModal()"></button>
+    </header>
+    <section class="modal-card-body" id="log-plunge-box-body">
+    </section>
   </div>
-
-  {# ── History ───────────────────────────────────────────────────────────── #}
-  <div class="column">
-    <h2 class="title is-5 mb-4">{% translate "My plunge history" %}</h2>
-
-    {% if plunges %}
-      <div class="table-container">
-        <table class="table is-fullwidth is-hoverable">
-          <thead>
-            <tr>
-              <th>{% translate "When" %}</th>
-              <th>{% translate "Setting" %}</th>
-              <th>{% translate "Duration" %}</th>
-              <th>{% translate "Depth" %}</th>
-              <th>{% translate "Temp" %}</th>
-              <th>{% translate "Perseverance" %}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="plunge-list-body">
-            {% for plunge in plunges %}
-              {% include "plunges/partials/_plunge_row.html" %}
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      {% if is_paginated %}
-        <nav class="pagination is-small" role="navigation" aria-label="pagination">
-          {% if page_obj.has_previous %}
-            <a class="pagination-previous" href="?page={{ page_obj.previous_page_number }}">{% translate "Previous" %}</a>
-          {% endif %}
-          {% if page_obj.has_next %}
-            <a class="pagination-next" href="?page={{ page_obj.next_page_number }}">{% translate "Next" %}</a>
-          {% endif %}
-        </nav>
-      {% endif %}
-
-    {% else %}
-      <div class="has-text-centered py-6 has-text-grey">
-        <p class="is-size-5 mb-2">{% translate "No plunges logged yet." %}</p>
-        <p class="is-size-7">{% translate "Use the form to record your first one." %}</p>
-      </div>
-    {% endif %}
-  </div>
-
 </div>
+
+{# ── Heading + trigger ──────────────────────────────────────────────────── #}
+<div class="is-flex is-align-items-center mb-4" style="gap: 0.75rem;">
+  <h2 class="title is-5 mb-0">{% translate "My plunge history" %}</h2>
+  {% include "plunges/partials/_log_plunge_trigger.html" %}
+</div>
+
+{# ── History table ─────────────────────────────────────────────────────── #}
+<div class="table-container">
+  <table class="table is-fullwidth is-hoverable">
+    <thead>
+      <tr>
+        <th>{% translate "When" %}</th>
+        <th>{% translate "Setting" %}</th>
+        <th>{% translate "Duration" %}</th>
+        <th>{% translate "Depth" %}</th>
+        <th>{% translate "Temp" %}</th>
+        <th>{% translate "Perseverance" %}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="plunge-list-body">
+      {% for plunge in plunges %}
+        {% include "plunges/partials/_plunge_row.html" %}
+      {% empty %}
+        <tr id="empty-plunge-state">
+          <td colspan="7" class="has-text-centered py-6 has-text-grey">
+            <p class="is-size-5 mb-2">{% translate "No plunges logged yet." %}</p>
+            <p class="is-size-7">{% translate "Use the button above to record your first one." %}</p>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if is_paginated %}
+  <nav class="pagination is-small" role="navigation" aria-label="pagination">
+    {% if page_obj.has_previous %}
+      <a class="pagination-previous" href="?page={{ page_obj.previous_page_number }}">{% translate "Previous" %}</a>
+    {% endif %}
+    {% if page_obj.has_next %}
+      <a class="pagination-next" href="?page={{ page_obj.next_page_number }}">{% translate "Next" %}</a>
+    {% endif %}
+  </nav>
+{% endif %}
+
 {% endblock content %}

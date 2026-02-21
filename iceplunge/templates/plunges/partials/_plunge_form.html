@@ -1,8 +1,8 @@
 {% load i18n %}
-<form hx-post="{% url 'plunges:create' %}"
-      hx-target="#plunge-list-body"
-      hx-swap="afterbegin"
-      hx-on::after-request="if(event.detail.successful) this.reset()">
+<form id="plunge-form"
+      hx-post="{% url 'plunges:create' %}"
+      hx-target="#log-plunge-box-body"
+      hx-swap="innerHTML swap:100ms">
   {% csrf_token %}
 
   {# ── Setting ─────────────────────────────────────────────────────────── #}
@@ -52,9 +52,29 @@
     </div>
   </div>
 
+  {# ── How hard was it to persevere? ───────────────────────────────────── #}
+  <div class="field">
+    <label class="label">{% translate "How hard was it to persevere?" %}</label>
+    <p class="is-size-7 has-text-grey mb-2">{% translate "Rate how much mental effort it took to stay in." %}</p>
+    {% if form.perceived_intensity.errors %}<p class="help is-danger mb-1">{{ form.perceived_intensity.errors.0 }}</p>{% endif %}
+    <div class="plunge-radio-group is-intensity">
+      {% with cur=form.perceived_intensity.value|stringformat:"s" %}
+        {% for val, lbl, desc in intensity_choices %}
+          <input type="radio" name="perceived_intensity" id="intensity_{{ val }}" value="{{ val }}"
+                 {% if val|stringformat:"s" == cur %}checked{% endif %}>
+          <label for="intensity_{{ val }}">
+            <span class="radio-main">{{ val }}</span>
+            <span class="radio-sub">{{ lbl }}</span>
+            <span class="radio-sub" style="font-size:.65rem;">{{ desc }}</span>
+          </label>
+        {% endfor %}
+      {% endwith %}
+    </div>
+  </div>
+
   {# ── Temperature ──────────────────────────────────────────────────────── #}
   <div class="field">
-    <label class="label" for="{{ form.water_temp_celsius.id_for_label }}">{% translate "Water temperature (°C)" %}</label>
+    <label class="label" for="{{ form.water_temp_celsius.id_for_label }}">{% translate "Water temperature (°C)" %} <span class="has-text-weight-normal has-text-grey is-size-7">({% translate "optional" %})</span></label>
     {% if form.water_temp_celsius.errors %}<p class="help is-danger">{{ form.water_temp_celsius.errors.0 }}</p>{% endif %}
     <div class="field has-addons mb-0">
       <div class="control is-expanded">
@@ -74,6 +94,22 @@
              {% if form.temp_measured.value %}checked{% endif %}>
       {% translate "I measured this (not estimated)" %}
     </label>
+  </div>
+
+  {# ── Duck your head? ──────────────────────────────────────────────────── #}
+  <div class="field">
+    <label class="label">{% translate "Duck your head?" %} <span class="has-text-weight-normal has-text-grey is-size-7">({% translate "optional" %})</span></label>
+    {% if form.head_submerged.errors %}<p class="help is-danger mb-1">{{ form.head_submerged.errors.0 }}</p>{% endif %}
+    <div class="plunge-radio-group">
+      {% with cur=form.head_submerged.value|stringformat:"s" %}
+        <input type="radio" name="head_submerged" id="hs_yes" value="True"
+               {% if cur == "True" %}checked{% endif %}>
+        <label for="hs_yes"><span class="radio-main">{% translate "Yes" %}</span></label>
+        <input type="radio" name="head_submerged" id="hs_no" value="False"
+               {% if cur == "False" %}checked{% endif %}>
+        <label for="hs_no"><span class="radio-main">{% translate "No" %}</span></label>
+      {% endwith %}
+    </div>
   </div>
 
   {# ── Hot treatment before? ────────────────────────────────────────────── #}
@@ -109,79 +145,41 @@
   {# ── Exercise? ─────────────────────────────────────────────────────────── #}
   <div class="field">
     <label class="label">{% translate "Exercise?" %} <span class="has-text-weight-normal has-text-grey is-size-7">({% translate "optional" %})</span></label>
-    <div class="columns is-mobile mb-0">
-      <div class="column">
-        <p class="is-size-7 has-text-grey mb-1">{% translate "When" %}</p>
-        {% if form.exercise_timing.errors %}<p class="help is-danger mb-1">{{ form.exercise_timing.errors.0 }}</p>{% endif %}
-        <div class="plunge-radio-group">
-          {% with cur=form.exercise_timing.value|default:"" %}
-            {% for val, lbl in form.exercise_timing.field.choices %}
-              <input type="radio" name="exercise_timing" id="et_{{ val }}" value="{{ val }}"
-                     {% if val == cur %}checked{% endif %}
-                     onchange="document.getElementById('exercise-detail-row').style.display='flex'">
-              <label for="et_{{ val }}"><span class="radio-main">{{ lbl }}</span></label>
-            {% endfor %}
-          {% endwith %}
-        </div>
-      </div>
-      <div class="column">
-        <p class="is-size-7 has-text-grey mb-1">{% translate "Type" %}</p>
-        {% if form.exercise_type.errors %}<p class="help is-danger mb-1">{{ form.exercise_type.errors.0 }}</p>{% endif %}
-        <div class="plunge-radio-group">
-          {% with cur=form.exercise_type.value|default:"" %}
-            {% for val, lbl in form.exercise_type.field.choices %}
-              <input type="radio" name="exercise_type" id="ety_{{ val }}" value="{{ val }}"
-                     {% if val == cur %}checked{% endif %}
-                     onchange="document.getElementById('exercise-detail-row').style.display='flex'">
-              <label for="ety_{{ val }}"><span class="radio-main">{{ lbl }}</span></label>
-            {% endfor %}
-          {% endwith %}
-        </div>
-      </div>
-      <div class="column is-narrow"
-           id="exercise-detail-row"
-           style="display:{% if form.exercise_timing.value or form.exercise_type.value %}flex{% else %}none{% endif %};align-items:flex-end;gap:.5rem;padding-bottom:.5rem;">
-        <input class="input" type="number" min="1" max="600"
-               name="exercise_minutes"
-               id="{{ form.exercise_minutes.id_for_label }}"
-               value="{{ form.exercise_minutes.value|default:'' }}"
-               style="width:5rem;">
-        <span class="is-size-7 has-text-grey">{% translate "min" %}</span>
-      </div>
-    </div>
-  </div>
 
-  {# ── How hard was it to persevere? ───────────────────────────────────── #}
-  <div class="field">
-    <label class="label">{% translate "How hard was it to persevere?" %}</label>
-    <p class="is-size-7 has-text-grey mb-2">{% translate "Rate how much mental effort it took to stay in." %}</p>
-    {% if form.perceived_intensity.errors %}<p class="help is-danger mb-1">{{ form.perceived_intensity.errors.0 }}</p>{% endif %}
-    <div class="plunge-radio-group is-intensity">
-      {% with cur=form.perceived_intensity.value|stringformat:"s" %}
-        {% for val, lbl, desc in intensity_choices %}
-          <input type="radio" name="perceived_intensity" id="intensity_{{ val }}" value="{{ val }}"
-                 {% if val|stringformat:"s" == cur %}checked{% endif %}>
-          <label for="intensity_{{ val }}">
-            <span class="radio-main">{{ val }}</span>
-            <span class="radio-sub">{{ lbl }}</span>
-            <span class="radio-sub" style="font-size:.65rem;">{{ desc }}</span>
-          </label>
+    <p class="is-size-7 has-text-grey mb-1">{% translate "When" %}</p>
+    {% if form.exercise_timing.errors %}<p class="help is-danger mb-1">{{ form.exercise_timing.errors.0 }}</p>{% endif %}
+    <div class="plunge-radio-group mb-3">
+      {% with cur=form.exercise_timing.value|default:"" %}
+        {% for val, lbl in form.exercise_timing.field.choices %}
+          <input type="radio" name="exercise_timing" id="et_{{ val }}" value="{{ val }}"
+                 {% if val == cur %}checked{% endif %}
+                 onchange="document.getElementById('exercise-detail-row').style.display='flex'">
+          <label for="et_{{ val }}"><span class="radio-main">{{ lbl }}</span></label>
         {% endfor %}
       {% endwith %}
     </div>
-  </div>
 
-  {# ── Breathing technique ──────────────────────────────────────────────── #}
-  <div class="field">
-    <label class="label" for="{{ form.breathing_technique.id_for_label }}">
-      {% translate "Breathing technique" %} <span class="has-text-weight-normal has-text-grey is-size-7">({% translate "optional" %})</span>
-    </label>
-    <div class="control">
-      <input class="input" type="text"
-             name="breathing_technique"
-             id="{{ form.breathing_technique.id_for_label }}"
-             placeholder="{% translate 'e.g. Wim Hof, box breathing…' %}"
-             value="{{ form.breathing_technique.value|default:'' }}">
+    <p class="is-size-7 has-text-grey mb-1">{% translate "Type" %}</p>
+    {% if form.exercise_type.errors %}<p class="help is-danger mb-1">{{ form.exercise_type.errors.0 }}</p>{% endif %}
+    <div class="plunge-radio-group mb-3">
+      {% with cur=form.exercise_type.value|default:"" %}
+        {% for val, lbl in form.exercise_type.field.choices %}
+          <input type="radio" name="exercise_type" id="ety_{{ val }}" value="{{ val }}"
+                 {% if val == cur %}checked{% endif %}
+                 onchange="document.getElementById('exercise-detail-row').style.display='flex'">
+          <label for="ety_{{ val }}"><span class="radio-main">{{ lbl }}</span></label>
+        {% endfor %}
+      {% endwith %}
+    </div>
+
+    <div id="exercise-detail-row"
+         style="display:{% if form.exercise_timing.value or form.exercise_type.value %}flex{% else %}none{% endif %};align-items:center;gap:.5rem;">
+      <input class="input" type="number" min="1" max="600"
+             name="exercise_minutes"
+             id="{{ form.exercise_minutes.id_for_label }}"
+             value="{{ form.exercise_minutes.value|default:'' }}"
+             style="width:5rem;">
+      <span class="is-size-7 has-text-grey">{% translate "min" %}</span>
     </div>
   </div>
 
@@ -202,12 +200,25 @@
 
   {# ── More information ──────────────────────────────────────────────────── #}
   {% if daily_form and weekly_form %}
-    <details class="mb-3">
+    <details id="more-info-details" class="mb-3">
       <summary class="is-size-7 has-text-grey" style="cursor:pointer;">
         {% translate "More information" %}
-        <span class="has-text-weight-normal ml-1">({% translate "sleep, alcohol, exercise, health" %})</span>
+        <span class="has-text-weight-normal ml-1">({% translate "breathing, sleep, menstruation, alcohol, exercise, health" %})</span>
       </summary>
       <div class="mt-3">
+        {# ── Breathing technique ──────────────────────────────────────── #}
+        <div class="field mb-3">
+          <label class="label is-small" for="{{ form.breathing_technique.id_for_label }}">
+            {% translate "Breathing technique" %} <span class="has-text-weight-normal has-text-grey">({% translate "optional" %})</span>
+          </label>
+          <div class="control">
+            <input class="input is-small" type="text"
+                   name="breathing_technique"
+                   id="{{ form.breathing_technique.id_for_label }}"
+                   placeholder="{% translate 'e.g. Wim Hof, box breathing…' %}"
+                   value="{{ form.breathing_technique.value|default:'' }}">
+          </div>
+        </div>
         {% include "covariates/partials/_more_info_fields.html" %}
         <div class="field mt-2">
           <div class="control">

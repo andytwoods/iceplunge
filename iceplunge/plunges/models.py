@@ -63,6 +63,7 @@ class PlungeLog(Model):
     context = CharField(max_length=20, choices=Context.choices)
     breathing_technique = CharField(max_length=100, blank=True)
     perceived_intensity = PositiveSmallIntegerField(choices=INTENSITY_CHOICES)
+    head_submerged = BooleanField(null=True, blank=True)
     pre_hot_treatment = CharField(
         max_length=20, choices=PreHotTreatment.choices, null=True, blank=True
     )

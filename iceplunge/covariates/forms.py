@@ -42,10 +42,17 @@ class DailyCovariateForm(ModelForm):
         required=False,
         empty_value=None,
     )
+    menstruation_today = forms.ChoiceField(
+        choices=DailyCovariate.MenstruationStatus.choices,
+        required=False,
+    )
 
     class Meta:
         model = DailyCovariate
-        fields = ["sleep_duration_hours", "sleep_quality", "alcohol_last_24h", "exercise_today"]
+        fields = ["sleep_duration_hours", "sleep_quality", "alcohol_last_24h", "exercise_today", "menstruation_today"]
+
+    def clean_menstruation_today(self):
+        return self.cleaned_data.get("menstruation_today") or None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

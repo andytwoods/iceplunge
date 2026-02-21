@@ -301,6 +301,7 @@ Each plunge entry includes:
 * Sleep quality (5-point: Poor – Excellent).
 * Alcohol last 24h (yes/no).
 * Exercise today (yes/no).
+* Currently menstruating? (Yes / No / Not applicable). Captures the menstrual phase as a daily covariate; menstruation is associated with changes in thermoregulation (core temperature varies ~0.5 °C across the cycle), pain sensitivity, and inflammatory markers relevant to cold-water immersion responses.
 
 Captured via the "More information" section on the plunge log page and after each cognitive session. Stored in `DailyCovariate` (one record per user per date; updated if the form is submitted again the same day).
 
@@ -442,7 +443,7 @@ Designed to maximise engagement and transparency.
 | `CognitiveSession` | user, prompt_event, started_at, completed_at, task_order, random_seed, device_meta, completion_status, quality_flags |
 | `TaskResult` | session, task_type, task_version, started_at, completed_at, trial_data (JSON), summary_metrics (JSON), session_index_overall, session_index_per_task |
 | `MoodRating` | session, valence, arousal, stress, sharpness |
-| `DailyCovariate` | user, date, sleep_duration_hours, sleep_quality (1–5), alcohol_last_24h, exercise_today |
+| `DailyCovariate` | user, date, sleep_duration_hours, sleep_quality (1–5), alcohol_last_24h, exercise_today, menstruation_today (yes/no/na) |
 | `WeeklyCovariate` | user, week_start, gi_severity (1–5), gi_symptoms (JSON list), illness_status |
 | `SessionCovariate` | session (OneToOne), caffeine_since_last_session, minutes_since_last_meal, cold_hands, wet_hands |
 
