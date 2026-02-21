@@ -1,137 +1,167 @@
 {% load static i18n %}<!DOCTYPE html>
 {% get_current_language as LANGUAGE_CODE %}
 <html lang="{{ LANGUAGE_CODE }}">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <title>
-      {% block title %}iceplunge{% endblock title %}
-    </title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Ice Plunge Cognitive Research Platform" />
-    <meta name="author" content="Andy T. Woods" />
-    <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}" />
-    {% block css %}
-      <link rel="stylesheet" href="{% static 'css/bulma.min.css' %}" />
-      <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}" />
-      <link rel="stylesheet" href="{% static 'css/project.css' %}" />
-    {% endblock css %}
-    {% block javascript %}
-      <script defer src="{% static 'js/htmx.min.js' %}"></script>
-      <script defer src="{% static 'js/sweetalert2.min.js' %}"></script>
-      <script defer src="{% static 'js/project.js' %}"></script>
-    {% endblock javascript %}
-  </head>
-  <body class="{% block bodyclass %}{% endblock bodyclass %}">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+  <style>
+    html {
+      font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+      /* Prevent layout shift from scrollbar appearance */
+      scrollbar-gutter: stable;
+    }
 
-    {% if request.user.is_impersonated %}
-      <div class="notification is-warning has-text-centered" style="margin-bottom:0;border-radius:0;">
-        {% blocktranslate with user=request.user %}
-          You are impersonating <strong>{{ user }}</strong>.
-        {% endblocktranslate %}
-        <a href="{% url 'hijack:release' %}" class="button is-small is-warning is-outlined ml-3">
-          {% translate "Release" %}
-        </a>
+    /* If OS is in dark mode, prevent Bulma's dark mode from flashing before project.css overrides it to light */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: light;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      const LS_KEY = 'a11yPrefs';
+      const html = document.documentElement;
+      try {
+        const prefs = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+        if (prefs.contrast && prefs.contrast !== 'standard') html.setAttribute('data-a11y-contrast', prefs.contrast);
+        if (prefs.text && prefs.text !== 'standard') html.setAttribute('data-a11y-text', prefs.text);
+        if (prefs.motion && prefs.motion !== 'standard') html.setAttribute('data-a11y-motion', prefs.motion);
+      } catch (_) {
+      }
+    })();
+  </script>
+  <title>
+    {% block title %}iceplunge{% endblock title %}
+  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Ice Plunge Cognitive Research Platform"/>
+  <meta name="author" content="Andy T. Woods"/>
+  <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}"/>
+  {% block css %}
+    <link rel="stylesheet" href="{% static 'css/bulma.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/sweetalert2.min.css' %}"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/all.min.css"/>
+
+    <link rel="stylesheet" href="{% static 'css/project.css' %}"/>
+  {% endblock css %}
+  {% block javascript %}
+    <script defer src="{% static 'js/htmx.min.js' %}"></script>
+    <script defer src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <script defer src="{% static 'js/sweetalert2.min.js' %}"></script>
+    <script defer src="{% static 'js/project.js' %}"></script>
+  {% endblock javascript %}
+</head>
+<body class="{% block bodyclass %}{% endblock bodyclass %}">
+
+{% if request.user.is_impersonated %}
+  <div class="notification is-warning has-text-centered" style="margin-bottom:0;border-radius:0;">
+    {% blocktranslate with user=request.user %}
+      You are impersonating <strong>{{ user }}</strong>.
+    {% endblocktranslate %}
+    <a href="{% url 'hijack:release' %}" class="button is-small is-warning is-outlined ml-3">
+      {% translate "Release" %}
+    </a>
+  </div>
+{% endif %}
+
+{% include "partials/_navbar.html" %}
+
+{# ── TOAST NOTIFICATIONS ────────────────────────────────────────────── #}
+<div class="toast-container" id="toastContainer" aria-live="polite">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="notification {% if message.tags %}is-{{ message.tags }}{% endif %}">
+        <button class="delete"></button>
+        {{ message }}
       </div>
-    {% endif %}
+    {% endfor %}
+  {% endif %}
+</div>
 
-    {% include "partials/_navbar.html" %}
-
-    {# ── TOAST NOTIFICATIONS ────────────────────────────────────────────── #}
-    <div class="toast-container" id="toastContainer" aria-live="polite">
-      {% if messages %}
-        {% for message in messages %}
-          <div class="notification {% if message.tags %}is-{{ message.tags }}{% endif %}">
-            <button class="delete"></button>
-            {{ message }}
-          </div>
-        {% endfor %}
-      {% endif %}
+{% block body %}
+  <section class="section">
+    <div class="container">
+      {% block main %}
+        {% block content %}{% endblock content %}
+      {% endblock main %}
     </div>
+  </section>
+{% endblock body %}
 
-    {% block body %}
-      <section class="section">
-        <div class="container">
-          {% block main %}
-            {% block content %}{% endblock content %}
-          {% endblock main %}
-        </div>
-      </section>
-    {% endblock body %}
+{% include "partials/_footer.html" %}
 
-    {% include "partials/_footer.html" %}
+{# ── ACCESSIBILITY WIDGET ──────────────────────────────────────────── #}
+<div class="a11y-panel" id="a11yPanel" role="dialog"
+     aria-modal="false"
+     aria-labelledby="a11yPanelTitle"
+     aria-describedby="a11yPanelDesc">
+  <div class="a11y-panel-header">
+    <span class="a11y-panel-title" id="a11yPanelTitle">{% translate "Accessibility" %}</span>
+    <button class="a11y-close" id="a11yClose" aria-label="{% translate 'Close accessibility panel' %}">&#x2715;</button>
+  </div>
+  <p class="a11y-description" id="a11yPanelDesc">
+    {% translate "Adjust display settings. Preferences are saved for your next visit." %}
+  </p>
 
-    {# ── ACCESSIBILITY WIDGET ──────────────────────────────────────────── #}
-    <div class="a11y-panel" id="a11yPanel" role="dialog"
-         aria-modal="false"
-         aria-labelledby="a11yPanelTitle"
-         aria-describedby="a11yPanelDesc">
-      <div class="a11y-panel-header">
-        <span class="a11y-panel-title" id="a11yPanelTitle">{% translate "Accessibility" %}</span>
-        <button class="a11y-close" id="a11yClose" aria-label="{% translate 'Close accessibility panel' %}">&#x2715;</button>
-      </div>
-      <p class="a11y-description" id="a11yPanelDesc">
-        {% translate "Adjust display settings. Preferences are saved for your next visit." %}
-      </p>
+  <div class="a11y-group" role="group" aria-labelledby="a11y-contrast-label">
+    <span class="a11y-group-label" id="a11y-contrast-label">{% translate "Contrast" %}</span>
+    <div class="a11y-pills">
+      <input type="radio" name="a11y-contrast" id="a11y-contrast-standard" value="standard">
+      <label for="a11y-contrast-standard">{% translate "Standard" %}</label>
 
-      <div class="a11y-group" role="group" aria-labelledby="a11y-contrast-label">
-        <span class="a11y-group-label" id="a11y-contrast-label">{% translate "Contrast" %}</span>
-        <div class="a11y-pills">
-          <input type="radio" name="a11y-contrast" id="a11y-contrast-standard" value="standard">
-          <label for="a11y-contrast-standard">{% translate "Standard" %}</label>
+      <input type="radio" name="a11y-contrast" id="a11y-contrast-low" value="low">
+      <label for="a11y-contrast-low">{% translate "Low" %}</label>
 
-          <input type="radio" name="a11y-contrast" id="a11y-contrast-low" value="low">
-          <label for="a11y-contrast-low">{% translate "Low" %}</label>
-
-          <input type="radio" name="a11y-contrast" id="a11y-contrast-high" value="high">
-          <label for="a11y-contrast-high">{% translate "High" %}</label>
-        </div>
-      </div>
-
-      <div class="a11y-group" role="group" aria-labelledby="a11y-text-label">
-        <span class="a11y-group-label" id="a11y-text-label">{% translate "Text Size" %}</span>
-        <div class="a11y-pills">
-          <input type="radio" name="a11y-text" id="a11y-text-standard" value="standard">
-          <label for="a11y-text-standard">{% translate "Standard" %}</label>
-
-          <input type="radio" name="a11y-text" id="a11y-text-large" value="large">
-          <label for="a11y-text-large">{% translate "Large" %}</label>
-
-          <input type="radio" name="a11y-text" id="a11y-text-extra-large" value="extra-large">
-          <label for="a11y-text-extra-large">{% translate "Extra Large" %}</label>
-        </div>
-      </div>
-
-      <div class="a11y-group" role="group" aria-labelledby="a11y-motion-label">
-        <span class="a11y-group-label" id="a11y-motion-label">{% translate "Motion" %}</span>
-        <div class="a11y-pills">
-          <input type="radio" name="a11y-motion" id="a11y-motion-standard" value="standard">
-          <label for="a11y-motion-standard">{% translate "Standard" %}</label>
-
-          <input type="radio" name="a11y-motion" id="a11y-motion-reduced" value="reduced">
-          <label for="a11y-motion-reduced">{% translate "Reduced" %}</label>
-        </div>
-      </div>
-
-      <button class="button is-light is-small is-fullwidth a11y-reset" id="a11yReset">
-        {% translate "Reset to defaults" %}
-      </button>
+      <input type="radio" name="a11y-contrast" id="a11y-contrast-high" value="high">
+      <label for="a11y-contrast-high">{% translate "High" %}</label>
     </div>
+  </div>
 
-    {% block modal %}{% endblock modal %}
-    {% block inline_javascript %}{% endblock inline_javascript %}
+  <div class="a11y-group" role="group" aria-labelledby="a11y-text-label">
+    <span class="a11y-group-label" id="a11y-text-label">{% translate "Text Size" %}</span>
+    <div class="a11y-pills">
+      <input type="radio" name="a11y-text" id="a11y-text-standard" value="standard">
+      <label for="a11y-text-standard">{% translate "Standard" %}</label>
 
-    <script>
-      // Bulma navbar burger toggle
-      document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.navbar-burger').forEach(burger => {
-          burger.addEventListener('click', () => {
-            const target = document.getElementById(burger.dataset.target);
-            burger.classList.toggle('is-active');
-            target.classList.toggle('is-active');
-          });
-        });
+      <input type="radio" name="a11y-text" id="a11y-text-large" value="large">
+      <label for="a11y-text-large">{% translate "Large" %}</label>
+
+      <input type="radio" name="a11y-text" id="a11y-text-extra-large" value="extra-large">
+      <label for="a11y-text-extra-large">{% translate "Extra Large" %}</label>
+    </div>
+  </div>
+
+  <div class="a11y-group" role="group" aria-labelledby="a11y-motion-label">
+    <span class="a11y-group-label" id="a11y-motion-label">{% translate "Motion" %}</span>
+    <div class="a11y-pills">
+      <input type="radio" name="a11y-motion" id="a11y-motion-standard" value="standard">
+      <label for="a11y-motion-standard">{% translate "Standard" %}</label>
+
+      <input type="radio" name="a11y-motion" id="a11y-motion-reduced" value="reduced">
+      <label for="a11y-motion-reduced">{% translate "Reduced" %}</label>
+    </div>
+  </div>
+
+  <button class="button is-light is-small is-fullwidth a11y-reset" id="a11yReset">
+    {% translate "Reset to defaults" %}
+  </button>
+</div>
+
+{% block modal %}{% endblock modal %}
+{% block inline_javascript %}{% endblock inline_javascript %}
+
+<script>
+  // Bulma navbar burger toggle
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.navbar-burger').forEach(burger => {
+      burger.addEventListener('click', () => {
+        const target = document.getElementById(burger.dataset.target);
+        burger.classList.toggle('is-active');
+        target.classList.toggle('is-active');
       });
-    </script>
-  </body>
+    });
+  });
+</script>
+</body>
 </html>

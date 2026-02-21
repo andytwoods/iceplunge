@@ -9,6 +9,8 @@ app_name = "plunges"
 urlpatterns = [
     path("", view=plunge_list_view, name="list"),
     path("form/", view=plunge_form_view, name="form"),
+    path("form/<int:pk>/", view=plunge_form_view, name="form_edit"),
     path("create/", view=plunge_create_view, name="create"),
+    path("<int:pk>/update/", view=plunge_create_view, name="update"),
     path("<int:pk>/delete/", view=plunge_delete_view, name="delete"),
 ]

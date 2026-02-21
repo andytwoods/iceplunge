@@ -46,11 +46,16 @@ plunge_list_view = PlungeListView.as_view()
 class PlungeFormView(LoginRequiredMixin, View):
     """Return the plunge log form partial via HTMX GET."""
 
-    def get(self, request):
+    def get(self, request, pk=None):
         if not request.headers.get("HX-Request"):
             return redirect(reverse("plunges:list"))
+
+        plunge = None
+        if pk:
+            plunge = get_object_or_404(PlungeLog, pk=pk, user=request.user)
+
         return HttpResponse(
-            _render_form_partial(request),
+            _render_form_partial(request, plunge=plunge),
             content_type="text/html",
         )
 
@@ -59,11 +64,15 @@ plunge_form_view = PlungeFormView.as_view()
 
 
 class PlungeCreateView(LoginRequiredMixin, View):
-    def get(self, request):
+    def get(self, request, pk=None):
         return redirect(reverse("plunges:list"))
 
-    def post(self, request):
-        form = PlungeLogForm(request.POST)
+    def post(self, request, pk=None):
+        plunge = None
+        if pk:
+            plunge = get_object_or_404(PlungeLog, pk=pk, user=request.user)
+
+        form = PlungeLogForm(request.POST, instance=plunge)
         daily, weekly = _covariate_instances(request.user)
         daily_form = DailyCovariateForm(request.POST, instance=daily)
         weekly_form = WeeklyCovariateForm(request.POST, instance=weekly)
@@ -79,17 +88,26 @@ class PlungeCreateView(LoginRequiredMixin, View):
             if request.headers.get("HX-Request"):
                 row_html = _render_plunge_row(request, plunge)
                 response = HttpResponse(row_html, content_type="text/html")
-                response["HX-Retarget"] = "#plunge-list-body"
-                response["HX-Reswap"] = "afterbegin"
+                if pk:
+                    # Update existing row
+                    response["HX-Retarget"] = f"#plunge-{pk}"
+                    response["HX-Reswap"] = "outerHTML"
+                    msg = "Plunge updated!"
+                else:
+                    # Append new row
+                    response["HX-Retarget"] = "#plunge-list-body"
+                    response["HX-Reswap"] = "afterbegin"
+                    msg = "Plunge logged!"
+
                 response["HX-Trigger"] = json.dumps(
-                    {"plungeLogged": {"message": "Plunge logged!", "type": "success"}}
+                    {"plungeLogged": {"message": msg, "type": "success"}}
                 )
                 return response
             return redirect(reverse("plunges:list"))
 
         if request.headers.get("HX-Request"):
             return HttpResponse(
-                _render_form_partial(request, form, daily_form, weekly_form),
+                _render_form_partial(request, form, daily_form, weekly_form, plunge=plunge),
                 content_type="text/html",
                 status=422,
             )
@@ -144,18 +162,28 @@ def _build_plunge_form(user):
     return PlungeLogForm(initial=initial)
 
 
-def _render_form_partial(request, form=None, daily_form=None, weekly_form=None):
+def _render_form_partial(request, form=None, daily_form=None, weekly_form=None, plunge=None):
     from django.template.loader import render_to_string
     if form is None:
-        form = _build_plunge_form(request.user)
+        if plunge:
+            form = PlungeLogForm(instance=plunge)
+        else:
+            form = _build_plunge_form(request.user)
+
     if daily_form is None or weekly_form is None:
-        daily, weekly = _covariate_instances(request.user)
+        # For an existing plunge, we should ideally fetch the covariates for THAT plunge's date.
+        # But _covariate_instances currently only works for today.
+        # Let's refine _covariate_instances or do it here.
+        log_date = plunge.timestamp.date() if plunge else datetime.date.today()
+        daily, weekly = _covariate_instances_for_date(request.user, log_date)
         daily_form = daily_form or DailyCovariateForm(instance=daily)
         weekly_form = weekly_form or WeeklyCovariateForm(instance=weekly)
+
     return render_to_string(
         "plunges/partials/_plunge_form.html",
         {
             "form": form,
+            "plunge": plunge,
             "intensity_choices": [
                 (val, label, desc)
                 for (val, label), desc in zip(PlungeLog.INTENSITY_CHOICES, PlungeLog.INTENSITY_DESCRIPTIONS)
@@ -165,3 +193,11 @@ def _render_form_partial(request, form=None, daily_form=None, weekly_form=None):
         },
         request=request,
     )
+
+
+def _covariate_instances_for_date(user, date):
+    """Return (daily_instance, weekly_instance) for a specific date, creating if needed."""
+    week_start = date - datetime.timedelta(days=date.weekday())
+    daily, _ = DailyCovariate.objects.get_or_create(user=user, date=date)
+    weekly, _ = WeeklyCovariate.objects.get_or_create(user=user, week_start=week_start)
+    return daily, weekly

@@ -124,3 +124,76 @@ class TestPlungeDeleteView:
         )
         assert response.status_code == 200
         assert not PlungeLog.objects.filter(pk=plunge.pk).exists()
+
+
+@pytest.mark.django_db
+class TestPlungeUpdateView:
+    def _create_plunge(self, user):
+        return PlungeLog.objects.create(
+            user=user,
+            duration_minutes=5,
+            immersion_depth="waist",
+            context="bath",
+            perceived_intensity=1,
+        )
+
+    def test_get_form_for_edit(self, client):
+        user = _consented_user()
+        client.force_login(user)
+        plunge = self._create_plunge(user)
+        response = client.get(
+            reverse("plunges:form_edit", kwargs={"pk": plunge.pk}),
+            HTTP_HX_REQUEST="true",
+        )
+        assert response.status_code == 200
+        assert b"Update plunge" in response.content
+        assert b"Editing plunge from:" in response.content
+        assert b"Edit plunge" in response.content
+        # Check if values are in form
+        assert b'value="bath"' in response.content
+        assert b'value="waist"' in response.content
+        assert str(plunge.duration_minutes).encode() in response.content
+
+    def test_update_plunge_success(self, client):
+        user = _consented_user()
+        client.force_login(user)
+        plunge = self._create_plunge(user)
+        payload = _plunge_payload(duration_minutes=15, context="sea")
+        response = client.post(
+            reverse("plunges:update", kwargs={"pk": plunge.pk}),
+            data=payload,
+        )
+        assert response.status_code == 302
+        plunge.refresh_from_db()
+        assert plunge.duration_minutes == 15
+        assert plunge.context == "sea"
+
+    def test_update_via_htmx_returns_partial(self, client):
+        user = _consented_user()
+        client.force_login(user)
+        plunge = self._create_plunge(user)
+        payload = _plunge_payload(duration_minutes=20)
+        response = client.post(
+            reverse("plunges:update", kwargs={"pk": plunge.pk}),
+            data=payload,
+            HTTP_HX_REQUEST="true",
+        )
+        assert response.status_code == 200
+        assert b"<tr" in response.content
+        assert b"20" in response.content
+        assert response["HX-Retarget"] == f"#plunge-{plunge.pk}"
+        assert response["HX-Reswap"] == "outerHTML"
+
+    def test_other_user_cannot_update(self, client):
+        owner = _consented_user()
+        attacker = _consented_user()
+        client.force_login(attacker)
+        plunge = self._create_plunge(owner)
+        payload = _plunge_payload(duration_minutes=25)
+        response = client.post(
+            reverse("plunges:update", kwargs={"pk": plunge.pk}),
+            data=payload,
+        )
+        assert response.status_code == 404
+        plunge.refresh_from_db()
+        assert plunge.duration_minutes == 5

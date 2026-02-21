@@ -1,9 +1,13 @@
 {% load i18n %}
 <form id="plunge-form"
-      hx-post="{% url 'plunges:create' %}"
+      hx-post="{% if plunge %}{% url 'plunges:update' plunge.pk %}{% else %}{% url 'plunges:create' %}{% endif %}"
       hx-target="#log-plunge-box-body"
       hx-swap="innerHTML swap:100ms">
   {% csrf_token %}
+
+  <p class="modal-card-title" id="plunge-modal-title" hx-swap-oob="true">
+    {% if plunge %}{% translate "Edit plunge" %}{% else %}{% translate "Log a plunge" %}{% endif %}
+  </p>
 
   {# ── Setting ─────────────────────────────────────────────────────────── #}
   <div class="field">
@@ -184,16 +188,22 @@
   </div>
 
   {# ── When ─────────────────────────────────────────────────────────────── #}
-  <details class="mb-4">
+  {% if plunge %}
+    <div class="notification is-info is-light is-size-7 py-2 px-3 mb-4">
+      <strong>{% translate "Editing plunge from:" %}</strong> {{ plunge.timestamp|date:"d M Y, H:i" }}
+    </div>
+  {% endif %}
+
+  <details class="mb-4" {% if plunge %}open{% endif %}>
     <summary class="is-size-7 has-text-grey" style="cursor:pointer;">
-      {% translate "Change date / time (defaults to now)" %}
+      {% if plunge %}{% translate "Change date / time" %}{% else %}{% translate "Change date / time (defaults to now)" %}{% endif %}
     </summary>
     <div class="field mt-2">
       <div class="control">
         <input class="input" type="datetime-local"
                name="timestamp"
                id="{{ form.timestamp.id_for_label }}"
-               value="{{ form.initial.timestamp|default:'' }}">
+               value="{% if form.timestamp.value %}{{ form.timestamp.value|date:'Y-m-d\TH:i' }}{% else %}{{ form.initial.timestamp|default:'' }}{% endif %}">
       </div>
     </div>
   </details>
@@ -235,7 +245,7 @@
   <div class="field mt-4">
     <div class="control">
       <button class="button is-primary is-fullwidth" type="submit">
-        {% translate "Log plunge" %}
+        {% if plunge %}{% translate "Update plunge" %}{% else %}{% translate "Log plunge" %}{% endif %}
       </button>
     </div>
   </div>

@@ -26,14 +26,29 @@
       {{ plunge.perceived_intensity }}/5 {{ plunge.get_perceived_intensity_display }}
     </span>
   </td>
-  <td>
-    <button class="button is-small is-danger is-outlined"
-            hx-post="{% url 'plunges:delete' plunge.pk %}"
-            hx-target="#plunge-{{ plunge.pk }}"
-            hx-swap="outerHTML swap:0.3s"
-            hx-confirm="{% translate 'Delete this plunge log?' %}"
-            {% csrf_token %}>
-      {% translate "Delete" %}
-    </button>
+  <td style="white-space:nowrap;">
+    <div class="buttons">
+      <button class="button is-small is-link is-outlined"
+              hx-get="{% url 'plunges:form_edit' plunge.pk %}"
+              hx-target="#log-plunge-box-body"
+              hx-swap="innerHTML"
+              onclick="openPlungeModal()">
+        <span class="icon" aria-hidden="true">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </span>
+        <span>{% translate "Edit" %}</span>
+      </button>
+      <button class="button is-small is-danger is-outlined"
+              hx-post="{% url 'plunges:delete' plunge.pk %}"
+              hx-target="#plunge-{{ plunge.pk }}"
+              hx-swap="outerHTML swap:0.3s"
+              hx-confirm="{% translate 'Delete this plunge log?' %}"
+              {% csrf_token %}
+        <span class="icon" aria-hidden="true">
+          <i class="fa-solid fa-trash"></i>
+        </span>
+        <span>{% translate "Delete" %}</span>
+      </button>
+    </div>
   </td>
 </tr>

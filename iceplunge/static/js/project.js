@@ -180,6 +180,8 @@ window.clearMoreInfo = function (formEl) {
   }
 
   // Apply stored prefs immediately (before DOM ready) so there's no flash
+  // This is also handled by an inline script in base.html for even faster application,
+  // but we keep it here to ensure consistency if project.js is used elsewhere.
   applyPrefs(loadPrefs());
 
   document.addEventListener('DOMContentLoaded', function () {
