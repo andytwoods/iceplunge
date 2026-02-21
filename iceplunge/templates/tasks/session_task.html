@@ -9,6 +9,17 @@
 {% endblock javascript %}
 
 {% block content %}
+<script>
+  var TASK_SUBMIT_URL = "{% url 'tasks:submit_result' %}";
+  var SESSION_META_URL = "{% url 'tasks:session_meta' %}";
+  var TASK_COMPLETE_URL = "{% url 'tasks:complete' session_id=session.id %}";
+  var TASK_TASK_URL = "{% url 'tasks:task' session_id=session.id %}";
+  var TASK_CONFIG = {
+    seed: "{{ session.random_seed }}",
+    taskType: "{{ task_type }}",
+    taskVersion: "1.0"
+  };
+</script>
 <div class="columns is-centered">
   <div class="column is-full">
     <h2 class="title is-4">{{ task_label }}</h2>
@@ -34,15 +45,6 @@
 
 {% block inline_javascript %}
 <script>
-  var TASK_SUBMIT_URL = "{% url 'tasks:submit_result' %}";
-  var SESSION_META_URL = "{% url 'tasks:session_meta' %}";
-  var TASK_COMPLETE_URL = "{% url 'tasks:complete' session_id=session.id %}";
-  var TASK_TASK_URL = "{% url 'tasks:task' session_id=session.id %}";
-  var TASK_CONFIG = {
-    seed: "{{ session.random_seed }}",
-    taskType: "{{ task_type }}",
-    taskVersion: "1.0"
-  };
   TaskCore.init("{{ session.id }}", "{{ csrf_token }}");
 </script>
 {% endblock inline_javascript %}
