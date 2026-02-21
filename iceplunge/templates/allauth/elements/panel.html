@@ -1,19 +1,14 @@
 {% load allauth %}
-
-<section>
-  <div class="card mb-4">
-    <div class="card-body">
-      <h2 class="card-title">
-        {% slot title %}
-      {% endslot %}
-    </h2>
-    {% slot body %}
-  {% endslot %}
+<div class="box mb-4">
+  {% if slots.title %}
+    <h2 class="title is-5 mb-3">{% slot title %}{% endslot %}</h2>
+  {% endif %}
+  {% slot body %}{% endslot %}
   {% if slots.actions %}
-    <ul>
-      {% for action in slots.actions %}<li>{{ action }}</li>{% endfor %}
-    </ul>
+    <div class="field is-grouped mt-4">
+      {% for action in slots.actions %}
+        <div class="control">{{ action }}</div>
+      {% endfor %}
+    </div>
   {% endif %}
 </div>
-</div>
-</section>

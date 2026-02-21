@@ -268,9 +268,11 @@ Each plunge entry includes:
 * Water temperature.
 * Measured vs estimated indicator.
 * Immersion depth (waist/chest/neck).
-* Context (bath/lake/sea/cryotherapy/other).
+* Context (plunge pool/bath/lake/sea/cryotherapy/other).
 * Breathing technique.
-* Perceived intensity (5-point scale).
+* Perceived intensity / perseverance effort (5-point scale: "How hard was it to persevere?").
+* Pre-plunge hot treatment (optional): type (sauna / steam room) and duration in minutes.
+* Exercise session (optional): timing (before / after the plunge), type (cardio / weights), and duration in minutes.
 
 ---
 
@@ -295,16 +297,20 @@ Each plunge entry includes:
 
 ## Daily
 
-* Sleep duration.
-* Sleep quality (5-point).
-* Alcohol last 24h.
-* Exercise today.
+* Sleep duration (hours, 0.5-step).
+* Sleep quality (5-point: Poor – Excellent).
+* Alcohol last 24h (yes/no).
+* Exercise today (yes/no).
+
+Captured via the "More information" section on the plunge log page and after each cognitive session. Stored in `DailyCovariate` (one record per user per date; updated if the form is submitted again the same day).
 
 ## Weekly
 
-* Gastrointestinal discomfort severity (5-point).
-* Optional GI symptom checkboxes.
-* Current illness status.
+* Gastrointestinal discomfort severity (5-point: None – Severe).
+* Optional GI symptom checkboxes (bloating, cramps, nausea, diarrhea, constipation, reflux).
+* Current illness status (yes/no).
+
+Captured via the same "More information" section. Stored in `WeeklyCovariate` (one record per user per week; updated if re-submitted).
 
 ---
 
@@ -431,13 +437,14 @@ Designed to maximise engagement and transparency.
 | --- | --- |
 | `User` | allauth-managed; pseudonymised export ID |
 | `BaselineProfile` | age, gender, height, weight, BMI, handedness, plunge_years |
-| `PlungeLog` | user, timestamp, duration, water_temp, temp_measured, immersion_depth, context, breathing_technique, perceived_intensity |
+| `PlungeLog` | user, timestamp, duration, water_temp, temp_measured, immersion_depth, context, breathing_technique, perceived_intensity (perseverance effort), pre_hot_treatment (sauna/steam_room, nullable), pre_hot_treatment_minutes (nullable), exercise_timing (before/after, nullable), exercise_type (cardio/weights, nullable), exercise_minutes (nullable) |
 | `PromptEvent` | user, scheduled_at, sent_at, opened_at, prompt_type (reactive/scheduled), linked_plunge |
 | `CognitiveSession` | user, prompt_event, started_at, completed_at, task_order, random_seed, device_meta, completion_status, quality_flags |
 | `TaskResult` | session, task_type, task_version, started_at, completed_at, trial_data (JSON), summary_metrics (JSON), session_index_overall, session_index_per_task |
 | `MoodRating` | session, valence, arousal, stress, sharpness |
-| `DailyCovariate` | user, date, sleep_duration, sleep_quality, alcohol_last_24h, exercise_today |
-| `WeeklyCovariate` | user, week_start, gi_severity, gi_symptoms, illness_status |
+| `DailyCovariate` | user, date, sleep_duration_hours, sleep_quality (1–5), alcohol_last_24h, exercise_today |
+| `WeeklyCovariate` | user, week_start, gi_severity (1–5), gi_symptoms (JSON list), illness_status |
+| `SessionCovariate` | session (OneToOne), caffeine_since_last_session, minutes_since_last_meal, cold_hands, wet_hands |
 
 ## Key Relationships
 
@@ -590,3 +597,36 @@ Quality flags are stored for downstream sensitivity analyses (include/exclude).
 ---
 
 This document represents the build-ready specification for implementation.
+
+---
+
+# 20. Sponsor This Research
+
+## Purpose
+
+A homepage section inviting individuals and organisations to financially support the project. Funds cover server costs; surplus goes toward hiring researchers and developers to extend the platform.
+
+## Tiers
+
+| Tier | Recognition | Suggested amount |
+| --- | --- | --- |
+| **Individual** | Name listed in text | ~£5 / month |
+| **Organisation** | Logo displayed, linked to sponsor's website | ~£50 / month |
+
+## Payment Routes
+
+* **Individuals** — GitHub Sponsors link (self-serve).
+* **Organisations** — Contact form on the homepage; sponsorship agreed offline.
+
+## Onboarding
+
+* Sponsors email the research team after paying to provide their name / logo / URL.
+* The research team adds them manually via Django admin.
+
+## Data Model
+
+A `Sponsor` model with fields: `name`, `logo` (optional image), `url` (optional, org only), `tier` (`individual` / `organisation`), `is_active` (boolean).
+
+## Homepage Placement
+
+Prominent mid-page section, rendered from the `Sponsor` model. Suggested amounts and both payment routes (GitHub Sponsors button + contact form / mailto link for orgs) displayed within the section.

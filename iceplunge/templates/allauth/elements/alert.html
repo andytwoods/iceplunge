@@ -1,7 +1,5 @@
-{% load i18n %}
 {% load allauth %}
-
-<div class="alert alert-error">
-  {% slot message %}
-{% endslot %}
+<div class="notification {% if 'danger' in attrs.tags or 'error' in attrs.tags %}is-danger{% elif 'warning' in attrs.tags %}is-warning{% elif 'success' in attrs.tags %}is-success{% else %}is-info{% endif %} is-light">
+  <button class="delete"></button>
+  {% slot message %}{% endslot %}
 </div>

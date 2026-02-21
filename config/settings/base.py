@@ -329,5 +329,10 @@ SOCIALACCOUNT_ADAPTER = "iceplunge.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_FORMS = {"signup": "iceplunge.users.forms.UserSocialSignupForm"}
 
 
+# Sponsorship
+# ------------------------------------------------------------------------------
+GITHUB_SPONSORS_URL = env("GITHUB_SPONSORS_URL", default="https://github.com/sponsors/andytwoods")
+SPONSOR_CONTACT_EMAIL = env("SPONSOR_CONTACT_EMAIL", default="andytwoods@gmail.com")
+
 # Your stuff...
 # ------------------------------------------------------------------------------

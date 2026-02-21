@@ -1,3 +1,292 @@
 {% extends "base.html" %}
+{% load i18n static %}
 
+{% block title %}About – Cold Cognition Project{% endblock title %}
 
+{% block content %}
+
+  <h1 class="title is-3 mb-2">About the Cold Cognition Project</h1>
+  <p class="subtitle is-5 mb-6">
+    A community-led citizen science study into how cold-water immersion affects
+    real-world cognitive performance.
+  </p>
+
+  {# ── RESEARCH QUESTION ──────────────────────────────────────────────────── #}
+  <details open>
+    <summary class="title is-5 mb-3" style="cursor:pointer; list-style:none;">
+      What we're trying to understand
+    </summary>
+    <div class="content mb-5 ml-4">
+      <p>
+        Cold-water immersion has attracted enormous popular interest, but the evidence on
+        its cognitive effects is thin, inconsistent, and largely based on small, one-off
+        laboratory studies. We want to do something different: collect dense, repeated
+        measurements from real people in real conditions, over months and years.
+      </p>
+      <p>The central questions driving the project are:</p>
+      <ul>
+        <li>
+          <strong>Acute effects –</strong> does a cold plunge sharpen or slow cognition
+          in the hours immediately after? Is there a sweet spot, or does intensity or
+          duration change the picture?
+        </li>
+        <li>
+          <strong>Dose and frequency –</strong> does plunging more often lead to different
+          baseline cognitive performance? Is the relationship linear, or U-shaped?
+        </li>
+        <li>
+          <strong>Adaptation over time –</strong> do effects change as people become more
+          experienced cold-water practitioners?
+        </li>
+      </ul>
+      <p>
+        Because the data are collected <em>by</em> community members <em>from</em>
+        community members, the findings belong to the community. Anonymised results will
+        be shared openly.
+      </p>
+    </div>
+  </details>
+
+  <hr>
+
+  {# ── COGNITIVE TASKS ────────────────────────────────────────────────────── #}
+  <details open>
+    <summary class="title is-5 mb-3" style="cursor:pointer; list-style:none;">
+      The cognitive tasks
+    </summary>
+    <div class="content mb-5 ml-4">
+      <p>
+        Each session takes around 5 minutes and consists of up to five short tasks,
+        presented in a randomised order. All run in your browser – no app download required.
+      </p>
+
+      <div class="columns is-multiline mt-3">
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Reaction time &amp; vigilance (PVT)</p>
+          <p>
+            A 60-second Psychomotor Vigilance Task: respond as fast as you can when a
+            stimulus appears. We measure median reaction time, how much it varies, and how
+            many <em>lapses</em> (responses slower than 500 ms) occur – a sensitive index
+            of mental fatigue and alertness.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Sustained attention &amp; impulse control (SART)</p>
+          <p>
+            Respond to frequent targets but withhold your response to rare non-targets.
+            Errors of commission measure inhibitory control; response-time variability
+            reflects how well attention is maintained over time.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Executive control &amp; selective attention (Flanker)</p>
+          <p>
+            Respond to a central arrow while ignoring flanking arrows that may point in a
+            different direction. The difference in reaction time between congruent and
+            incongruent trials – the <em>conflict effect</em> – is a well-validated measure
+            of executive control.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Processing speed (Digit Symbol)</p>
+          <p>
+            Match digits to symbols as quickly as possible using a key. Correct responses
+            per minute captures processing speed and perceptual-motor coordination – one
+            of the broadest indicators of overall cognitive efficiency.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Mood &amp; subjective state</p>
+          <p>
+            Four quick ratings: valence (how positive you feel), arousal/energy, stress,
+            and mental sharpness. These let us separate objective cognitive performance
+            from how people <em>feel</em> – and how the two relate.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </details>
+
+  <hr>
+
+  {# ── COVARIATES ─────────────────────────────────────────────────────────── #}
+  <details>
+    <summary class="title is-5 mb-3" style="cursor:pointer; list-style:none;">
+      What else shapes cognition – and why we capture it
+    </summary>
+    <div class="content mb-5 ml-4">
+      <p>
+        Cognitive performance doesn't exist in a vacuum. Many factors influence how sharp
+        your brain is on any given day. We record these not to be intrusive, but because
+        failing to account for them would make the data scientifically worthless. All
+        fields are optional, and the more context you provide, the more useful your
+        contribution.
+      </p>
+
+      <div class="columns is-multiline mt-3">
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Plunge timing &amp; dose</p>
+          <p>
+            How long ago did you plunge? Water temperature, immersion depth, duration, and
+            context (bath, lake, sea, cryotherapy) all contribute to the dose. Frequency
+            over 7, 14, and 30 days lets us model adaptation.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Sleep</p>
+          <p>
+            Sleep is the single strongest within-person predictor of reaction time and
+            vigilance. Duration and quality are recorded daily so we can separate
+            cold-water effects from the simple fact that you slept badly last night.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Caffeine &amp; alcohol</p>
+          <p>
+            Caffeine acutely improves vigilance; alcohol impairs it, with effects that
+            persist well beyond the feeling of intoxication. We record caffeine since your
+            last session and any alcohol in the past 24 hours.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Exercise &amp; meal timing</p>
+          <p>
+            Acute exercise can boost executive function temporarily; exercising to
+            exhaustion can impair it. We also note time since your last meal, as low blood
+            glucose affects sustained attention.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Illness &amp; gastrointestinal symptoms</p>
+          <p>
+            Even mild illness meaningfully impairs cognition. GI symptoms are captured
+            weekly because some practitioners report gut-related effects from cold-water
+            immersion – a poorly studied area.
+          </p>
+        </div>
+
+        <div class="column is-6">
+          <p class="has-text-weight-semibold mb-1">Baseline profile</p>
+          <p>
+            Age, sex, handedness, height, weight, and years of cold-water experience –
+            collected once at sign-up. These allow us to model individual differences and
+            avoid confounding group-level patterns with personal baseline variation.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </details>
+
+  <hr>
+
+  {# ── HOW IT WORKS ───────────────────────────────────────────────────────── #}
+  <details>
+    <summary class="title is-5 mb-3" style="cursor:pointer; list-style:none;">
+      How participating works
+    </summary>
+    <div class="content mb-5 ml-4">
+      <ol>
+        <li>
+          <strong>Create an account</strong> and complete a brief baseline questionnaire
+          (age, experience, etc.) and informed consent. No data is collected before consent.
+        </li>
+        <li>
+          <strong>Log your plunges</strong> as you do them – water temperature, duration,
+          depth, context. This takes under a minute.
+        </li>
+        <li>
+          <strong>Receive gentle notifications</strong> (optional) around 15–30 minutes and
+          again 2–3 hours after each plunge, prompting a short cognitive session. You can
+          also complete sessions at any time independently of a plunge.
+        </li>
+        <li>
+          <strong>Complete a 5-minute session</strong> – a few short cognitive tasks and a
+          mood check-in.
+        </li>
+        <li>
+          <strong>See your own data</strong> on your personal dashboard: reaction time
+          trends, attention patterns, mood trajectories, and how they relate to your
+          plunge history.
+        </li>
+      </ol>
+      <p>
+        You can participate as much or as little as you like. More frequent sessions mean
+        a richer personal dataset and a stronger contribution to the group analysis, but
+        there is no obligation.
+      </p>
+    </div>
+  </details>
+
+  <hr>
+
+  {# ── DATA & ETHICS ──────────────────────────────────────────────────────── #}
+  <details>
+    <summary class="title is-5 mb-3" style="cursor:pointer; list-style:none;">
+      Your data &amp; your rights
+    </summary>
+    <div class="content mb-5 ml-4">
+      <ul>
+        <li>
+          <strong>Consent comes first.</strong> No data is collected until you have read
+          and agreed to the study information and given informed consent. You can withdraw
+          at any time.
+        </li>
+        <li>
+          <strong>Pseudonymisation.</strong> All data is stored and analysed against a
+          random participant ID, not your name or email address. Exports never contain
+          direct identifiers.
+        </li>
+        <li>
+          <strong>You own your contribution.</strong> You can view your own data on your
+          dashboard at any time. You can request full deletion of your records via your
+          account settings – all raw data will be permanently removed within 30 days.
+        </li>
+        <li>
+          <strong>Open results.</strong> Aggregate and anonymised findings will be shared
+          openly with the community and, where appropriate, submitted to peer-reviewed
+          journals. Individual-level data is never shared.
+        </li>
+        <li>
+          <strong>No commercial use.</strong> Your data will never be sold or used for
+          advertising or commercial profiling of any kind.
+        </li>
+      </ul>
+      <p>
+        Aggregate or anonymised results already included in published analyses will not be
+        retroactively altered, in line with standard research ethics practice. This is
+        disclosed in the consent form you sign on joining.
+      </p>
+    </div>
+  </details>
+
+  <hr>
+
+  {# ── CONTACT ────────────────────────────────────────────────────────────── #}
+  <div class="content mt-5">
+    <h2 class="title is-5">Contact</h2>
+    <p>
+      Questions or concerns about the study? Email the research team at
+      <a href="mailto:research@coldcognition.org">research@coldcognition.org</a>.
+    </p>
+    {% if not request.user.is_authenticated %}
+      <p>
+        <a class="button is-link is-outlined mt-2" href="{% url 'account_signup' %}">
+          Join the study
+        </a>
+      </p>
+    {% endif %}
+  </div>
+
+{% endblock content %}

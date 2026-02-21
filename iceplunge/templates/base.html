@@ -35,63 +35,23 @@
       </div>
     {% endif %}
 
-    {% block body %}
-      <nav class="navbar is-light" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-          <a class="navbar-item has-text-weight-bold" href="{% url 'home' %}">
-            iceplunge
-          </a>
-          <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false"
-             data-target="mainNavbar">
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-            <span aria-hidden="true"></span>
-          </a>
-        </div>
-        <div id="mainNavbar" class="navbar-menu">
-          <div class="navbar-start">
-            <a class="navbar-item" href="{% url 'home' %}">{% translate "Home" %}</a>
-            <a class="navbar-item" href="{% url 'about' %}">{% translate "About" %}</a>
-          </div>
-          <div class="navbar-end">
-            <div class="navbar-item">
-              {% if request.user.is_authenticated %}
-                <div class="buttons">
-                  <a class="button is-light" href="{% url 'users:detail' request.user.pk %}">
-                    {% translate "My Profile" %}
-                  </a>
-                  <a class="button is-light" href="{% url 'account_logout' %}">
-                    {% translate "Sign Out" %}
-                  </a>
-                </div>
-              {% else %}
-                <div class="buttons">
-                  {% if ACCOUNT_ALLOW_REGISTRATION %}
-                    <a id="sign-up-link" class="button is-primary" href="{% url 'account_signup' %}">
-                      {% translate "Sign Up" %}
-                    </a>
-                  {% endif %}
-                  <a id="log-in-link" class="button is-light" href="{% url 'account_login' %}">
-                    {% translate "Sign In" %}
-                  </a>
-                </div>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-      </nav>
+    {% include "partials/_navbar.html" %}
 
+    {# ── TOAST NOTIFICATIONS ────────────────────────────────────────────── #}
+    <div class="toast-container" id="toastContainer" aria-live="polite">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="notification {% if message.tags %}is-{{ message.tags }}{% endif %}">
+            <button class="delete"></button>
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    {% block body %}
       <section class="section">
         <div class="container">
-          {% if messages %}
-            {% for message in messages %}
-              <div class="notification {% if message.tags %}is-{{ message.tags }}{% endif %}">
-                <button class="delete"></button>
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-
           {% block main %}
             {% block content %}{% endblock content %}
           {% endblock main %}
@@ -99,23 +59,77 @@
       </section>
     {% endblock body %}
 
+    {% include "partials/_footer.html" %}
+
+    {# ── ACCESSIBILITY WIDGET ──────────────────────────────────────────── #}
+    <div class="a11y-panel" id="a11yPanel" role="dialog"
+         aria-modal="false"
+         aria-labelledby="a11yPanelTitle"
+         aria-describedby="a11yPanelDesc">
+      <div class="a11y-panel-header">
+        <span class="a11y-panel-title" id="a11yPanelTitle">{% translate "Accessibility" %}</span>
+        <button class="a11y-close" id="a11yClose" aria-label="{% translate 'Close accessibility panel' %}">&#x2715;</button>
+      </div>
+      <p class="a11y-description" id="a11yPanelDesc">
+        {% translate "Adjust display settings. Preferences are saved for your next visit." %}
+      </p>
+
+      <div class="a11y-group" role="group" aria-labelledby="a11y-contrast-label">
+        <span class="a11y-group-label" id="a11y-contrast-label">{% translate "Contrast" %}</span>
+        <div class="a11y-pills">
+          <input type="radio" name="a11y-contrast" id="a11y-contrast-standard" value="standard">
+          <label for="a11y-contrast-standard">{% translate "Standard" %}</label>
+
+          <input type="radio" name="a11y-contrast" id="a11y-contrast-low" value="low">
+          <label for="a11y-contrast-low">{% translate "Low" %}</label>
+
+          <input type="radio" name="a11y-contrast" id="a11y-contrast-high" value="high">
+          <label for="a11y-contrast-high">{% translate "High" %}</label>
+        </div>
+      </div>
+
+      <div class="a11y-group" role="group" aria-labelledby="a11y-text-label">
+        <span class="a11y-group-label" id="a11y-text-label">{% translate "Text Size" %}</span>
+        <div class="a11y-pills">
+          <input type="radio" name="a11y-text" id="a11y-text-standard" value="standard">
+          <label for="a11y-text-standard">{% translate "Standard" %}</label>
+
+          <input type="radio" name="a11y-text" id="a11y-text-large" value="large">
+          <label for="a11y-text-large">{% translate "Large" %}</label>
+
+          <input type="radio" name="a11y-text" id="a11y-text-extra-large" value="extra-large">
+          <label for="a11y-text-extra-large">{% translate "Extra Large" %}</label>
+        </div>
+      </div>
+
+      <div class="a11y-group" role="group" aria-labelledby="a11y-motion-label">
+        <span class="a11y-group-label" id="a11y-motion-label">{% translate "Motion" %}</span>
+        <div class="a11y-pills">
+          <input type="radio" name="a11y-motion" id="a11y-motion-standard" value="standard">
+          <label for="a11y-motion-standard">{% translate "Standard" %}</label>
+
+          <input type="radio" name="a11y-motion" id="a11y-motion-reduced" value="reduced">
+          <label for="a11y-motion-reduced">{% translate "Reduced" %}</label>
+        </div>
+      </div>
+
+      <button class="button is-light is-small is-fullwidth a11y-reset" id="a11yReset">
+        {% translate "Reset to defaults" %}
+      </button>
+    </div>
+
     {% block modal %}{% endblock modal %}
     {% block inline_javascript %}{% endblock inline_javascript %}
 
     <script>
       // Bulma navbar burger toggle
       document.addEventListener('DOMContentLoaded', () => {
-        const burgers = document.querySelectorAll('.navbar-burger');
-        burgers.forEach(burger => {
+        document.querySelectorAll('.navbar-burger').forEach(burger => {
           burger.addEventListener('click', () => {
             const target = document.getElementById(burger.dataset.target);
             burger.classList.toggle('is-active');
             target.classList.toggle('is-active');
           });
-        });
-        // Bulma notification dismiss
-        document.querySelectorAll('.notification .delete').forEach(del => {
-          del.addEventListener('click', () => del.parentElement.remove());
         });
       });
     </script>

@@ -1,3 +1,246 @@
 {% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}Cold Cognition Project{% endblock title %}
+
+{% block body %}
+
+  {# ── 1. HERO ─────────────────────────────────────────────────────────────── #}
+  <section class="section" style="padding-top:3.5rem; padding-bottom:3.5rem;">
+    <div class="container">
+      <div class="columns is-vcentered">
+        <div class="column is-7">
+
+          <h1 class="title is-2 mb-4" style="line-height:1.2;">
+            Does cold water change<br>how your brain works?
+          </h1>
+          <p class="subtitle is-5" style="max-width:38rem;">
+            Cold-water immersion has been studied in labs and is known to affect arousal,
+            stress physiology, and mood. What's less clear is how it influences real-world
+            cognitive performance – minutes, hours, and months after a plunge, and <strong>how does it affect you, personally.</strong> This
+            community-led project lets you track your own performance over time, and see
+            how your results compare with the wider community.
+          </p>
+        <p class="is-size-7 has-text-grey-dark has-text-weight-semibold mb-2 is-uppercase" style="letter-spacing:.08em;">
+            Track your brain &middot; see your stats &middot; build the evidence
+          </p>
+          {% if not request.user.is_authenticated %}
+            <div class="buttons mt-5">
+              {% if ACCOUNT_ALLOW_REGISTRATION %}
+                <a class="button is-link" href="{% url 'account_signup' %}">
+                  Join the study
+                </a>
+              {% endif %}
+              <a class="button is-light" href="{% url 'account_login' %}">
+                Already a member? Sign in
+              </a>
+            </div>
+          {% else %}
+            <a class="button is-link mt-4" href="{% url 'tasks:start' %}">
+              Start a cognitive session
+            </a>
+          {% endif %}
+        </div>
+        <div class="column is-4 is-offset-1 is-hidden-mobile" aria-hidden="true"
+             style="font-size:7rem; line-height:1; user-select:none; text-align:center; opacity:.12;">
+          🧠
+        </div>
+      </div>
+    </div>
+  </section>
 
 
+  {# ── 2. HOW IT WORKS ──────────────────────────────────────────────────────── #}
+  <section class="section has-background-light">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-8 is-offset-2">
+          <h2 class="title is-4 mb-4">How it works</h2>
+          <div class="content">
+            <ol>
+              <li><strong>Create an account</strong> and complete a short baseline questionnaire.</li>
+              <li><strong>Log a plunge</strong> – water temperature, duration, and context. Takes under a minute.</li>
+              <li><strong>Complete a 3-minute session</strong> consisting of several short cognitive tests, before or after a plunge.</li>
+              <li><strong>Repeat the previous step if you want</strong>, several times, to learn how long-lasting your effects are.</li>
+              <li><strong>See your results</strong> on your dashboard – and how they shift around your plunges.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  {# ── 3. WHAT YOU GET ──────────────────────────────────────────────────────── #}
+  <section class="section">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-8 is-offset-2">
+          <h2 class="title is-4 mb-4">What you get</h2>
+          <div class="content">
+            <ul>
+              <li>
+                <strong>See your stats</strong> – reaction time,
+                attention stability, processing speed, and mood.
+              </li>
+              <li>
+                <strong>See patterns</strong> – how your frequency of cold plunges,
+                and how timing, sleep, and caffeine influence your results.
+              </li>
+              <li>
+                <strong>Benchmark yourself</strong> – compare your results with those of the
+                community as a whole. Individual data is never shown.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  {# ── 3. WHAT WE MEASURE ───────────────────────────────────────────────────── #}
+  <section class="section has-background-light">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-8 is-offset-2">
+          <h2 class="title is-4 mb-3">What we measure</h2>
+          <div class="content">
+            <p>
+              Each session takes about 3 minutes and includes a small set
+              of short tasks covering reaction time, attention, executive control, and
+              processing speed – plus a quick mood check-in. Context factors such as sleep,
+              caffeine, and plunge timing are recorded alongside each session so results
+              can be interpreted properly.
+            </p>
+            <p>
+              <a href="{% url 'about' %}">See full task and methodology details on the About page &rarr;</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  {# ── 4. COMMUNITY + TRANSPARENCY ─────────────────────────────────────────── #}
+  <section class="section">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-8 is-offset-2">
+          <h2 class="title is-4 mb-4">Community-led and transparent</h2>
+          <div class="content">
+            <ul>
+              <li><strong>Consent first</strong> – no data collected until you agree; withdraw any time.</li>
+              <li><strong>Anonymised analysis</strong> – no direct identifiers in any exports or publications.</li>
+              <li><strong>No commercial use</strong> – your data will never be sold or used for advertising.</li>
+              <li><strong>Results</strong> shared as aggregated, anonymised summaries, openly with the community.</li>
+            </ul>
+            <p>
+              The dataset belongs to the community. Participation strengthens both your
+              personal insights and the group evidence.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  {# ── 5. SPONSOR THIS RESEARCH ─────────────────────────────────────────────── #}
+  <section class="section has-background-light">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-8 is-offset-2">
+
+          <h2 class="title is-4 mb-2">Sponsor this research</h2>
+          <p class="mb-2">
+            Running this platform has real costs: servers, storage, and ongoing development.
+            Sponsorship helps cover those costs and, with additional support, would allow me to
+            bring in researchers and developers to add new features and boost the science.
+          </p>
+
+          {# Org logos #}
+          {% if org_sponsors %}
+            <div class="mb-5">
+              <p class="is-size-7 has-text-grey-dark has-text-weight-semibold mb-3 is-uppercase"
+                 style="letter-spacing:.06em;">Organisation sponsors</p>
+              <div class="is-flex is-flex-wrap-wrap" style="gap:1.5rem; align-items:center;">
+                {% for sponsor in org_sponsors %}
+                  {% if sponsor.url %}
+                    <a href="{{ sponsor.url }}" target="_blank" rel="noopener noreferrer"
+                       title="{{ sponsor.name }}">
+                  {% endif %}
+                  {% if sponsor.logo %}
+                    <img src="{{ sponsor.logo.url }}" alt="{{ sponsor.name }}"
+                         style="max-height:60px; max-width:160px; object-fit:contain;">
+                  {% else %}
+                    <span class="has-text-weight-semibold">{{ sponsor.name }}</span>
+                  {% endif %}
+                  {% if sponsor.url %}</a>{% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {# Individual names #}
+          {% if individual_sponsors %}
+            <div class="mb-5">
+              <p class="is-size-7 has-text-grey-dark has-text-weight-semibold mb-2 is-uppercase"
+                 style="letter-spacing:.06em;">Individual sponsors</p>
+              <p>
+                {% for sponsor in individual_sponsors %}
+                  {{ sponsor.name }}{% if not forloop.last %} &middot; {% endif %}
+                {% endfor %}
+              </p>
+            </div>
+          {% endif %}
+
+          {# CTA buttons #}
+          <div class="buttons">
+            {% if GITHUB_SPONSORS_URL %}
+              <a class="button is-link" href="{{ GITHUB_SPONSORS_URL }}" target="_blank" rel="noopener noreferrer">
+                Sponsor on GitHub
+              </a>
+            {% endif %}
+            <a class="button is-dark is-outlined"
+               href="mailto:{{ SPONSOR_CONTACT_EMAIL }}?subject=Organisation%20sponsorship%20enquiry">
+              Enquire about organisation sponsorship
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  {# ── 6. JOIN CTA ──────────────────────────────────────────────────────────── #}
+  {% if not request.user.is_authenticated %}
+  <section class="section">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-8 is-offset-2 has-text-centered">
+          <h2 class="title is-4">Get involved!</h2>
+          <p class="mb-5" style="max-width:34rem; margin:0 auto 2rem;">
+            Every plunge you log and test you do improves your personal dashboard and strengthens the
+            community evidence.
+          </p>
+          <div class="buttons is-centered">
+            {% if ACCOUNT_ALLOW_REGISTRATION %}
+              <a class="button is-link is-medium" href="{% url 'account_signup' %}">
+                Join the study
+              </a>
+            {% endif %}
+            <a class="button is-light is-medium" href="{% url 'account_login' %}">
+              Sign in
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+
+{% endblock body %}
