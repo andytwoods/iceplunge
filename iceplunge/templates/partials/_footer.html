@@ -1,20 +1,12 @@
 {% load i18n %}
 <footer class="footer" style="padding:2rem 1.5rem;">
   <div class="container">
-    <div class="columns">
+    <div class="columns is-vcentered">
       <div class="column is-narrow">
         <p class="has-text-weight-semibold">Cold Cognition Project</p>
         <p class="is-size-7 has-text-grey">Community-led citizen science</p>
       </div>
-      <div class="column">
-        <p class="is-size-7 has-text-grey">
-          Non-commercial research initiative. Participation is entirely voluntary.
-          Questions? <a href="{% url 'about' %}">Contact the research team</a>.
-          <br>
-          Code available on <a href="https://github.com/andytwoods/iceplunge">GitHub</a> under the <a href="https://github.com/andytwoods/iceplunge/blob/main/LICENSE">MIT License</a>.
-        </p>
-      </div>
-      <div class="column is-narrow has-text-right-tablet">
+      <div class="column is-narrow has-text-right-tablet" style="margin-left: auto;">
         <p class="is-size-7 has-text-grey">
           <a href="{% url 'privacy' %}" class="has-text-grey">{% translate "Privacy Policy" %}</a>
           &nbsp;&middot;&nbsp;
@@ -23,6 +15,17 @@
           <a href="#" class="has-text-grey a11y-open-btn" aria-controls="a11yPanel">{% translate "Accessibility" %}</a>
           &nbsp;&middot;&nbsp;
           <a href="{% url 'users:delete_data' %}" class="has-text-grey">{% translate "Delete my data" %}</a>
+        </p>
+      </div>
+    </div>
+    <hr style="margin: 1rem 0; background-color: #eee;">
+    <div class="columns">
+      <div class="column">
+        <p class="is-size-7 has-text-grey">
+          Non-commercial research initiative. Participation is entirely voluntary.
+          Questions? <a href="{% url 'about' %}">Contact the research team</a>.
+          <br>
+          Code available on <a href="https://github.com/andytwoods/iceplunge">GitHub</a> under the <a href="https://github.com/andytwoods/iceplunge/blob/main/LICENSE">MIT License</a>.
         </p>
       </div>
     </div>
