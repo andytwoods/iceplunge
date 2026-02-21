@@ -65,8 +65,11 @@
      * or if the browser is offline.
      */
     submit(payload) {
+      if (!_sessionId) {
+        return Promise.reject(new Error("TaskCore.init() has not been called — session_id is unknown"));
+      }
+
       var REQUIRED = [
-        "session_id",
         "task_type",
         "task_version",
         "started_at",
