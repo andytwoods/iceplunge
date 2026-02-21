@@ -27,7 +27,7 @@
             </ul>
           </div>
 
-        <p class="is-size-7 has-text-grey-dark has-text-weight-semibold mb-2 is-uppercase" style="letter-spacing:.08em;">
+        <p class="is-size-7 has-text-grey has-text-weight-semibold mb-2 is-uppercase" style="letter-spacing:.08em;">
             Track your brain &middot; see your stats &middot; build the evidence
           </p>
           {% if not request.user.is_authenticated %}
@@ -57,7 +57,7 @@
 
 
   {# ── 2. HOW IT WORKS ──────────────────────────────────────────────────────── #}
-  <section class="section has-background-light">
+  <section class="section has-background-scheme-main-bis">
     <div class="container">
       <div class="columns">
         <div class="column is-8 is-offset-2">
@@ -106,7 +106,7 @@
 
 
   {# ── 3. WHAT WE MEASURE ───────────────────────────────────────────────────── #}
-  <section class="section has-background-light">
+  <section class="section has-background-scheme-main-bis">
     <div class="container">
       <div class="columns">
         <div class="column is-8 is-offset-2">
@@ -154,7 +154,7 @@
 
 
   {# ── 5. SPONSOR THIS RESEARCH ─────────────────────────────────────────────── #}
-  <section class="section has-background-light">
+  <section class="section has-background-scheme-main-bis">
     <div class="container">
       <div class="columns">
         <div class="column is-8 is-offset-2">
@@ -169,7 +169,7 @@
           {# Org logos #}
           {% if org_sponsors %}
             <div class="mb-5">
-              <p class="is-size-7 has-text-grey-dark has-text-weight-semibold mb-3 is-uppercase"
+              <p class="is-size-7 has-text-grey has-text-weight-semibold mb-3 is-uppercase"
                  style="letter-spacing:.06em;">Organisation sponsors</p>
               <div class="is-flex is-flex-wrap-wrap" style="gap:1.5rem; align-items:center;">
                 {% for sponsor in org_sponsors %}
@@ -192,7 +192,7 @@
           {# Individual names #}
           {% if individual_sponsors %}
             <div class="mb-5">
-              <p class="is-size-7 has-text-grey-dark has-text-weight-semibold mb-2 is-uppercase"
+              <p class="is-size-7 has-text-grey has-text-weight-semibold mb-2 is-uppercase"
                  style="letter-spacing:.06em;">Individual sponsors</p>
               <p>
                 {% for sponsor in individual_sponsors %}

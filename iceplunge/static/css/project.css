@@ -1,46 +1,5 @@
 /* These styles are generated from project.scss. */
 
-/*
- * Force light mode throughout.
- *
- * Bulma v1 ships a prefers-color-scheme:dark block that sets --bulma-text-title-l
- * to 100% (white) and --bulma-text-strong-l to 93% (near-white). Elements with a
- * fixed light background (.has-background-light, .box, .card) keep their pale
- * surface colour while text turns white — unreadable contrast.
- *
- * This override repeats every variable that Bulma's dark block mutates, restoring
- * the light-mode defaults so the page is always rendered in light mode regardless
- * of the OS colour scheme setting.
- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bulma-scheme-brightness: light;
-    --bulma-scheme-main-l: 100%;
-    --bulma-scheme-main-bis-l: 98%;
-    --bulma-scheme-main-ter-l: 96%;
-    --bulma-soft-l: 90%;
-    --bulma-bold-l: 20%;
-    --bulma-soft-invert-l: 20%;
-    --bulma-bold-invert-l: 90%;
-    --bulma-background-l: 96%;
-    --bulma-border-weak-l: 93%;
-    --bulma-border-l: 86%;
-    --bulma-text-weak-l: 48%;
-    --bulma-text-l: 29%;
-    --bulma-text-strong-l: 21%;
-    --bulma-text-title-l: 14%;
-    --bulma-hover-background-l-delta: -5%;
-    --bulma-active-background-l-delta: -10%;
-    --bulma-hover-border-l-delta: -10%;
-    --bulma-active-border-l-delta: -20%;
-    --bulma-hover-color-l-delta: -5%;
-    --bulma-active-color-l-delta: -10%;
-    --bulma-shadow-h: 221deg;
-    --bulma-shadow-s: 14%;
-    --bulma-shadow-l: 4%;
-  }
-}
-
 .alert-debug {
   color: black;
   background-color: white;
@@ -53,8 +12,9 @@
   border-color: #eed3d7;
 }
 
-/* ── ACCESSIBILITY WIDGET ──────────────────────────────────────────────────── */
-
+/*
+ * Accessibility widget styles.
+ */
 .a11y-panel {
   position: fixed;
   top: 3.75rem;
@@ -62,12 +22,13 @@
   z-index: 1001;
   width: 20rem;
   max-width: calc(100vw - 2rem);
-  background: #fff;
-  border: 1px solid #dbdbdb;
+  background: var(--bulma-scheme-main);
+  border: 1px solid var(--bulma-border);
   border-radius: .5rem;
   box-shadow: 0 8px 24px rgba(0,0,0,.18);
   padding: 1.25rem;
   display: none;
+  color: var(--bulma-text);
 }
 
 .a11y-panel.is-open {
@@ -92,20 +53,20 @@
   cursor: pointer;
   font-size: 1.25rem;
   line-height: 1;
-  color: #4a4a4a;
+  color: var(--bulma-text);
   padding: .25rem;
   border-radius: .25rem;
 }
 
 .a11y-close:hover,
 .a11y-close:focus-visible {
-  background: #f5f5f5;
-  outline: 2px solid #3273dc;
+  background: var(--bulma-scheme-main-bis);
+  outline: 2px solid var(--bulma-link);
 }
 
 .a11y-description {
   font-size: .8125rem;
-  color: #4a4a4a;
+  color: var(--bulma-text-weak);
   margin-bottom: 1rem;
 }
 
@@ -136,26 +97,28 @@
 .a11y-pills label {
   display: inline-block;
   padding: .3rem .75rem;
-  border: 1.5px solid #b5b5b5;
+  border: 1.5px solid var(--bulma-border);
   border-radius: 2rem;
   font-size: .8125rem;
   cursor: pointer;
-  background: #fff;
+  background: var(--bulma-scheme-main);
+  color: var(--bulma-text);
   transition: border-color .12s, background .12s;
 }
 
 .a11y-pills input[type="radio"]:checked + label {
-  border-color: #3273dc;
-  background: #eef3fc;
+  border-color: var(--bulma-link);
+  background: var(--bulma-link-light);
+  color: var(--bulma-link-dark);
   font-weight: 600;
 }
 
 .a11y-pills label:hover {
-  border-color: #7a7a7a;
+  border-color: var(--bulma-border-hover);
 }
 
 .a11y-pills input[type="radio"]:focus-visible + label {
-  outline: 2px solid #3273dc;
+  outline: 2px solid var(--bulma-link);
   outline-offset: 2px;
 }
 
@@ -184,12 +147,14 @@
   flex-direction: column;
   align-items: center;
   padding: .5rem .6rem;
-  border: 1.5px solid #dbdbdb;
+  border: 1.5px solid var(--bulma-border);
   border-radius: .5rem;
   cursor: pointer;
   text-align: center;
   transition: border-color .12s, background .12s;
   min-width: 3.5rem;
+  background: var(--bulma-scheme-main);
+  color: var(--bulma-text);
 }
 
 .plunge-radio-group label .radio-main {
@@ -200,26 +165,27 @@
 
 .plunge-radio-group label .radio-sub {
   font-size: .7rem;
-  color: #7a7a7a;
+  color: var(--bulma-text-weak);
   margin-top: .2rem;
   line-height: 1.2;
 }
 
 .plunge-radio-group input[type="radio"]:checked + label {
-  border-color: #3273dc;
-  background: #eef3fc;
+  border-color: var(--bulma-link);
+  background: var(--bulma-link-light);
+  color: var(--bulma-link-dark);
 }
 
 .plunge-radio-group input[type="radio"]:checked + label .radio-sub {
-  color: #3273dc;
+  color: var(--bulma-link);
 }
 
 .plunge-radio-group label:hover {
-  border-color: #7a7a7a;
+  border-color: var(--bulma-border-hover);
 }
 
 .plunge-radio-group input[type="radio"]:focus-visible + label {
-  outline: 2px solid #3273dc;
+  outline: 2px solid var(--bulma-link);
   outline-offset: 2px;
 }
 
@@ -232,6 +198,19 @@
 
 .plunge-radio-group.is-intensity label .radio-main {
   font-size: 1.1rem;
+}
+
+/*
+ * Custom components adjustments for dark mode.
+ */
+.a11y-panel .a11y-pills input[type="radio"]:checked + label {
+  background: var(--bulma-link-light);
+  color: var(--bulma-link-dark);
+}
+
+.plunge-radio-group input[type="radio"]:checked + label {
+  background: var(--bulma-link-light);
+  color: var(--bulma-link-dark);
 }
 
 /* ── TOAST NOTIFICATIONS ─────────────────────────────────────────────────── */

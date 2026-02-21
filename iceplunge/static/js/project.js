@@ -136,7 +136,7 @@ window.clearMoreInfo = function (formEl) {
 (function () {
   'use strict';
 
-  const DEFAULTS = { contrast: 'standard', text: 'standard', motion: 'standard' };
+  const DEFAULTS = { theme: 'system', contrast: 'standard', text: 'standard', motion: 'standard' };
   const LS_KEY = 'a11yPrefs';
   const html = document.documentElement;
 
@@ -153,6 +153,11 @@ window.clearMoreInfo = function (formEl) {
   }
 
   function applyPrefs(prefs) {
+    if (prefs.theme === 'system') {
+      html.removeAttribute('data-theme');
+    } else {
+      html.setAttribute('data-theme', prefs.theme);
+    }
     if (prefs.contrast === 'standard') {
       html.removeAttribute('data-a11y-contrast');
     } else {
@@ -171,7 +176,7 @@ window.clearMoreInfo = function (formEl) {
   }
 
   function reflectPrefs(prefs) {
-    ['contrast', 'text', 'motion'].forEach(function (key) {
+    ['theme', 'contrast', 'text', 'motion'].forEach(function (key) {
       const radio = document.querySelector(
         'input[name="a11y-' + key + '"][value="' + prefs[key] + '"]'
       );
@@ -226,7 +231,7 @@ window.clearMoreInfo = function (formEl) {
       });
     }
 
-    ['contrast', 'text', 'motion'].forEach(function (key) {
+    ['theme', 'contrast', 'text', 'motion'].forEach(function (key) {
       document.querySelectorAll('input[name="a11y-' + key + '"]').forEach(function (radio) {
         radio.addEventListener('change', function () {
           prefs[key] = radio.value;
