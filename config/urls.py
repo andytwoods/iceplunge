@@ -19,6 +19,13 @@ urlpatterns = [
     # User management
     path("users/", include("iceplunge.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
+    path("hijack/", include("hijack.urls")),
+    path("plunges/", include("iceplunge.plunges.urls", namespace="plunges")),
+    path("covariates/", include("iceplunge.covariates.urls", namespace="covariates")),
+    path("tasks/", include("iceplunge.tasks.urls", namespace="tasks")),
+    path("notifications/", include("iceplunge.notifications.urls", namespace="notifications")),
+    path("dashboard/", include("iceplunge.dashboard.urls", namespace="dashboard")),
+    path("export/", include("iceplunge.export.urls", namespace="export")),
     # Your stuff: custom urls includes go here
     # ...
     # Media files

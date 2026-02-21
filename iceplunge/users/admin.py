@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 
 from .forms import UserAdminChangeForm
 from .forms import UserAdminCreationForm
+from .models import BaselineProfile
+from .models import ConsentProfile
 from .models import User
 
 if settings.DJANGO_ADMIN_FORCE_ALLAUTH:
@@ -48,3 +50,15 @@ class UserAdmin(auth_admin.UserAdmin):
             },
         ),
     )
+
+
+@admin.register(ConsentProfile)
+class ConsentProfileAdmin(admin.ModelAdmin):
+    list_display = ["user", "consented_at", "consent_version"]
+    search_fields = ["user__email"]
+
+
+@admin.register(BaselineProfile)
+class BaselineProfileAdmin(admin.ModelAdmin):
+    list_display = ["user", "age", "gender", "handedness", "plunge_years", "bmi"]
+    search_fields = ["user__email"]

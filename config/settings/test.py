@@ -34,5 +34,12 @@ TEMPLATES[0]["OPTIONS"]["debug"] = True  # type: ignore[index]
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#media-url
 MEDIA_URL = "http://media.testserver/"
+# Huey — run tasks synchronously (immediate mode) during tests
+# ------------------------------------------------------------------------------
+HUEY = {
+    "huey_class": "huey.MemoryHuey",
+    "immediate": True,
+}
+
 # Your stuff...
 # ------------------------------------------------------------------------------

@@ -79,16 +79,27 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
-    "crispy_bootstrap5",
+    "crispy_bulma",
     "allauth",
     "allauth.account",
     "allauth.mfa",
     "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.github",
+    "hijack",
+    "hijack.contrib.admin",
+    "django_htmx",
 ]
 
 LOCAL_APPS = [
     "iceplunge.users",
-    # Your stuff: custom apps go here
+    "iceplunge.pages",
+    "iceplunge.plunges",
+    "iceplunge.tasks",
+    "iceplunge.covariates",
+    "iceplunge.notifications",
+    "iceplunge.dashboard",
+    "iceplunge.export",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -146,7 +157,14 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "hijack.middleware.HijackUserMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
+    "iceplunge.users.middleware.ConsentRequiredMiddleware",
 ]
+
+# django-hijack
+# ------------------------------------------------------------------------------
+HIJACK_PERMISSION_CHECK = "hijack.permissions.superusers_and_staff"
 
 # STATIC
 # ------------------------------------------------------------------------------
@@ -201,8 +219,8 @@ TEMPLATES = [
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 
 # http://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
-CRISPY_TEMPLATE_PACK = "bootstrap5"
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bulma"
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bulma"
 
 # FIXTURES
 # ------------------------------------------------------------------------------
@@ -265,6 +283,29 @@ LOGGING = {
 
 REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 REDIS_SSL = REDIS_URL.startswith("rediss://")
+
+# Huey — background task queue
+# https://huey.readthedocs.io/en/latest/django.html
+HUEY = {
+    "huey_class": "huey.RedisHuey",
+    "url": REDIS_URL,
+    "immediate": env.bool("HUEY_IMMEDIATE", default=False),
+    "results": True,
+    "store_none": False,
+    "consumer": {
+        "workers": 2,
+        "worker_type": "thread",
+    },
+}
+
+# OneSignal push notifications
+# https://documentation.onesignal.com/reference/rest-api-overview
+ONESIGNAL_APP_ID = env("ONESIGNAL_APP_ID", default="")
+ONESIGNAL_API_KEY = env("ONESIGNAL_API_KEY", default="")
+
+# Notification throttle limits
+NOTIFICATIONS_DAILY_PROMPT_CAP = env.int("NOTIFICATIONS_DAILY_PROMPT_CAP", default=4)
+NOTIFICATIONS_MIN_GAP_MINUTES = env.int("NOTIFICATIONS_MIN_GAP_MINUTES", default=45)
 
 
 # django-allauth

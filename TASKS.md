@@ -30,9 +30,9 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 0 — Foundation
+## Phase 0 — Foundation ✅
 
-### T0.1 Complete the scaffold setup
+### T0.1 Complete the scaffold setup ✅
 **Goal:** The cookiecutter-django scaffold is already in place. This task finishes the project-specific setup on top of it.
 
 **Spec refs:** §2 Architecture, §13 Data Models, `.junie/guidelines.md` Project Scaffold
@@ -59,7 +59,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T0.2 Authentication setup
+### T0.2 Authentication setup ✅
 **Goal:** Wire up django-allauth with email/password + Google + GitHub, plus django-hijack for admin impersonation.
 
 **Spec refs:** §12 Onboarding, `.junie/guidelines.md` Authentication & User Impersonation sections
@@ -78,7 +78,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T0.3 Consent gate middleware
+### T0.3 Consent gate middleware ✅
 **Goal:** Any authenticated user who has not completed the consent flow is redirected to the consent page before accessing any other view.
 
 **Spec refs:** §19 Ethics, §12 Onboarding
@@ -97,9 +97,9 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 1 — Data Models
+## Phase 1 — Data Models ✅
 
-### T1.1 Baseline profile model
+### T1.1 Baseline profile model ✅
 **Goal:** Capture once-per-user demographic and background covariates.
 
 **Spec refs:** §6 Covariates (Baseline), §12 Onboarding, §13 Data Models
@@ -126,7 +126,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T1.2 Plunge log model
+### T1.2 Plunge log model ✅
 **Goal:** Record every cold plunge a participant performs.
 
 **Spec refs:** §5 Plunge Logging, §13 Data Models
@@ -153,7 +153,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T1.3 Prompt and session models
+### T1.3 Prompt and session models ✅
 **Goal:** Track every notification sent and every cognitive assessment session.
 
 **Spec refs:** §11 Notification Schedule, §13 Data Models, §16 Compliance
@@ -190,7 +190,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T1.4 Task result and mood models
+### T1.4 Task result and mood models ✅
 **Goal:** Store trial-level and session-level cognitive task data.
 
 **Spec refs:** §3 Modularity (payload schema), §4 Battery, §13 Data Models
@@ -227,7 +227,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T1.5 Covariate models
+### T1.5 Covariate models ✅
 **Goal:** Store daily and weekly self-report covariates.
 
 **Spec refs:** §6 Covariates (Daily, Weekly), §13 Data Models
@@ -258,9 +258,9 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 2 — Plunge Logging
+## Phase 2 — Plunge Logging ✅
 
-### T2.1 Plunge log CRUD views
+### T2.1 Plunge log CRUD views ✅
 **Goal:** Participants can log, view, and delete their plunges via an HTMX-powered interface.
 
 **Spec refs:** §5 Plunge Logging, `.junie/guidelines.md` HTMX, Views
@@ -283,7 +283,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T2.2 Derived variable computation
+### T2.2 Derived variable computation ✅
 **Goal:** Compute and store plunge-relative derived variables on each `CognitiveSession` at creation time.
 
 **Spec refs:** §7 Derived Variables, §13 Derived Variables
@@ -306,9 +306,9 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 3 — Covariates Collection
+## Phase 3 — Covariates Collection ✅
 
-### T3.1 Daily and weekly covariate forms
+### T3.1 Daily and weekly covariate forms ✅
 **Goal:** Participants are prompted for daily covariates once per day and weekly covariates once per week, embedded in the session flow.
 
 **Spec refs:** §6 Covariates, §12 Onboarding
@@ -331,7 +331,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T3.2 Per-session covariate collection
+### T3.2 Per-session covariate collection ✅
 **Goal:** Capture caffeine, last-meal, and hand-state data at the start of each cognitive session.
 
 **Spec refs:** §6 Covariates (Per Session), §13 Data Models
@@ -354,9 +354,9 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 4 — Task Infrastructure
+## Phase 4 — Task Infrastructure ✅
 
-### T4.1 Task registry and session orchestration (backend)
+### T4.1 Task registry and session orchestration (backend) ✅
 **Goal:** Backend logic to create a `CognitiveSession`, select and order tasks, and serve them one at a time.
 
 **Spec refs:** §3 Modularity (Backend Task Registry, Randomisation), §13 Models
@@ -380,7 +380,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T4.2 `task_core.js` shared library
+### T4.2 `task_core.js` shared library ✅
 **Goal:** Shared JS library that all task modules call for timing, submission, and event handling.
 
 **Spec refs:** §3 Modularity (JS Interface Contract, Lifecycle Event Handling, Payload Schema)
@@ -403,7 +403,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T4.3 Task result submission endpoint
+### T4.3 Task result submission endpoint ✅
 **Goal:** Backend endpoint that receives, validates, and saves a `TaskResult` payload.
 
 **Spec refs:** §3 (Payload Schema), §18 Data Integrity
@@ -428,14 +428,14 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 5 — Cognitive Tasks
+## Phase 5 — Cognitive Tasks ✅
 
 > All tasks in this phase depend on T4.1 and T4.2.
 > Each task delivers: one JS file, one partial template, server-side summary metric computation, and unit tests for the metric functions.
 
 ---
 
-### T5.1 PVT task
+### T5.1 PVT task ✅
 **Goal:** Implement the 1-minute Psychomotor Vigilance Task.
 
 **Spec refs:** §4 Core Battery (PVT), §3 (all contracts)
@@ -458,7 +458,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T5.2 SART task
+### T5.2 SART task ✅
 **Goal:** Implement the SART-style sustained attention / inhibition task.
 
 **Spec refs:** §4 Core Battery (SART)
@@ -480,7 +480,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T5.3 Mood rating task
+### T5.3 Mood rating task ✅
 **Goal:** Implement the 4-item mood/subjective state rating.
 
 **Spec refs:** §4 Core Battery (Mood), §13 MoodRating model
@@ -502,7 +502,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T5.4 Flanker task
+### T5.4 Flanker task ✅
 **Goal:** Implement the Eriksen Flanker selective-attention task (rotating module).
 
 **Spec refs:** §4 Rotating Modules (Flanker)
@@ -524,7 +524,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T5.5 Digit Symbol task
+### T5.5 Digit Symbol task ✅
 **Goal:** Implement the processing speed digit-symbol substitution task (rotating module).
 
 **Spec refs:** §4 Rotating Modules (Digit Symbol)
@@ -545,9 +545,9 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 6 — Notifications
+## Phase 6 — Notifications ✅
 
-### T6.1 OneSignal integration
+### T6.1 OneSignal integration ✅
 **Goal:** Connect the Django backend to OneSignal so push notifications can be sent programmatically.
 
 **Spec refs:** §10 Reliability, §11 Notification Schedule
@@ -568,7 +568,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T6.2 Reactive prompt scheduling
+### T6.2 Reactive prompt scheduling ✅
 **Goal:** After a plunge is logged, automatically schedule two post-plunge cognitive prompts.
 
 **Spec refs:** §11 Notification Schedule (Reactive prompts), §16 Compliance
@@ -588,7 +588,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-### T6.3 Scheduled daily prompts
+### T6.3 Scheduled daily prompts ✅
 **Goal:** Send morning and evening prompts each day for all opted-in participants.
 
 **Spec refs:** §11 Notification Schedule (Scheduled prompts)
@@ -607,7 +607,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 7 — Quality & Compliance
+## Phase 7 — Quality & Compliance ✅
 
 ### T7.1 Quality flag computation
 **Goal:** Automatically compute and store quality flags on each completed `TaskResult`.
@@ -647,7 +647,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 8 — Participant Dashboard
+## Phase 8 — Participant Dashboard ✅
 
 ### T8.1 Dashboard JSON API
 **Goal:** Provide JSON endpoints that the dashboard charts consume.
@@ -692,7 +692,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 9 — Research Data Export
+## Phase 9 — Research Data Export ✅
 
 ### T9.1 Session-level CSV export
 **Goal:** Produce a research-ready session-level CSV with all covariates and derived variables.
@@ -737,7 +737,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 10 — Ethics & Self-Service Governance
+## Phase 10 — Ethics & Self-Service Governance ✅
 
 ### T10.1 Data deletion flow
 **Goal:** Allow participants to request and confirm full data deletion from within the app.
@@ -779,7 +779,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ---
 
-## Phase 11 — Capacitor Wrapper
+## Phase 11 — Capacitor Wrapper ✅
 
 ### T11.1 Capacitor project setup
 **Goal:** Wrap the Django web app in a Capacitor container for iOS and Android.
