@@ -241,6 +241,174 @@
   transform: translateX(2rem);
 }
 
+/* ── DARK MODE OVERRIDES ─────────────────────────────────────────────────── */
+/*
+ * Since the bulmaswatch theme (based on Bulma 0.8) uses static colors,
+ * we override them when data-theme="dark" is active.
+ */
+
+html[data-theme="dark"] {
+  background-color: #1a1a1a;
+  color: #f5f5f5;
+  --bulma-scheme-main: #1a1a1a;
+  --bulma-scheme-main-bis: #262626;
+  --bulma-scheme-main-ter: #2d2d2d;
+  --bulma-scheme-invert: #ffffff;
+  --bulma-text: #f5f5f5;
+  --bulma-text-strong: #ffffff;
+  --bulma-text-weak: #b5b5b5;
+  --bulma-border: #363636;
+  --bulma-border-hover: #4a4a4a;
+  --bulma-border-weak: #2d2d2d;
+  --bulma-background: #121212;
+  --bulma-link: #1abc9c;
+  --bulma-link-hover: #17a085;
+  --bulma-link-light: #122d28;
+  --bulma-link-dark: #70d8c1;
+}
+
+html[data-theme="dark"] body {
+  background-color: #1a1a1a;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .box,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .footer,
+html[data-theme="dark"] .navbar,
+html[data-theme="dark"] .modal-card-body,
+html[data-theme="dark"] .modal-card-foot,
+html[data-theme="dark"] .modal-card-head {
+  background-color: #262626;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .title,
+html[data-theme="dark"] .subtitle,
+html[data-theme="dark"] strong {
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .input,
+html[data-theme="dark"] .textarea,
+html[data-theme="dark"] .select select {
+  background-color: #2d2d2d;
+  border-color: #363636;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .input::placeholder,
+html[data-theme="dark"] .textarea::placeholder {
+  color: #7a7a7a;
+}
+
+html[data-theme="dark"] .button.is-light {
+  background-color: #363636;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .table {
+  background-color: #262626;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .table thead td,
+html[data-theme="dark"] .table thead th {
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .notification:not(.is-info):not(.is-success):not(.is-warning):not(.is-danger) {
+  background-color: #262626;
+  color: #f5f5f5;
+}
+
+html[data-theme="dark"] .hr,
+html[data-theme="dark"] hr {
+  background-color: #363636;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) {
+    background-color: #1a1a1a;
+    color: #f5f5f5;
+    --bulma-scheme-main: #1a1a1a;
+    --bulma-scheme-main-bis: #262626;
+    --bulma-scheme-main-ter: #2d2d2d;
+    --bulma-scheme-invert: #ffffff;
+    --bulma-text: #f5f5f5;
+    --bulma-text-strong: #ffffff;
+    --bulma-text-weak: #b5b5b5;
+    --bulma-border: #363636;
+    --bulma-border-hover: #4a4a4a;
+    --bulma-border-weak: #2d2d2d;
+    --bulma-background: #121212;
+    --bulma-link: #1abc9c;
+    --bulma-link-hover: #17a085;
+    --bulma-link-light: #122d28;
+    --bulma-link-dark: #70d8c1;
+  }
+
+  html:not([data-theme="light"]) body {
+    background-color: #1a1a1a;
+    color: #f5f5f5;
+  }
+
+  html:not([data-theme="light"]) .box,
+  html:not([data-theme="light"]) .card,
+  html:not([data-theme="light"]) .footer,
+  html:not([data-theme="light"]) .navbar,
+  html:not([data-theme="light"]) .modal-card-body,
+  html:not([data-theme="light"]) .modal-card-foot,
+  html:not([data-theme="light"]) .modal-card-head {
+    background-color: #262626;
+    color: #f5f5f5;
+  }
+
+  html:not([data-theme="light"]) .title,
+  html:not([data-theme="light"]) .subtitle,
+  html:not([data-theme="light"]) strong {
+    color: #ffffff;
+  }
+
+  html:not([data-theme="light"]) .input,
+  html:not([data-theme="light"]) .textarea,
+  html:not([data-theme="light"]) .select select {
+    background-color: #2d2d2d;
+    border-color: #363636;
+    color: #f5f5f5;
+  }
+
+  html:not([data-theme="light"]) .input::placeholder,
+  html:not([data-theme="light"]) .textarea::placeholder {
+    color: #7a7a7a;
+  }
+
+  html:not([data-theme="light"]) .button.is-light {
+    background-color: #363636;
+    color: #f5f5f5;
+  }
+
+  html:not([data-theme="light"]) .table {
+    background-color: #262626;
+    color: #f5f5f5;
+  }
+
+  html:not([data-theme="light"]) .table thead td,
+  html:not([data-theme="light"]) .table thead th {
+    color: #ffffff;
+  }
+
+  html:not([data-theme="light"]) .notification:not(.is-info):not(.is-success):not(.is-warning):not(.is-danger) {
+    background-color: #262626;
+    color: #f5f5f5;
+  }
+
+  html:not([data-theme="light"]) .hr,
+  html:not([data-theme="light"]) hr {
+    background-color: #363636;
+  }
+}
+
 /* ── CONTRAST OVERRIDES ───────────────────────────────────────────────────── */
 
 html[data-a11y-contrast="high"] {
