@@ -173,11 +173,7 @@
         trials: trials,
         summary: {},
       }).then(function (data) {
-        if (data.next_task) {
-          window.location.href = window.TASK_TASK_URL;
-        } else {
-          window.location.href = window.TASK_COMPLETE_URL;
-        }
+        TaskCore.navigateAfterTask(data.next_task);
       }).catch(function (err) {
         displayEl.textContent = "Error: " + err.message;
       });

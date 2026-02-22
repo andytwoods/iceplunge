@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block title %}{{ task_label }}{% endblock title %}
+{% block title %}{% translate "Try:" %} {{ task_label }}{% endblock title %}
 
 {% block javascript %}
   {{ block.super }}
@@ -15,9 +15,10 @@
   <script>
     var TASK_SUBMIT_URL = "{% url 'tasks:submit_result' %}";
     var SESSION_META_URL = "{% url 'tasks:session_meta' %}";
-    var TASK_COMPLETE_URL = "{% url 'tasks:complete' session_id=session.id %}";
-    var TASK_HUB_URL = "{% url 'tasks:hub' session_id=session.id %}";
-    var TASK_SKIP_URL = "{% url 'tasks:skip_task' %}";
+    var TASK_COMPLETE_URL = "";
+    var TASK_HUB_URL = "";
+    var TASK_SKIP_URL = "";
+    var TASK_IS_PRACTICE = true;
     var TASK_CONFIG = {
       seed: "{{ session.random_seed }}",
       taskType: "{{ task_type }}",
@@ -28,9 +29,11 @@
 
   <div class="task-fullscreen-header">
     <span class="task-fullscreen-title">{{ task_label }}</span>
-    <button id="skip-task-btn" class="button is-small is-ghost" type="button">
-      {% translate "Skip" %}
-    </button>
+  </div>
+
+  <div class="task-practice-banner">
+    <span class="icon mr-2"><i class="fas fa-flask"></i></span>
+    <strong>{% translate "PRACTICE RUN — your results will not be saved" %}</strong>
   </div>
 
   <div class="task-fullscreen-body">
@@ -56,9 +59,5 @@
 {% block inline_javascript %}
 <script>
   TaskCore.init("{{ session.id }}", "{{ csrf_token }}");
-
-  document.getElementById('skip-task-btn').addEventListener('click', function() {
-    TaskCore.skipCurrentTask();
-  });
 </script>
 {% endblock inline_javascript %}

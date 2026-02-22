@@ -290,6 +290,247 @@ html[data-a11y-motion="reduced"] *::after {
   opacity: 0;
 }
 
+/* ── TASK FULL-SCREEN PAGE ───────────────────────────────────────────────── */
+
+body.task-page > nav,
+body.task-page > footer,
+body.task-page .a11y-panel,
+body.task-page #toastContainer {
+  display: none !important;
+}
+
+.task-fullscreen-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.task-fullscreen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .6rem 1rem;
+  border-bottom: 1px solid var(--bulma-border);
+  background: var(--bulma-scheme-main-bis);
+  flex-shrink: 0;
+}
+
+.task-fullscreen-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--bulma-text);
+}
+
+.task-fullscreen-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.task-practice-banner {
+  background: #fffbeb;
+  border-bottom: 2px solid #f59e0b;
+  color: #92400e;
+  padding: .6rem 1rem;
+  font-size: .95rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+html[data-theme="dark"] .task-practice-banner {
+  background: #2d2006;
+  border-color: #d97706;
+  color: #fcd34d;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .task-practice-banner {
+    background: #2d2006;
+    border-color: #d97706;
+    color: #fcd34d;
+  }
+}
+
+/* ── TASK HUB ────────────────────────────────────────────────────────────── */
+
+.task-hub-list {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.task-hub-card {
+  border: 1.5px solid var(--bulma-border);
+  border-radius: .6rem;
+  background: var(--bulma-scheme-main);
+  overflow: hidden;
+  transition: border-color .15s;
+}
+
+.task-hub-card.is-next {
+  border-color: var(--bulma-link);
+}
+
+.task-hub-card.is-done {
+  border-color: var(--bulma-success);
+  opacity: .85;
+}
+
+.task-hub-card.is-skipped {
+  opacity: .55;
+}
+
+.task-hub-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  flex-wrap: wrap;
+}
+
+.task-hub-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  min-width: 0;
+}
+
+.task-hub-card-label {
+  font-weight: 600;
+  font-size: .95rem;
+  color: var(--bulma-text-strong);
+}
+
+.task-hub-card-duration {
+  font-size: .75rem;
+  color: var(--bulma-text-weak);
+}
+
+.task-hub-card-badges {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-shrink: 0;
+}
+
+.task-hub-instructions {
+  padding: .6rem 1rem .9rem;
+  border-top: 1px solid var(--bulma-border);
+  background: var(--bulma-scheme-main-bis);
+  font-size: .875rem;
+  color: var(--bulma-text);
+}
+
+/* ── TASK PROGRESS STRIP ─────────────────────────────────────────────────── */
+
+.task-progress-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  padding: .75rem 1rem;
+  background: var(--bulma-scheme-main-bis);
+  border-bottom: 1px solid var(--bulma-border);
+  margin-bottom: 1.25rem;
+}
+
+.task-step {
+  flex: 1 1 auto;
+  min-width: 8rem;
+  padding: .5rem .75rem;
+  border: 1.5px solid var(--bulma-border);
+  border-radius: .5rem;
+  background: var(--bulma-scheme-main);
+  color: var(--bulma-text-weak);
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+  position: relative;
+}
+
+.task-step-label {
+  font-size: .8rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.task-step-duration {
+  font-size: .7rem;
+  color: var(--bulma-text-weak);
+}
+
+.task-step-badge {
+  position: absolute;
+  top: .35rem;
+  right: .5rem;
+  font-size: .85rem;
+  font-weight: 700;
+}
+
+.task-step.is-current {
+  border-color: var(--bulma-link);
+  background: var(--bulma-link-light);
+  color: var(--bulma-link-dark);
+}
+
+.task-step.is-current .task-step-label {
+  color: var(--bulma-link-dark);
+}
+
+.task-step.is-done {
+  border-color: var(--bulma-success);
+  background: var(--bulma-success-light);
+  color: var(--bulma-success-dark);
+  opacity: .85;
+}
+
+.task-step.is-done .task-step-label {
+  color: var(--bulma-success-dark);
+}
+
+.task-step.is-done .task-step-badge {
+  color: var(--bulma-success);
+}
+
+.task-step.is-skipped {
+  opacity: .55;
+}
+
+.task-step.is-skipped .task-step-badge {
+  color: var(--bulma-text-weak);
+}
+
+/* ── TASK INTERSTITIAL OVERLAY ───────────────────────────────────────────── */
+
+.task-interstitial {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-interstitial[hidden] {
+  display: none;
+}
+
+.task-interstitial-box {
+  background: var(--bulma-scheme-main);
+  border-radius: .75rem;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  max-width: 26rem;
+  width: calc(100vw - 3rem);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+}
+
 /* ── Plunge modal — full-height to prevent flash on HTMX load ────────────── */
 #plunge-modal .modal-card {
   height: calc(100vh - 40px);

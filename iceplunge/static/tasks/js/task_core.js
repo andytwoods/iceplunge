@@ -152,6 +152,57 @@
     registerTask(taskObject) {
       _activeTask = taskObject;
     },
+
+    /**
+     * Called by every task JS after submit resolves.
+     * Returns to the session hub so the user can see progress and start the
+     * next task.  Redirects straight to complete if no tasks remain.
+     *
+     * @param {string|null} nextTaskType
+     */
+    navigateAfterTask(nextTaskType) {
+      if (window.TASK_IS_PRACTICE) {
+        _showPracticeDone();
+        return;
+      }
+      if (nextTaskType) {
+        window.location.href = window.TASK_HUB_URL;
+      } else {
+        window.location.href = window.TASK_COMPLETE_URL;
+      }
+    },
+
+    /**
+     * Aborts the active task and POSTs a skip request to TASK_SKIP_URL.
+     * On success, shows the interstitial for the next task (or redirects
+     * to complete if no tasks remain).
+     */
+    skipCurrentTask() {
+      if (_activeTask && typeof _activeTask.abort === "function") {
+        _activeTask.abort("user_skip");
+      }
+      fetch(window.TASK_SKIP_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": _csrfToken,
+        },
+        body: JSON.stringify({
+          session_id: _sessionId,
+          task_type: window.TASK_CONFIG.taskType,
+        }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { TaskCore.navigateAfterTask(data.next_task); })
+        .catch(function (err) {
+          var msg = (err && err.message) ? err.message : "Unknown error";
+          if (window.Swal) {
+            Swal.fire({ title: "Skip failed", text: msg, icon: "error" });
+          } else {
+            alert("Skip failed: " + msg);
+          }
+        });
+    },
   };
 
   // ─── Private helpers ───────────────────────────────────────────────────────
@@ -225,6 +276,25 @@
         alert(
           "You are back online. Please restart your session to continue."
         );
+      }
+    });
+  }
+
+  // ─── Private: practice mode ────────────────────────────────────────────────
+
+  function _showPracticeDone() {
+    Swal.fire({
+      title: "Practice complete!",
+      text: "This was a practice run — no results have been saved to your record.",
+      icon: "success",
+      confirmButtonText: "Try again",
+      showCancelButton: true,
+      cancelButtonText: "Close tab",
+    }).then(function (result) {
+      if (result.isConfirmed) {
+        window.location.reload();
+      } else {
+        window.close();
       }
     });
   }

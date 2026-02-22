@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% translate "Session tasks" %}{% endblock title %}
+
+{% block content %}
+<div class="columns is-centered">
+  <div class="column is-three-quarters-desktop is-full-mobile">
+
+    <h1 class="title is-4 mb-1">{% translate "Your session tasks" %}</h1>
+    <p class="subtitle is-6 mb-5">
+      {% translate "Complete each task below. Tap 'Instructions' to learn how a task works before starting." %}
+    </p>
+
+    <div class="task-hub-list mb-5">
+      {% for t in task_list %}
+        <div class="task-hub-card{% if t.is_next %} is-next{% elif t.is_done %} is-done{% elif t.is_skipped %} is-skipped{% endif %}">
+          <div class="task-hub-card-header">
+            <div class="task-hub-card-meta">
+              <span class="task-hub-card-label">{{ t.label }}</span>
+              <span class="task-hub-card-duration">{{ t.duration_display }}</span>
+            </div>
+            <div class="task-hub-card-badges">
+              {% if t.is_done %}
+                <span class="tag is-success is-light">{% translate "Done" %} ✓</span>
+              {% elif t.is_skipped %}
+                <span class="tag is-light">{% translate "Skipped" %}</span>
+              {% elif t.is_next %}
+                <span class="tag is-primary is-light">{% translate "Up next" %}</span>
+              {% else %}
+                <span class="tag is-light">{% translate "Upcoming" %}</span>
+              {% endif %}
+              <button class="button is-small is-ghost task-hub-instructions-btn"
+                      type="button"
+                      aria-expanded="false"
+                      data-target="instructions-{{ t.type }}">
+                {% translate "Instructions" %} <span class="task-hub-chevron ml-1">▾</span>
+              </button>
+            </div>
+          </div>
+          <div id="instructions-{{ t.type }}" class="task-hub-instructions" hidden>
+            <p class="is-size-6 mb-3">{{ t.instructions }}</p>
+            <a href="{% url 'tasks:try_task' task_type=t.type %}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="button is-small is-info is-light">
+              Try it now ↗
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if all_done %}
+      <a href="{% url 'tasks:complete' session_id=session.id %}"
+         class="button is-primary is-large is-fullwidth">
+        {% translate "Finish session →" %}
+      </a>
+    {% else %}
+      {% for t in task_list %}{% if t.is_next %}
+      <a href="{% url 'tasks:task' session_id=session.id %}"
+         class="button is-primary is-large is-fullwidth">
+        {% translate "Start:" %} {{ t.label }}
+      </a>
+      {% endif %}{% endfor %}
+    {% endif %}
+
+  </div>
+</div>
+{% endblock content %}
+
+{% block inline_javascript %}
+<script>
+  document.querySelectorAll('.task-hub-instructions-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var panel = document.getElementById(btn.getAttribute('data-target'));
+      var isExpanded = btn.getAttribute('aria-expanded') === 'true';
+      panel.hidden = isExpanded;
+      btn.setAttribute('aria-expanded', String(!isExpanded));
+      btn.querySelector('.task-hub-chevron').textContent = isExpanded ? '▾' : '▴';
+    });
+  });
+</script>
+{% endblock inline_javascript %}

@@ -154,7 +154,7 @@
         trials: trials,
         summary: {},
       }).then(function (data) {
-        window.location.href = data.next_task ? window.TASK_TASK_URL : window.TASK_COMPLETE_URL;
+        TaskCore.navigateAfterTask(data.next_task);
       }).catch(function (err) {
         stimulusEl.textContent = "Error: " + err.message;
       });

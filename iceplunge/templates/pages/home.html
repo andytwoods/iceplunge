@@ -131,6 +131,12 @@
                 </div>
                 <div class="media-content">
                   <p><strong>Reaction time</strong> and attention stability</p>
+                  <div class="buttons mt-2" style="gap:.4rem;">
+                    <a href="{% url 'tasks:try_task' task_type='pvt' %}" target="_blank" rel="noopener noreferrer"
+                       class="button is-small is-info is-light">Try: Reaction time ↗</a>
+                    <a href="{% url 'tasks:try_task' task_type='sart' %}" target="_blank" rel="noopener noreferrer"
+                       class="button is-small is-info is-light">Try: Sustained attention ↗</a>
+                  </div>
                 </div>
               </div>
               <div class="media mb-4">
@@ -141,6 +147,12 @@
                 </div>
                 <div class="media-content">
                   <p><strong>Processing speed</strong> and executive control</p>
+                  <div class="buttons mt-2" style="gap:.4rem;">
+                    <a href="{% url 'tasks:try_task' task_type='flanker' %}" target="_blank" rel="noopener noreferrer"
+                       class="button is-small is-info is-light">Try: Executive control ↗</a>
+                    <a href="{% url 'tasks:try_task' task_type='digit_symbol' %}" target="_blank" rel="noopener noreferrer"
+                       class="button is-small is-info is-light">Try: Processing speed ↗</a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -153,6 +165,10 @@
                 </div>
                 <div class="media-content">
                   <p><strong>Mood</strong> and stress check-in</p>
+                  <div class="mt-2">
+                    <a href="{% url 'tasks:try_task' task_type='mood' %}" target="_blank" rel="noopener noreferrer"
+                       class="button is-small is-info is-light">Try: Mood check-in ↗</a>
+                  </div>
                 </div>
               </div>
               <div class="media mb-4">

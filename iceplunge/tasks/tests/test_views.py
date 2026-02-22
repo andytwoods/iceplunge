@@ -150,7 +150,7 @@ class TestSessionTaskView:
             )
         response = client.get(reverse("tasks:task", kwargs={"session_id": session.id}))
         assert response.status_code == 302
-        assert "complete" in response["Location"]
+        assert "hub" in response["Location"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────

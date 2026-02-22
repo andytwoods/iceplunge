@@ -70,7 +70,6 @@
             btn.style.borderColor = "#3273dc";
             btn.style.color = "#fff";
             ratings[scale.key] = val;
-            updateSubmit();
           });
           btnRow.appendChild(btn);
         })(v);
@@ -85,13 +84,24 @@
     var submitBtn = document.createElement("button");
     submitBtn.type = "button";
     submitBtn.textContent = "Submit";
-    submitBtn.disabled = true;
     submitBtn.style.cssText = (
       "width:100%;padding:1rem;background:#48c774;color:#fff;" +
       "border:none;border-radius:6px;font-size:1.1rem;cursor:pointer;margin-top:1rem;"
     );
     submitBtn.addEventListener("click", function () {
-      if (submitBtn.disabled) return;
+      var unanswered = SCALES.filter(function (s) { return ratings[s.key] === undefined; });
+      if (unanswered.length > 0) {
+        Swal.fire({
+          toast: true,
+          position: "top",
+          icon: "warning",
+          title: "Please answer all questions before submitting.",
+          showConfirmButton: false,
+          timer: 3000,
+          timerProgressBar: true,
+        });
+        return;
+      }
       submitBtn.disabled = true;
       submitBtn.textContent = "Submitting\u2026";
 
@@ -106,7 +116,7 @@
         trials: [Object.assign({}, ratings)],
         summary: Object.assign({}, ratings),
       }).then(function (data) {
-        window.location.href = data.next_task ? window.TASK_TASK_URL : window.TASK_COMPLETE_URL;
+        TaskCore.navigateAfterTask(data.next_task);
       }).catch(function (err) {
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit";
@@ -114,11 +124,6 @@
       });
     });
     container.appendChild(submitBtn);
-
-    function updateSubmit() {
-      var allRated = SCALES.every(function (s) { return ratings[s.key] !== undefined; });
-      submitBtn.disabled = !allRated;
-    }
 
     TaskCore.registerTask({
       pause: function () {},

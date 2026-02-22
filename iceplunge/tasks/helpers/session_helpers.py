@@ -32,14 +32,35 @@ def create_session(user, prompt_event=None, is_practice=False):
     return session
 
 
+def create_practice_session(user, task_type):
+    """
+    Create a single-task practice CognitiveSession (is_practice=True).
+    Results are saved but excluded from real analyses.
+    """
+    from iceplunge.tasks.models import CognitiveSession  # local import avoids circular
+
+    seed = str(uuid.uuid4())
+    session = CognitiveSession.objects.create(
+        user=user,
+        is_practice=True,
+        random_seed=seed,
+        task_order=[task_type],
+        started_at=timezone.now(),
+        completion_status=CognitiveSession.CompletionStatus.IN_PROGRESS,
+    )
+    return session
+
+
 def next_task(session):
     """
-    Return the task_type string of the first uncompleted task in task_order,
-    or None if all tasks have a submitted TaskResult.
+    Return the task_type string of the first uncompleted, non-skipped task in task_order,
+    or None if all tasks have a submitted TaskResult or have been skipped.
     """
     completed_types = set(session.task_results.values_list("task_type", flat=True))
+    skipped_types = set((session.device_meta or {}).get("skipped_tasks", []))
+    done = completed_types | skipped_types
     for task_type in session.task_order:
-        if task_type not in completed_types:
+        if task_type not in done:
             return task_type
     return None
 
