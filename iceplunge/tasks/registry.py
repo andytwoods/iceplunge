@@ -55,7 +55,7 @@ TASK_REGISTRY: dict[str, dict] = {
         "duration_ms": 0,
         "instructions": (
             "Rate how you feel right now on four scales: Mood, Energy, Stress, and Mental Clarity. "
-            "Tap a number from 1 (low) to 5 (high) for each scale. "
+            "Tap a number from 1 (low) to 7 (high) for each scale. "
             "There is no time limit."
         ),
     },

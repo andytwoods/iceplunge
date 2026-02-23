@@ -13,14 +13,14 @@
 {% block body %}
 <div class="task-fullscreen-wrapper">
   <script>
-    var TASK_SUBMIT_URL = "{% url 'tasks:submit_result' %}";
-    var SESSION_META_URL = "{% url 'tasks:session_meta' %}";
+    var TASK_SUBMIT_URL = "{% if session %}{% url 'tasks:submit_result' %}{% endif %}";
+    var SESSION_META_URL = "{% if session %}{% url 'tasks:session_meta' %}{% endif %}";
     var TASK_COMPLETE_URL = "";
     var TASK_HUB_URL = "";
     var TASK_SKIP_URL = "";
     var TASK_IS_PRACTICE = true;
     var TASK_CONFIG = {
-      seed: "{{ session.random_seed }}",
+      seed: "{% if session %}{{ session.random_seed }}{% else %}{{ anonymous_seed }}{% endif %}",
       taskType: "{{ task_type }}",
       taskLabel: "{{ task_label }}",
       taskVersion: "1.0"
@@ -58,6 +58,6 @@
 
 {% block inline_javascript %}
 <script>
-  TaskCore.init("{{ session.id }}", "{{ csrf_token }}");
+  TaskCore.init("{% if session %}{{ session.id }}{% endif %}", "{{ csrf_token }}");
 </script>
 {% endblock inline_javascript %}

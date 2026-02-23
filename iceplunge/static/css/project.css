@@ -1,5 +1,61 @@
 /* These styles are generated from project.scss. */
 
+/* ── STICKY FOOTER ───────────────────────────────────────────────────────── */
+
+body:not(.task-page) {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body:not(.task-page) > footer {
+  margin-top: auto;
+}
+
+/* ── MEMBER HOME ACTION CARDS ────────────────────────────────────────────── */
+
+.member-action-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  padding: 2.5rem 1.5rem;
+  border: 2px solid var(--bulma-link);
+  border-radius: .75rem;
+  background: var(--bulma-scheme-main);
+  color: var(--bulma-link);
+  text-decoration: none;
+  text-align: center;
+  transition: background .15s, color .15s, transform .1s, box-shadow .15s;
+  height: 100%;
+  min-height: 11rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.member-action-card:hover,
+.member-action-card:focus-visible {
+  background: var(--bulma-link);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.14);
+}
+
+.member-action-icon {
+  line-height: 1;
+}
+
+.member-action-label {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.member-action-sub {
+  font-size: .875rem;
+  opacity: .8;
+}
+
 .alert-debug {
   color: black;
   background-color: white;
@@ -327,6 +383,44 @@ html[data-theme="dark"] hr {
   background-color: #363636;
 }
 
+/* Form elements */
+html[data-theme="dark"] .label {
+  color: #e8e8e8;
+}
+
+html[data-theme="dark"] .help {
+  color: #b5b5b5;
+}
+
+html[data-theme="dark"] .help.is-danger {
+  color: #ff6b6b;
+}
+
+html[data-theme="dark"] .select {
+  background-color: #2d2d2d;
+}
+
+html[data-theme="dark"] .select::after {
+  border-color: #b5b5b5;
+}
+
+html[data-theme="dark"] .checkbox,
+html[data-theme="dark"] .radio {
+  color: #e8e8e8;
+}
+
+html[data-theme="dark"] .checkbox input,
+html[data-theme="dark"] .radio input {
+  accent-color: #1abc9c;
+}
+
+html[data-theme="dark"] .field-body .field .control input,
+html[data-theme="dark"] .field-body .field .control select {
+  background-color: #2d2d2d;
+  border-color: #363636;
+  color: #f5f5f5;
+}
+
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) {
     background-color: #1a1a1a;
@@ -406,6 +500,44 @@ html[data-theme="dark"] hr {
   html:not([data-theme="light"]) .hr,
   html:not([data-theme="light"]) hr {
     background-color: #363636;
+  }
+
+  /* Form elements */
+  html:not([data-theme="light"]) .label {
+    color: #e8e8e8;
+  }
+
+  html:not([data-theme="light"]) .help {
+    color: #b5b5b5;
+  }
+
+  html:not([data-theme="light"]) .help.is-danger {
+    color: #ff6b6b;
+  }
+
+  html:not([data-theme="light"]) .select {
+    background-color: #2d2d2d;
+  }
+
+  html:not([data-theme="light"]) .select::after {
+    border-color: #b5b5b5;
+  }
+
+  html:not([data-theme="light"]) .checkbox,
+  html:not([data-theme="light"]) .radio {
+    color: #e8e8e8;
+  }
+
+  html:not([data-theme="light"]) .checkbox input,
+  html:not([data-theme="light"]) .radio input {
+    accent-color: #1abc9c;
+  }
+
+  html:not([data-theme="light"]) .field-body .field .control input,
+  html:not([data-theme="light"]) .field-body .field .control select {
+    background-color: #2d2d2d;
+    border-color: #363636;
+    color: #f5f5f5;
   }
 }
 
@@ -709,4 +841,41 @@ html[data-theme="dark"] .task-practice-banner {
 #plunge-modal .modal-card-body {
   flex: 1 1 auto;
   overflow-y: auto;
+}
+
+/* ── CAPACITOR SHELL ─────────────────────────────────────────────────────── */
+
+/* Hide nav/footer on login pages when running inside Capacitor */
+html.cap-mode nav.navbar,
+html.cap-mode .footer { display: none !important; }
+html.cap-mode .section { padding-top: calc(env(safe-area-inset-top, 0px) + 2rem); }
+
+/* Floating home button — injected on all Django pages inside Capacitor */
+.cap-back-btn {
+  position: fixed;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  left: 1.25rem;
+  z-index: 3000;
+  background: var(--bulma-scheme-main, #fff);
+  border: 1.5px solid var(--bulma-border, #dbdbdb);
+  border-radius: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+  color: var(--bulma-text, #363636);
+  text-decoration: none;
+  font-size: 1rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cap-back-btn:active { transform: scale(.92); }
+
+
+.title.is-clear {
+  background: none !important;
+  padding: 0 !important;
+  margin-top: 0 !important;
 }

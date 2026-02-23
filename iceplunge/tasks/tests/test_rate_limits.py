@@ -122,24 +122,24 @@ class TestSessionStartViewRateLimit:
     def test_get_returns_429_when_rate_limited(self, client):
         user = _consented_user()
         client.force_login(user)
-        _create_session(user)
-        _create_session(user)
+        _create_session(user, complete=True)
+        _create_session(user, complete=True)
         response = client.get(self._url())
         assert response.status_code == 429
 
     def test_429_renders_rate_limit_template(self, client):
         user = _consented_user()
         client.force_login(user)
-        _create_session(user)
-        _create_session(user)
+        _create_session(user, complete=True)
+        _create_session(user, complete=True)
         response = client.get(self._url())
         assert b"Too many sessions" in response.content or b"sessions" in response.content
 
     def test_post_returns_429_when_rate_limited(self, client):
         user = _consented_user()
         client.force_login(user)
-        _create_session(user)
-        _create_session(user)
+        _create_session(user, complete=True)
+        _create_session(user, complete=True)
         response = client.post(self._url(), {})
         assert response.status_code == 429
 
@@ -153,8 +153,8 @@ class TestSessionStartViewRateLimit:
     def test_reason_appears_in_rate_limited_response(self, client):
         user = _consented_user()
         client.force_login(user)
-        _create_session(user)
-        _create_session(user)
+        _create_session(user, complete=True)
+        _create_session(user, complete=True)
         response = client.get(self._url())
         assert response.status_code == 429
         # The reason text should appear somewhere in the rendered HTML

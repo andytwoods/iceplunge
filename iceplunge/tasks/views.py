@@ -42,27 +42,32 @@ class SessionStartView(LoginRequiredMixin, View):
     Creates a CognitiveSession and collects per-session covariates before
     redirecting the user to the first task.
 
-    GET  — create (or resume) a session, render the session-covariate form.
-    POST — save the covariate form, redirect to the first task.
+    GET  — if an in-progress session exists, redirect straight to its hub;
+           otherwise create a new session and render the covariate form.
+    POST — save the covariate form, redirect to the hub.
     """
 
     def get(self, request):
+        existing = self._find_in_progress_session(request)
+        if existing:
+            request.session[_SESSION_KEY] = str(existing.id)
+            return redirect("tasks:hub", session_id=existing.id)
         allowed, reason = check_voluntary_rate_limit(request.user)
         if not allowed:
             return render(request, "tasks/session_start.html", {"rate_limited": True, "reason": reason}, status=429)
-        session = self._get_or_create_session(request)
-        if SessionCovariate.objects.filter(session=session).exists():
-            return redirect("tasks:hub", session_id=session.id)
+        session = self._create_session(request)
         form = SessionCovariateForm()
         return render(request, "tasks/session_start.html", {"form": form, "session": session})
 
     def post(self, request):
+        existing = self._find_in_progress_session(request)
+        if existing:
+            request.session[_SESSION_KEY] = str(existing.id)
+            return redirect("tasks:hub", session_id=existing.id)
         allowed, reason = check_voluntary_rate_limit(request.user)
         if not allowed:
             return render(request, "tasks/session_start.html", {"rate_limited": True, "reason": reason}, status=429)
-        session = self._get_or_create_session(request)
-        if SessionCovariate.objects.filter(session=session).exists():
-            return redirect("tasks:hub", session_id=session.id)
+        session = self._create_session(request)
         form = SessionCovariateForm(request.POST)
         if form.is_valid():
             covariate = form.save(commit=False)
@@ -71,17 +76,32 @@ class SessionStartView(LoginRequiredMixin, View):
             return redirect("tasks:hub", session_id=session.id)
         return render(request, "tasks/session_start.html", {"form": form, "session": session})
 
-    def _get_or_create_session(self, request):
+    def _find_in_progress_session(self, request):
+        """Return an existing non-practice in-progress session, or None."""
+        # Check Django session key first (fast path)
         session_id = request.session.get(_SESSION_KEY)
         if session_id:
             try:
                 return CognitiveSession.objects.get(
                     id=session_id,
                     user=request.user,
+                    is_practice=False,
                     completion_status=CognitiveSession.CompletionStatus.IN_PROGRESS,
                 )
             except CognitiveSession.DoesNotExist:
                 pass
+        # Fall back to DB query (handles cleared session cookies, other devices, etc.)
+        return (
+            CognitiveSession.objects.filter(
+                user=request.user,
+                is_practice=False,
+                completion_status=CognitiveSession.CompletionStatus.IN_PROGRESS,
+            )
+            .order_by("-started_at")
+            .first()
+        )
+
+    def _create_session(self, request):
         session = create_session(request.user)
         request.session[_SESSION_KEY] = str(session.id)
         return session
@@ -327,19 +347,28 @@ class TaskResultSubmitView(LoginRequiredMixin, View):
         )
 
 
-class TryTaskView(LoginRequiredMixin, View):
+class TryTaskView(View):
     """
     Opens a single-task practice run in a new tab.
-    Creates a fresh is_practice session on every GET; results are submitted
-    normally but flagged as practice so they are excluded from real analyses.
-    The page makes clear that no results are saved to the user's record.
+    Accessible without login so visitors can try tasks from the homepage.
+    Logged-in users get a real (is_practice) CognitiveSession so results are
+    stored but excluded from all analyses.  Anonymous users get no DB session;
+    task_core.js detects the empty session_id and skips server submission,
+    showing the practice-complete dialog entirely client-side.
     """
 
     def get(self, request, task_type):
+        import random
+
         if task_type not in TASK_REGISTRY:
             from django.http import Http404
             raise Http404
-        session = create_practice_session(request.user, task_type)
+        if request.user.is_authenticated:
+            session = create_practice_session(request.user, task_type)
+            anonymous_seed = ""
+        else:
+            session = None
+            anonymous_seed = str(random.randint(100_000, 999_999))
         return render(
             request,
             "tasks/try_task.html",
@@ -347,6 +376,7 @@ class TryTaskView(LoginRequiredMixin, View):
                 "session": session,
                 "task_type": task_type,
                 "task_label": TASK_REGISTRY[task_type]["label"],
+                "anonymous_seed": anonymous_seed,
             },
         )
 

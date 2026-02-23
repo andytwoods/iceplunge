@@ -30,6 +30,13 @@
       _csrfToken = csrfToken;
       _initPerfTime = performance.now();
 
+      // Anonymous practice users have no session — skip the server meta POST.
+      if (!sessionId) {
+        _attachLifecycleListeners();
+        _attachOfflineListeners();
+        return;
+      }
+
       const timezoneOffsetMinutes = new Date().getTimezoneOffset();
       const deviceMeta = {
         user_agent: navigator.userAgent,
@@ -66,6 +73,11 @@
      */
     submit(payload) {
       if (!_sessionId) {
+        // Anonymous practice users: resolve immediately so navigateAfterTask()
+        // fires and shows the practice-complete dialog without a server round-trip.
+        if (window.TASK_IS_PRACTICE) {
+          return Promise.resolve({ ok: true, next_task: null, is_partial: false });
+        }
         return Promise.reject(new Error("TaskCore.init() has not been called — session_id is unknown"));
       }
 

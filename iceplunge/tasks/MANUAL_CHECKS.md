@@ -39,8 +39,15 @@ These items require human verification in a browser before each release.
 
 ## T5.3 — Mood task
 
-- [ ] Submit button is disabled until all four scales have a value selected.
+- [ ] Submit button is always enabled; clicking it before all four scales are rated shows
+  a SweetAlert2 toast ("Please answer all questions before submitting.") and does not submit.
+- [ ] After all four scales are rated, clicking Submit proceeds to submission normally.
 - [ ] Selecting a value highlights it clearly; changing selection deselects the previous.
+- [ ] All four scales show 7 buttons (1–7) with correct published anchor labels:
+  - Mood: "Very bad" (1) — "Very good" (7)
+  - Energy: "Calm / low energy" (1) — "Energetic / excited" (7)
+  - Stress: "Not at all stressed" (1) — "Extremely stressed" (7)
+  - Mental clarity: "Mentally foggy" (1) — "Mentally sharp" (7)
 
 ## T5.4 — Flanker task
 

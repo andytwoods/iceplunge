@@ -1,9 +1,12 @@
 /**
  * mood.js — Mood Rating Task
  *
- * Four 5-point scales: valence, arousal, stress, sharpness.
- * Submit button is enabled only after all four have a value.
- * Records started_at and ended_at.
+ * Four 7-point scales: valence, arousal, stress, sharpness.
+ * Anchors derived from published instruments:
+ *   Mood:           Feeling Scale (Hardy & Rejeski, 1989)
+ *   Energy:         Felt Arousal Scale (Svebak & Murgatroyd, 1985) + SAM (Bradley & Lang, 1994)
+ *   Stress:         EMA / Stress NRS-11 literature (Karvounides et al., 2016)
+ *   Mental clarity: Stanford Sleepiness Scale (Hoddes et al., 1973), inverted
  *
  * Requires window.TaskCore, window.TASK_SUBMIT_URL, window.TASK_TASK_URL,
  * window.TASK_COMPLETE_URL, and window.TASK_CONFIG.
@@ -15,11 +18,12 @@
   var TASK_VERSION = "1.0";
 
   var SCALES = [
-    { key: "valence",   label: "Mood", low: "Very negative", high: "Very positive" },
-    { key: "arousal",   label: "Energy", low: "Very low", high: "Very high" },
-    { key: "stress",    label: "Stress", low: "Not at all", high: "Extremely stressed" },
-    { key: "sharpness", label: "Mental clarity", low: "Very foggy", high: "Very sharp" },
+    { key: "valence",   label: "Mood",           low: "Very bad",            high: "Very good" },
+    { key: "arousal",   label: "Energy",          low: "Calm / low energy",   high: "Energetic / excited" },
+    { key: "stress",    label: "Stress",          low: "Not at all stressed", high: "Extremely stressed" },
+    { key: "sharpness", label: "Mental clarity",  low: "Mentally foggy",      high: "Mentally sharp" },
   ];
+  var SCALE_POINTS = 7;
 
   function init(config) {
     var startedAt = TaskCore.wallClock();
@@ -48,7 +52,7 @@
       var btnRow = document.createElement("div");
       btnRow.style.cssText = "display:flex;gap:0.5rem;";
 
-      for (var v = 1; v <= 5; v++) {
+      for (var v = 1; v <= SCALE_POINTS; v++) {
         (function (val) {
           var btn = document.createElement("button");
           btn.type = "button";

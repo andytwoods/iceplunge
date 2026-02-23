@@ -43,7 +43,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Ice Plunge Cognitive Research Platform"/>
   <meta name="author" content="Andy T. Woods"/>
-  <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}"/>
+  <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}" sizes="any"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicons/favicon-32x32.png' %}"/>
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicons/favicon-16x16.png' %}"/>
+  <link rel="apple-touch-icon" href="{% static 'images/favicons/apple-touch-icon.png' %}"/>
+  <link rel="manifest" href="{% static 'images/favicons/site.webmanifest' %}"/>
+  <meta name="theme-color" content="#1a9e7a"/>
   {% block css %}
     <link rel="stylesheet" href="{% static 'css/bulma.min.css' %}"/>
     <link rel="stylesheet" href="{% static 'css/bulmaswatch.min.css' %}">
@@ -59,6 +64,7 @@
     <script defer src="{% static 'js/sweetalert2.min.js' %}"></script>
     <script defer src="{% static 'js/project.js' %}"></script>
   {% endblock javascript %}
+  {% block head_extra %}{% endblock head_extra %}
 </head>
 <body class="{% block bodyclass %}{% endblock bodyclass %}">
 
@@ -184,6 +190,18 @@
       });
     });
   });
+</script>
+<script>
+  (function () {
+    if (!window.Capacitor) return;
+    if (window.location.pathname === '/app/') return;
+    var btn = document.createElement('a');
+    btn.href = '/app/';
+    btn.setAttribute('aria-label', 'Back to home');
+    btn.className = 'cap-back-btn';
+    btn.innerHTML = '<i class="fas fa-home"></i>';
+    document.body.appendChild(btn);
+  })();
 </script>
 </body>
 </html>

@@ -2,6 +2,11 @@ import { CapacitorConfig } from "@capacitor/cli";
 
 const isDev = process.env.NODE_ENV !== "production";
 
+// For Android emulator, set CAPACITOR_HOST=10.0.2.2 (emulator loopback to host).
+// For a real device on the same network, set CAPACITOR_HOST to your machine's LAN IP.
+// Default is localhost (works for iOS Simulator and browser-based testing).
+const host = process.env.CAPACITOR_HOST || "localhost";
+
 const config: CapacitorConfig = {
   appId: "com.iceplunge.app",
   appName: "Ice Plunge",
@@ -13,7 +18,8 @@ const config: CapacitorConfig = {
     ? {
         // Forward all requests to the local Django dev server so you can test
         // inside the Capacitor shell without a build step.
-        url: "http://localhost:8000",
+        // Opens /app/ directly so Apple sees meaningful bundled native content.
+        url: `http://${host}:8000/app/`,
         cleartext: true,
       }
     : undefined,

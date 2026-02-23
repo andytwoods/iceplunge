@@ -1,7 +1,96 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block title %}Cold Cognition Project{% endblock title %}
+{% block title %}Cold Cognition Project — Plunge. Test. Discover.{% endblock title %}
+
+{% block head_extra %}
+  {# PRIMARY SEO META #}
+  <meta name="description" content="Join a citizen-science study measuring how cold-water immersion affects reaction time, attention, and mood. Complete 3-minute cognitive tests before and after plunges — and help build the world's largest cold-plunge cognition dataset. Free, anonymous, community-led."/>
+  <meta name="keywords" content="cold water immersion, cold plunge, cognition, reaction time, citizen science, mental performance, ice bath, cold water swimming"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}"/>
+
+  {# OPEN GRAPH — Facebook, LinkedIn, WhatsApp, iMessage, Slack. Image: 1200×630 px #}
+  <meta property="og:type"         content="website"/>
+  <meta property="og:site_name"    content="Cold Cognition Project"/>
+  <meta property="og:locale"       content="en_GB"/>
+  <meta property="og:title"        content="Cold Cognition Project — Plunge. Test. Discover."/>
+  <meta property="og:description"  content="Log your cold plunges, run 3-minute cognitive tests, and see how icy water shifts your reaction time, focus, and mood. Free, anonymous, community science."/>
+  <meta property="og:url"          content="{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}"/>
+  <meta property="og:image"        content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/social/og-home.png' %}"/>
+  <meta property="og:image:secure_url" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/social/og-home.png' %}"/>
+  <meta property="og:image:type"   content="image/png"/>
+  <meta property="og:image:width"  content="1200"/>
+  <meta property="og:image:height" content="630"/>
+  <meta property="og:image:alt"    content="Person stepping into cold water — cognitive test charts overlaid"/>
+
+  {# TWITTER / X CARD — summary_large_image, recommended 1200×628 px #}
+  <meta name="twitter:card"        content="summary_large_image"/>
+  <meta name="twitter:title"       content="Cold Cognition Project — Plunge. Test. Discover."/>
+  <meta name="twitter:description" content="Log cold plunges, run 3-minute cognitive tests, and track how cold water shapes your reaction time and mood. Free, anonymous, community science."/>
+  <meta name="twitter:image"       content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/social/og-home.png' %}"/>
+  <meta name="twitter:image:alt"   content="Person stepping into cold water — cognitive test charts overlaid"/>
+
+  {# STRUCTURED DATA — JSON-LD: WebSite + ResearchProject #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "{{ request.scheme }}://{{ request.get_host }}/#website",
+        "name": "Cold Cognition Project",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/",
+        "description": "A citizen-science platform capturing cognitive measurements from cold-water immersion practitioners before and after plunges.",
+        "inLanguage": "en-GB",
+        "publisher": {
+          "@type": "Organization",
+          "@id": "{{ request.scheme }}://{{ request.get_host }}/#organization",
+          "name": "Cold Cognition Project",
+          "url": "{{ request.scheme }}://{{ request.get_host }}/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/favicons/favicon.ico' %}"
+          }
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}#webpage",
+        "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}",
+        "name": "Cold Cognition Project — Plunge. Test. Discover.",
+        "description": "Join a citizen-science study measuring how cold-water immersion affects reaction time, attention, and mood. Complete 3-minute cognitive tests before and after plunges.",
+        "isPartOf": { "@id": "{{ request.scheme }}://{{ request.get_host }}/#website" },
+        "inLanguage": "en-GB",
+        "image": {
+          "@type": "ImageObject",
+          "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/social/og-home.png' %}",
+          "width": 1200,
+          "height": 630
+        }
+      },
+      {
+        "@type": "ResearchProject",
+        "@id": "{{ request.scheme }}://{{ request.get_host }}/#research",
+        "name": "Cold Cognition Project",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/",
+        "description": "Community-led citizen science measuring the acute and chronic effects of cold-water immersion on cognition — reaction time, sustained attention, processing speed, and mood.",
+        "keywords": "cold water immersion, cognition, reaction time, citizen science, cold plunge, mental performance, ice bath",
+        "about": [
+          { "@type": "Thing", "name": "Cold water immersion" },
+          { "@type": "Thing", "name": "Cognitive performance" },
+          { "@type": "Thing", "name": "Reaction time" },
+          { "@type": "Thing", "name": "Psychomotor vigilance" }
+        ],
+        "member": {
+          "@type": "OrganizationRole",
+          "roleName": "Participant"
+        }
+      }
+    ]
+  }
+  </script>
+{% endblock head_extra %}
 
 {% block body %}
 
@@ -9,10 +98,10 @@
   <section class="section" style="padding-top:3.5rem; padding-bottom:3.5rem;">
     <div class="container">
       <div class="columns is-vcentered">
-        <div class="column">
+        <div class="column is-6">
 
-          <h1 class="title is-2 mb-4" style="line-height:1.2;">
-            Does cold water change<br>how your brain works?
+          <h1 class="title is- is-clear mb-4 is-clear" style="line-height:1.2;">
+            Plunge. Test. Discover.
           </h1>
           <p class="subtitle is-5" style="max-width:38rem;">
             Cold-water immersion has been studied in labs and is known to affect arousal, stress physiology, and mood.
@@ -44,6 +133,16 @@
             </a>
           {% endif %}
         </div>
+
+        <div class="column is-6 is-hidden-mobile">
+          <figure class="image" style="border-radius:1rem; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.18);">
+            <img src="{% static 'images/social/og-home.png' %}"
+                 alt="Person stepping into cold water at dawn"
+                 width="1200" height="630"
+                 style="display:block; width:100%; height:auto;">
+          </figure>
+        </div>
+
       </div>
     </div>
   </section>
@@ -54,12 +153,12 @@
       <div class="columns">
         <div class="column is-8 is-offset-2">
           <div class="box">
-            <h2 class="title is-4 mb-4">How to use this app</h2>
+            <h2 class="title is-4 mb-4 is-clear">How to use this app</h2>
             <div class="content">
               <ol>
                 <li><strong>Create an account</strong> and complete a short baseline questionnaire.</li>
                 <li><strong>Log a plunge</strong> – water temperature, duration, and context. Takes under a minute.</li>
-                <li><strong>Complete a 3-minute session</strong> consisting of several short cognitive tests, before or after a plunge.</li>
+                <li><strong>Complete a 3-minutes session of cognitive tests</strong>, before or after a plunge.</li>
                 <li><strong>Repeat the previous step if you want</strong>, several times, to learn how long-lasting your effects are.</li>
                 <li><strong>See your results</strong> on your dashboard – and how they shift around your plunges.</li>
               </ol>
@@ -73,7 +172,7 @@
   <!-- ... existing code ... -->
       <div class="columns is-centered">
         <div class="column is-10">
-          <h2 class="title is-4 mb-5 has-text-centered">What you get out of this</h2>
+          <h2 class="title is-4 mb-5 has-text-centered is-clear">What you get out of this</h2>
           <div class="columns">
             <div class="column is-4">
               <div class="card has-background-scheme-main-bis" style="height:100%;">
@@ -81,7 +180,7 @@
                   <div class="icon is-large has-text-primary mb-4">
                     <i class="fas fa-2x fa-chart-pie"></i>
                   </div>
-                  <h3 class="title is-5">See your stats</h3>
+                  <h3 class="title is-5 is-clear">See your stats</h3>
                   <p>Track reaction time, attention stability, processing speed, and mood.</p>
                 </div>
               </div>
@@ -92,7 +191,7 @@
                   <div class="icon is-large has-text-primary mb-4">
                     <i class="fas fa-2x fa-circle-nodes"></i>
                   </div>
-                  <h3 class="title is-5">See patterns</h3>
+                  <h3 class="title is-5 is-clear">See patterns</h3>
                   <p>Discover how plunge frequency, timing, sleep, and caffeine influence you.</p>
                 </div>
               </div>
@@ -103,7 +202,7 @@
                   <div class="icon is-large has-text-primary mb-4">
                     <i class="fas fa-2x fa-users"></i>
                   </div>
-                  <h3 class="title is-5">Benchmark</h3>
+                  <h3 class="title is-5 is-clear">Benchmark</h3>
                   <p>Compare your results anonymously with the community averages.</p>
                 </div>
               </div>
@@ -120,7 +219,7 @@
     <div class="container">
       <div class="columns is-centered">
         <div class="column is-10">
-          <h2 class="title is-4 mb-5 has-text-centered">What we measure</h2>
+          <h2 class="title is-4 mb-5 has-text-centered is-clear">What we measure</h2>
           <div class="columns is-multiline">
             <div class="column is-6">
               <div class="media mb-4">
@@ -199,7 +298,7 @@
     <div class="container">
       <div class="columns">
         <div class="column is-8 is-offset-2">
-          <h2 class="title is-4 mb-4">Community-led and transparent</h2>
+          <h2 class="title is-4 mb-4 is-clear">Community-led and transparent</h2>
           <div class="content">
             <ul>
               <li><strong>Consent first</strong> – no data collected until you agree; withdraw any time.</li>
@@ -224,7 +323,7 @@
       <div class="columns">
         <div class="column is-8 is-offset-2">
 
-          <h2 class="title is-4 mb-2">Sponsor this research</h2>
+          <h2 class="title is-4 is-clear">Sponsor this research</h2>
           <p class="mb-2">
             Sponsorship helps cover the costs associated with this app, such as servers, storage, and ongoing
             development.
@@ -293,7 +392,7 @@
       <div class="container">
         <div class="columns">
           <div class="column is-8 is-offset-2 has-text-centered">
-            <h2 class="title is-4">Get involved!</h2>
+            <h2 class="title is-4 is-clear">Get involved!</h2>
             <p class="mb-5" style="max-width:34rem; margin:0 auto 2rem;">
               Every plunge you log and test you do improves your personal dashboard and strengthens the
               community evidence.
