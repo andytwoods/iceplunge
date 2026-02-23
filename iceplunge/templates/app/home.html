@@ -1,0 +1,86 @@
+{% load static i18n %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>{% trans "Home" %} — Ice Plunge</title>
+  <style>
+    html {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { color-scheme: dark; }
+    }
+    html[data-theme="light"] { color-scheme: light; }
+  </style>
+  <script>
+    (function () {
+      const LS_KEY = 'a11yPrefs';
+      const html = document.documentElement;
+      try {
+        const prefs = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+        if (prefs.contrast && prefs.contrast !== 'standard') html.setAttribute('data-a11y-contrast', prefs.contrast);
+        if (prefs.text && prefs.text !== 'standard') html.setAttribute('data-a11y-text', prefs.text);
+        if (prefs.motion && prefs.motion !== 'standard') html.setAttribute('data-a11y-motion', prefs.motion);
+        if (prefs.theme && prefs.theme !== 'system') html.setAttribute('data-theme', prefs.theme);
+      } catch (_) {
+      }
+    })();
+  </script>
+  <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}"/>
+  <link rel="stylesheet" href="{% static 'fontawesome/css/all.min.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/bulma.min.css' %}"/>
+  <link rel="stylesheet" href="{% static 'app/css/app.css' %}"/>
+</head>
+<body class="app-home-body">
+
+<div class="app-status-bar"></div>
+
+<header class="app-header">
+  <div class="app-header-greeting">
+    <h1>{{ greeting }}, {{ request.user.name|default:_("there") }}</h1>
+  </div>
+  <div class="app-header-sub">
+    {% if last_plunge %}
+      <span>{% blocktranslate with ago=last_plunge.timestamp|timesince %}Last plunge {{ ago }} ago{% endblocktranslate %}</span>
+    {% elif last_session %}
+      <span>{% blocktranslate with ago=last_session.completed_at|timesince %}Last session {{ ago }} ago{% endblocktranslate %}</span>
+    {% else %}
+      <span>{% trans "Welcome — ready to start?" %}</span>
+    {% endif %}
+  </div>
+</header>
+
+<main class="app-cards">
+  <a href="{% url 'tasks:start' %}" class="app-card">
+    <span class="app-card-icon"><i class="fas fa-brain fa-lg"></i></span>
+    <span class="app-card-body">
+      <span class="app-card-label">{% trans "Start Cognitive Test" %}</span>
+      <span class="app-card-sub">{% trans "Test your focus and reaction time" %}</span>
+    </span>
+    <span class="app-card-chevron"><i class="fas fa-chevron-right"></i></span>
+  </a>
+
+  <a href="{% url 'plunges:form' %}" class="app-card">
+    <span class="app-card-icon"><i class="fas fa-water fa-lg"></i></span>
+    <span class="app-card-body">
+      <span class="app-card-label">{% trans "Log a Plunge" %}</span>
+      <span class="app-card-sub">{% trans "Record temperature, duration and more" %}</span>
+    </span>
+    <span class="app-card-chevron"><i class="fas fa-chevron-right"></i></span>
+  </a>
+
+  <a href="{% url 'dashboard:home' %}" class="app-card">
+    <span class="app-card-icon"><i class="fas fa-chart-line fa-lg"></i></span>
+    <span class="app-card-body">
+      <span class="app-card-label">{% trans "My Dashboard" %}</span>
+      <span class="app-card-sub">{% trans "View your progress and stats" %}</span>
+    </span>
+    <span class="app-card-chevron"><i class="fas fa-chevron-right"></i></span>
+  </a>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,148 @@
+/* ── APP HOME — native-feeling Capacitor shell ─────────────────────────── */
+
+body.app-home-body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #f5f5f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica",
+    "Arial", sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Safe-area top spacer — teal to blend with header */
+.app-status-bar {
+  height: env(safe-area-inset-top, 0px);
+  background: #1a9e7a;
+  flex-shrink: 0;
+}
+
+/* Header */
+.app-header {
+  background: linear-gradient(135deg, #1a9e7a 0%, #0d7a5f 100%);
+  color: #fff;
+  padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px) * 0);
+  flex-shrink: 0;
+}
+
+.app-header-greeting h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 .35rem;
+  color: #fff;
+}
+
+.app-header-sub {
+  font-size: .95rem;
+  opacity: .85;
+}
+
+/* Cards container */
+.app-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  flex: 1;
+}
+
+/* Individual card */
+.app-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+  padding: 1.1rem 1.25rem;
+  text-decoration: none;
+  color: #363636;
+  transition: transform .1s ease, box-shadow .1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-card:active {
+  transform: scale(.97);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .1);
+}
+
+.app-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: .75rem;
+  background: #e8f8f3;
+  color: #1a9e7a;
+  flex-shrink: 0;
+  font-size: 1.25rem;
+}
+
+.app-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.app-card-label {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.app-card-sub {
+  font-size: .8125rem;
+  opacity: .65;
+  line-height: 1.3;
+}
+
+.app-card-chevron {
+  color: #b5b5b5;
+  font-size: .875rem;
+  flex-shrink: 0;
+}
+
+/* ── DARK MODE ─────────────────────────────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  body.app-home-body {
+    background: #1a1a2e;
+  }
+  .app-card {
+    background: #242438;
+    color: #e0e0e0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+  }
+  .app-card-icon {
+    background: #1e3d32;
+    color: #3ecfa0;
+  }
+  .app-card-chevron {
+    color: #666;
+  }
+}
+
+html[data-theme="dark"] body.app-home-body {
+  background: #1a1a2e;
+}
+
+html[data-theme="dark"] .app-card {
+  background: #242438;
+  color: #e0e0e0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .3);
+}
+
+html[data-theme="dark"] .app-card-icon {
+  background: #1e3d32;
+  color: #3ecfa0;
+}
+
+html[data-theme="dark"] .app-card-chevron {
+  color: #666;
+}

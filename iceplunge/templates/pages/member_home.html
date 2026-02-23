@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Home" %}{% endblock title %}
+
+{% block content %}
+
+  {# ── GREETING ──────────────────────────────────────────────────────────── #}
+  <div class="mb-6">
+    <h1 class="title is-3 is-spaced is-clear">
+      {% if request.user.name %}
+        {% blocktranslate with name=request.user.name %}Welcome back, {{ name }}{% endblocktranslate %}
+      {% else %}
+        {% translate "Welcome back" %}
+      {% endif %}
+    </h1>
+    {% if plunge_count == 0 and session_count == 0 %}
+      <p class="subtitle is-5">{% translate "Ready to start? Log your first plunge or run a cognitive session." %}</p>
+    {% else %}
+      <p class="subtitle is-5">
+        {% blocktranslate with p=plunge_count s=session_count %}
+          {{ p }} plunge{{ p|pluralize }} logged &middot; {{ s }} session{{ s|pluralize }} completed
+        {% endblocktranslate %}
+        {% if last_plunge %}
+          &middot; {% translate "Last plunge" %} {{ last_plunge.timestamp|timesince }} {% translate "ago" %}
+        {% endif %}
+      </p>
+    {% endif %}
+  </div>
+
+  {# ── BIG ACTION BUTTONS ────────────────────────────────────────────────── #}
+  <div class="columns is-variable is-5 mb-6">
+
+    <div class="column is-half">
+      <a href="{% url 'plunges:form' %}" class="member-action-card">
+        <span class="member-action-icon">
+          <i class="fas fa-water fa-2x"></i>
+        </span>
+        <span class="member-action-label">{% translate "Log a plunge" %}</span>
+        <span class="member-action-sub">{% translate "Record water temp, duration &amp; context" %}</span>
+      </a>
+    </div>
+
+    <div class="column is-half">
+      <a href="{% url 'tasks:start' %}" class="member-action-card">
+        <span class="member-action-icon">
+          <i class="fas fa-brain fa-2x"></i>
+        </span>
+        <span class="member-action-label">{% translate "Start a session" %}</span>
+        <span class="member-action-sub">{% translate "5-minute cognitive test battery" %}</span>
+      </a>
+    </div>
+
+  </div>
+
+  {# ── SECONDARY LINKS ───────────────────────────────────────────────────── #}
+  <div class="columns is-variable is-4">
+    <div class="column is-narrow">
+      <a href="{% url 'dashboard:home' %}" class="has-text-link">
+        <span class="icon-text">
+          <span class="icon"><i class="fas fa-chart-line"></i></span>
+          <span>{% translate "My dashboard" %}</span>
+        </span>
+      </a>
+    </div>
+    <div class="column is-narrow">
+      <a href="{% url 'plunges:list' %}" class="has-text-link">
+        <span class="icon-text">
+          <span class="icon"><i class="fas fa-list"></i></span>
+          <span>{% translate "Plunge history" %}</span>
+        </span>
+      </a>
+    </div>
+    <div class="column is-narrow">
+      <a href="{% url 'about' %}" class="has-text-link">
+        <span class="icon-text">
+          <span class="icon"><i class="fas fa-flask"></i></span>
+          <span>{% translate "About the study" %}</span>
+        </span>
+      </a>
+    </div>
+  </div>
+
+{% endblock content %}
