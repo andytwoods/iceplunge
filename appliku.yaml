@@ -4,6 +4,7 @@ build_settings:
   dockerfile_context_path: ""
   container_port: 8000
   environment_variables:
+    # ── Injected by Appliku from linked databases ────────────────────────────
     - name: DATABASE_URL
       from_database:
         name: postgres
@@ -12,8 +13,28 @@ build_settings:
       from_database:
         name: redis
         property: private_connection_url
-    - name: DJANGO_SECRET_KEY
-    - name: DJANGO_ADMIN_URL
+
+    # ── Django core (set these in the Appliku dashboard) ─────────────────────
+    - name: DJANGO_SETTINGS_MODULE
+      value: config.settings.production
+    - name: DJANGO_SECRET_KEY          # generate a long random string
+    - name: DJANGO_ADMIN_URL           # e.g. my-secret-admin-path/
+    - name: DJANGO_ALLOWED_HOSTS       # e.g. yourdomain.com
+
+    # ── Email (required for registration, data-deletion confirmations, etc.) ─
+    - name: DJANGO_DEFAULT_FROM_EMAIL  # e.g. Cold Cognition <noreply@yourdomain.com>
+    - name: DJANGO_SERVER_EMAIL
+    - name: EMAIL_HOST
+    - name: EMAIL_PORT
+    - name: EMAIL_HOST_USER
+    - name: EMAIL_HOST_PASSWORD
+    - name: EMAIL_USE_TLS
+
+    # ── Strava integration (optional — skip if not using Strava sync) ────────
+    - name: STRAVA_CLIENT_ID
+    - name: STRAVA_CLIENT_SECRET
+
+    # ── Error tracking (optional) ────────────────────────────────────────────
     - name: ROLLBAR_ACCESS_TOKEN
 
 services:

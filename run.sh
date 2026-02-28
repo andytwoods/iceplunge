@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# Use PORT from environment or default to 8018
-BIND_PORT=${PORT:-8018}
+# Appliku sets PORT to match container_port in appliku.yaml
+BIND_PORT=${PORT:-8000}
 
 echo "Starting Gunicorn on port: $BIND_PORT"
 exec gunicorn config.wsgi:application \
