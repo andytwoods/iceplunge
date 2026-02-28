@@ -1,9 +1,33 @@
 import random
 import uuid
+from datetime import timedelta
 
+from django.conf import settings
 from django.utils import timezone
 
 from iceplunge.tasks.registry import TASK_REGISTRY
+
+# How long an IN_PROGRESS session stays valid before it is auto-abandoned.
+# Override via COGNITIVE_SESSION_EXPIRY_HOURS in Django settings.
+SESSION_EXPIRY_HOURS: int = getattr(settings, "COGNITIVE_SESSION_EXPIRY_HOURS", 1)
+
+
+def expire_stale_session(session) -> bool:
+    """
+    If the session is IN_PROGRESS and older than SESSION_EXPIRY_HOURS, mark it
+    ABANDONED and return True.  Returns False if the session is still valid.
+    """
+    from iceplunge.tasks.models import CognitiveSession  # local import avoids circular
+
+    if session.completion_status != CognitiveSession.CompletionStatus.IN_PROGRESS:
+        return False
+    cutoff = timezone.now() - timedelta(hours=SESSION_EXPIRY_HOURS)
+    if session.started_at and session.started_at < cutoff:
+        CognitiveSession.objects.filter(pk=session.pk).update(
+            completion_status=CognitiveSession.CompletionStatus.ABANDONED,
+        )
+        return True
+    return False
 
 
 def create_session(user, prompt_event=None, is_practice=False):
@@ -15,9 +39,24 @@ def create_session(user, prompt_event=None, is_practice=False):
     """
     from iceplunge.tasks.models import CognitiveSession  # local import avoids circular
 
+    from iceplunge.tasks.models import TaskConfig, UserTaskPreference  # local import avoids circular
+
     seed = str(uuid.uuid4())
     rng = random.Random(seed)
-    task_types = list(TASK_REGISTRY.keys())
+
+    # Global admin-level on/off switches
+    globally_enabled = set(
+        TaskConfig.objects.filter(is_enabled=True).values_list("task_type", flat=True)
+    )
+
+    # Per-user opt-outs
+    try:
+        pref = UserTaskPreference.objects.get(user=user)
+        user_disabled = set(pref.disabled_task_types)
+    except UserTaskPreference.DoesNotExist:
+        user_disabled = set()
+
+    task_types = [t for t in TASK_REGISTRY if t in globally_enabled and t not in user_disabled]
     rng.shuffle(task_types)
 
     session = CognitiveSession.objects.create(

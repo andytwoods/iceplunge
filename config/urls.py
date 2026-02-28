@@ -7,6 +7,7 @@ from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from iceplunge.pages.views import AppHomeView, HomePageView
+from iceplunge.users.views import rate_limited_signup_view
 
 urlpatterns = [
     path("", HomePageView.as_view(), name="home"),
@@ -30,6 +31,8 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("iceplunge.users.urls", namespace="users")),
+    # Rate-limited signup — must come before the allauth include to intercept /accounts/signup/
+    path("accounts/signup/", rate_limited_signup_view),
     path("accounts/", include("allauth.urls")),
     path("hijack/", include("hijack.urls")),
     path("plunges/", include("iceplunge.plunges.urls", namespace="plunges")),

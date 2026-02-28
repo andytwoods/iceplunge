@@ -1,5 +1,7 @@
 import json
+from datetime import timedelta
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -19,10 +21,11 @@ from iceplunge.tasks.helpers.rate_limits import check_voluntary_rate_limit
 from iceplunge.tasks.helpers.session_helpers import (
     create_practice_session,
     create_session,
+    expire_stale_session,
     increment_session_indices,
     next_task,
 )
-from iceplunge.tasks.models import CognitiveSession, MoodRating, TaskResult
+from iceplunge.tasks.models import CognitiveSession, MoodRating, TaskConfig, TaskResult, UserTaskPreference
 from iceplunge.tasks.registry import TASK_REGISTRY
 
 # Maps task_type → server-side metric compute function
@@ -35,6 +38,11 @@ _METRIC_COMPUTERS = {
 }
 
 _SESSION_KEY = "current_cognitive_session_id"
+
+
+def _expiry_hours() -> int:
+    from iceplunge.tasks.helpers.session_helpers import SESSION_EXPIRY_HOURS
+    return SESSION_EXPIRY_HOURS
 
 
 class SessionStartView(LoginRequiredMixin, View):
@@ -77,7 +85,22 @@ class SessionStartView(LoginRequiredMixin, View):
         return render(request, "tasks/session_start.html", {"form": form, "session": session})
 
     def _find_in_progress_session(self, request):
-        """Return an existing non-practice in-progress session, or None."""
+        """
+        Return an existing non-practice in-progress session that has not
+        expired, or None.  Stale sessions are marked ABANDONED on the way out.
+        """
+        from iceplunge.tasks.helpers.session_helpers import SESSION_EXPIRY_HOURS
+
+        expiry_cutoff = timezone.now() - timedelta(hours=SESSION_EXPIRY_HOURS)
+
+        # Expire any stale in-progress sessions for this user.
+        CognitiveSession.objects.filter(
+            user=request.user,
+            is_practice=False,
+            completion_status=CognitiveSession.CompletionStatus.IN_PROGRESS,
+            started_at__lt=expiry_cutoff,
+        ).update(completion_status=CognitiveSession.CompletionStatus.ABANDONED)
+
         # Check Django session key first (fast path)
         session_id = request.session.get(_SESSION_KEY)
         if session_id:
@@ -115,6 +138,16 @@ class SessionTaskView(LoginRequiredMixin, View):
 
     def get(self, request, session_id):
         session = get_object_or_404(CognitiveSession, id=session_id, user=request.user)
+
+        if expire_stale_session(session):
+            messages.warning(
+                request,
+                "Your session expired (sessions must be completed within "
+                f"{_expiry_hours()} hour). A new session will be started when you're ready.",
+            )
+            request.session.pop(_SESSION_KEY, None)
+            return redirect("tasks:start")
+
         task_type = next_task(session)
         if task_type is None:
             return redirect("tasks:hub", session_id=session.id)
@@ -393,6 +426,15 @@ class SessionHubView(LoginRequiredMixin, View):
         if session.completion_status == CognitiveSession.CompletionStatus.COMPLETE:
             return redirect("tasks:complete", session_id=session.id)
 
+        if expire_stale_session(session):
+            messages.warning(
+                request,
+                "Your session expired (sessions must be completed within "
+                f"{_expiry_hours()} hour). A new session will be started when you're ready.",
+            )
+            request.session.pop(_SESSION_KEY, None)
+            return redirect("tasks:start")
+
         completed_types = set(session.task_results.values_list("task_type", flat=True))
         skipped_types = set((session.device_meta or {}).get("skipped_tasks", []))
         next_task_type = next_task(session)
@@ -469,6 +511,94 @@ class SessionTaskSkipView(LoginRequiredMixin, View):
         return JsonResponse({"ok": True, "next_task": next_task_type})
 
 
+class SessionTaskUnskipView(LoginRequiredMixin, View):
+    """
+    Removes a previously skipped task from device_meta['skipped_tasks'],
+    allowing the user to attempt it.  Any skipped task in the session may
+    be un-skipped; ordering is determined by task_order as usual.
+
+    POST body: { session_id, task_type }
+    Returns:   { ok: true }
+    """
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, ValueError):
+            return JsonResponse({"error": "Invalid JSON"}, status=422)
+
+        session_id = data.get("session_id")
+        task_type = data.get("task_type")
+
+        if not session_id or not task_type:
+            return JsonResponse({"error": "session_id and task_type are required"}, status=422)
+
+        try:
+            session = CognitiveSession.objects.get(id=session_id)
+        except (CognitiveSession.DoesNotExist, ValueError):
+            return JsonResponse({"error": "Session not found"}, status=422)
+
+        if session.user != request.user:
+            return JsonResponse({"error": "Forbidden"}, status=403)
+
+        meta = dict(session.device_meta or {})
+        skipped = [t for t in meta.get("skipped_tasks", []) if t != task_type]
+        meta["skipped_tasks"] = skipped
+        CognitiveSession.objects.filter(pk=session.pk).update(device_meta=meta)
+
+        return JsonResponse({"ok": True})
+
+
+class TaskPreferenceView(LoginRequiredMixin, View):
+    """
+    Lets users choose which tasks appear in their sessions.
+    GET  — show all globally-enabled tasks with the user's current opt-outs.
+    POST — save updated opt-outs from checkbox form.
+    """
+
+    template_name = "tasks/task_preferences.html"
+
+    def _task_list(self, user):
+        """Return task metadata annotated with whether the user has enabled each one."""
+        globally_enabled = set(
+            TaskConfig.objects.filter(is_enabled=True).values_list("task_type", flat=True)
+        )
+        try:
+            pref = UserTaskPreference.objects.get(user=user)
+            user_disabled = set(pref.disabled_task_types)
+        except UserTaskPreference.DoesNotExist:
+            user_disabled = set()
+
+        return [
+            {
+                "type": t,
+                "label": meta["label"],
+                "duration_display": meta["duration_display"],
+                "instructions": meta["instructions"],
+                "is_enabled": t not in user_disabled,
+            }
+            for t, meta in TASK_REGISTRY.items()
+            if t in globally_enabled
+        ]
+
+    def get(self, request):
+        return render(request, self.template_name, {"task_list": self._task_list(request.user)})
+
+    def post(self, request):
+        globally_enabled = set(
+            TaskConfig.objects.filter(is_enabled=True).values_list("task_type", flat=True)
+        )
+        selected = set(request.POST.getlist("task_types"))
+        disabled = [t for t in globally_enabled if t not in selected]
+
+        pref, _ = UserTaskPreference.objects.get_or_create(user=request.user)
+        pref.disabled_task_types = disabled
+        pref.save(update_fields=["disabled_task_types"])
+
+        messages.success(request, "Your task preferences have been saved.")
+        return redirect("tasks:preferences")
+
+
 session_start_view = SessionStartView.as_view()
 try_task_view = TryTaskView.as_view()
 session_hub_view = SessionHubView.as_view()
@@ -477,3 +607,5 @@ session_complete_view = SessionCompleteView.as_view()
 session_meta_view = SessionMetaView.as_view()
 task_result_submit_view = TaskResultSubmitView.as_view()
 session_task_skip_view = SessionTaskSkipView.as_view()
+session_task_unskip_view = SessionTaskUnskipView.as_view()
+task_preference_view = TaskPreferenceView.as_view()

@@ -86,6 +86,45 @@ class TaskResult(Model):
         return f"{self.task_type} v{self.task_version} \u2013 {self.session}"
 
 
+class UserTaskPreference(Model):
+    """
+    Per-user task opt-outs.  Tasks listed in disabled_task_types are excluded
+    from that user's new CognitiveSessions.  All tasks are enabled by default
+    (empty list = no opt-outs).
+    """
+
+    user = models.OneToOneField(User, on_delete=CASCADE, related_name="task_preference")
+    disabled_task_types = JSONField(default=list)
+
+    class Meta:
+        verbose_name = "User task preference"
+        verbose_name_plural = "User task preferences"
+
+    def __str__(self) -> str:
+        return f"Task prefs: {self.user}"
+
+
+class TaskConfig(Model):
+    """
+    Admin-controlled on/off switch per task type.
+    Disabled tasks are excluded from new CognitiveSessions.
+    One row per entry in TASK_REGISTRY, seeded by a data migration.
+    """
+
+    task_type = CharField(max_length=50, unique=True)
+    is_enabled = BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Task configuration"
+        verbose_name_plural = "Task configurations"
+        ordering = ["task_type"]
+
+    def __str__(self) -> str:
+        label = TASK_REGISTRY.get(self.task_type, {}).get("label", self.task_type)
+        status = "enabled" if self.is_enabled else "disabled"
+        return f"{label} ({status})"
+
+
 class MoodRating(Model):
     SCALE_CHOICES = [(i, str(i)) for i in range(1, 6)]
 

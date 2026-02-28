@@ -6,7 +6,9 @@ from .views import (
     session_meta_view,
     session_start_view,
     session_task_skip_view,
+    session_task_unskip_view,
     session_task_view,
+    task_preference_view,
     task_result_submit_view,
     try_task_view,
 )
@@ -21,4 +23,6 @@ urlpatterns = [
     path("api/submit-result/", view=task_result_submit_view, name="submit_result"),
     path("api/session-meta/", view=session_meta_view, name="session_meta"),
     path("api/skip-task/", view=session_task_skip_view, name="skip_task"),
+    path("api/unskip-task/", view=session_task_unskip_view, name="unskip_task"),
+    path("preferences/", view=task_preference_view, name="preferences"),
 ]

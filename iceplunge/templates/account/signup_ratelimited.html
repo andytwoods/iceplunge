@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Too many sign-up attempts" %}{% endblock %}
+
+{% block body %}
+  <section class="section">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-5-tablet is-4-desktop">
+          <div class="notification is-warning">
+            <p class="title is-5">{% trans "Too many sign-up attempts" %}</p>
+            <p>
+              {% trans "We've detected too many registration attempts from your location. Please wait an hour and try again." %}
+            </p>
+            <p class="mt-3">
+              {% trans "If you already have an account," %}
+              <a href="{% url 'account_login' %}">{% trans "sign in here" %}</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

@@ -1,3 +1,4 @@
+from allauth.account.views import SignupView
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -7,11 +8,13 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
 from django.views.generic import UpdateView
+from django_ratelimit.decorators import ratelimit
 
 from iceplunge.users.forms import BaselineProfileForm
 from iceplunge.users.models import BaselineProfile
@@ -142,3 +145,22 @@ class DataDeletionCompleteView(TemplateView):
 
 data_deletion_view = DataDeletionView.as_view()
 data_deletion_complete_view = DataDeletionCompleteView.as_view()
+
+
+@method_decorator(
+    ratelimit(key="ip", rate="10/h", method="POST", block=False),
+    name="dispatch",
+)
+class RateLimitedSignupView(SignupView):
+    """
+    Wraps allauth's SignupView with an IP-based rate limit of 10 POST
+    attempts per hour. Returns 429 with a user-friendly page when exceeded.
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        if getattr(request, "limited", False):
+            return render(request, "account/signup_ratelimited.html", status=429)
+        return super().dispatch(request, *args, **kwargs)
+
+
+rate_limited_signup_view = RateLimitedSignupView.as_view()

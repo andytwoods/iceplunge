@@ -47,7 +47,7 @@
           <i class="fas fa-brain fa-2x"></i>
         </span>
         <span class="member-action-label">{% translate "Start a session" %}</span>
-        <span class="member-action-sub">{% translate "5-minute cognitive test battery" %}</span>
+        <span class="member-action-sub">{% translate "Cognitive test battery" %}</span>
       </a>
     </div>
 
@@ -76,6 +76,14 @@
         <span class="icon-text">
           <span class="icon"><i class="fas fa-flask"></i></span>
           <span>{% translate "About the study" %}</span>
+        </span>
+      </a>
+    </div>
+    <div class="column is-narrow">
+      <a href="{% url 'tasks:preferences' %}" class="has-text-link">
+        <span class="icon-text">
+          <span class="icon"><i class="fas fa-sliders-h"></i></span>
+          <span>{% translate "My test preferences" %}</span>
         </span>
       </a>
     </div>

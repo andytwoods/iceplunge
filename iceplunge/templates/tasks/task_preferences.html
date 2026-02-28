@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "My Task Preferences" %}{% endblock title %}
+
+{% block content %}
+<div class="columns is-centered">
+  <div class="column is-three-quarters-desktop is-full-mobile">
+
+    <h1 class="title is-4 mb-1 is-clear">{% translate "My Task Preferences" %}</h1>
+    <p class="subtitle is-6 mb-5">
+      {% translate "Choose which cognitive tasks appear in your sessions. Untick any task you'd prefer not to do — it will be left out of all future sessions." %}
+    </p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="task-hub-list mb-5">
+        {% for t in task_list %}
+          <div class="task-hub-card{% if not t.is_enabled %} is-skipped{% endif %}">
+            <label class="task-hub-card-header" style="cursor:pointer;">
+              <div class="task-hub-card-meta">
+                <span class="task-hub-card-label">{{ t.label }}</span>
+                <span class="task-hub-card-duration">{{ t.duration_display }}</span>
+              </div>
+              <div class="task-hub-card-badges">
+                <input type="checkbox"
+                       name="task_types"
+                       value="{{ t.type }}"
+                       {% if t.is_enabled %}checked{% endif %}>
+              </div>
+            </label>
+            <div class="task-hub-instructions" style="display:block; padding-top:0.25rem;">
+              <p class="is-size-7 has-text-grey">{{ t.instructions }}</p>
+            </div>
+          </div>
+        {% empty %}
+          <div class="notification is-warning">
+            {% translate "No tasks are currently available." %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="button is-primary is-fullwidth">
+        {% translate "Save preferences" %}
+      </button>
+    </form>
+
+    <p class="has-text-grey is-size-7 mt-3 has-text-centered">
+      {% translate "Changes apply to new sessions only — sessions already in progress are not affected." %}
+    </p>
+
+  </div>
+</div>
+{% endblock content %}
