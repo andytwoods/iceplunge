@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import BigIntegerField
 from django.db.models import CASCADE
 from django.db.models import BooleanField
 from django.db.models import CharField
@@ -75,6 +76,7 @@ class PlungeLog(Model):
         max_length=10, choices=ExerciseType.choices, null=True, blank=True
     )
     exercise_minutes = PositiveSmallIntegerField(null=True, blank=True)
+    strava_activity_id = BigIntegerField(null=True, blank=True, unique=True)
 
     class Meta:
         indexes = [

@@ -1,6 +1,7 @@
 import datetime
 import json
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -37,7 +38,10 @@ class PlungeListView(LoginRequiredMixin, ListView):
         return PlungeLog.objects.filter(user=self.request.user).order_by("-timestamp")
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
+        ctx = super().get_context_data(**kwargs)
+        from iceplunge.plunges.helpers.strava import get_strava_token
+        ctx["strava_connected"] = get_strava_token(self.request.user) is not None
+        return ctx
 
 
 plunge_list_view = PlungeListView.as_view()
@@ -127,6 +131,44 @@ class PlungeDeleteView(LoginRequiredMixin, View):
 
 
 plunge_delete_view = PlungeDeleteView.as_view()
+
+
+class StravaSyncView(LoginRequiredMixin, View):
+    """
+    POST — import cold-plunge activities from the user's connected Strava account.
+    Silently skips activities already imported (matched by strava_activity_id).
+    Redirects back to the plunge list with a flash message.
+    """
+
+    def post(self, request):
+        from iceplunge.plunges.helpers.strava import get_strava_token, import_cold_activities
+
+        token = get_strava_token(request.user)
+        if not token:
+            messages.error(request, "No Strava account connected. Please connect Strava first.")
+            return redirect(reverse("plunges:list"))
+
+        try:
+            count = import_cold_activities(request.user, token)
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Strava sync failed for user %s", request.user.pk)
+            messages.error(request, "Could not reach Strava — please try again later.")
+            return redirect(reverse("plunges:list"))
+
+        if count:
+            messages.success(
+                request,
+                f"Imported {count} new plunge{'s' if count != 1 else ''} from Strava. "
+                "Water temperature and other details still need to be filled in.",
+            )
+        else:
+            messages.info(request, "No new Strava plunges found — everything is already imported.")
+
+        return redirect(reverse("plunges:list"))
+
+
+strava_sync_view = StravaSyncView.as_view()
 
 
 # ---------------------------------------------------------------------------

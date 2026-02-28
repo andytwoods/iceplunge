@@ -19,9 +19,24 @@
 </div>
 
 {# ── Heading + trigger ──────────────────────────────────────────────────── #}
-<div class="is-flex is-align-items-center mb-4" style="gap: 0.75rem;">
+<div class="is-flex is-align-items-center is-flex-wrap-wrap mb-4" style="gap: 0.75rem;">
   <h2 class="title is-5 mb-0 is-clear">{% translate "My plunge history" %}</h2>
   {% include "plunges/partials/_log_plunge_trigger.html" %}
+  {% if strava_connected %}
+    <form method="post" action="{% url 'plunges:strava_sync' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="button is-light">
+        <span class="icon"><i class="fab fa-strava"></i></span>
+        <span>{% translate "Import from Strava" %}</span>
+      </button>
+    </form>
+  {% else %}
+    <a href="{% url 'strava_login' %}?process=connect&next={% url 'plunges:list' %}"
+       class="button is-light">
+      <span class="icon"><i class="fab fa-strava"></i></span>
+      <span>{% translate "Connect Strava" %}</span>
+    </a>
+  {% endif %}
 </div>
 
 {# ── History table ─────────────────────────────────────────────────────── #}

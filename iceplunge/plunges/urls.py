@@ -4,6 +4,7 @@ from .views import plunge_create_view
 from .views import plunge_delete_view
 from .views import plunge_form_view
 from .views import plunge_list_view
+from .views import strava_sync_view
 
 app_name = "plunges"
 urlpatterns = [
@@ -13,4 +14,5 @@ urlpatterns = [
     path("create/", view=plunge_create_view, name="create"),
     path("<int:pk>/update/", view=plunge_create_view, name="update"),
     path("<int:pk>/delete/", view=plunge_delete_view, name="delete"),
+    path("strava/sync/", view=strava_sync_view, name="strava_sync"),
 ]

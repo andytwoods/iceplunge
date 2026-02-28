@@ -86,6 +86,7 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.github",
+    "allauth.socialaccount.providers.strava",
     "hijack",
     "hijack.contrib.admin",
     "django_htmx",
@@ -327,6 +328,16 @@ ACCOUNT_FORMS = {"signup": "iceplunge.users.forms.UserSignupForm"}
 SOCIALACCOUNT_ADAPTER = "iceplunge.users.adapters.SocialAccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_FORMS = {"signup": "iceplunge.users.forms.UserSocialSignupForm"}
+SOCIALACCOUNT_PROVIDERS = {
+    "strava": {
+        "SCOPE": ["activity:read"],
+        "APP": {
+            "client_id": env("STRAVA_CLIENT_ID", default=""),
+            "secret": env("STRAVA_CLIENT_SECRET", default=""),
+            "key": "",
+        },
+    },
+}
 
 
 # Sponsorship
