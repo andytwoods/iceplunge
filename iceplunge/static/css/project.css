@@ -857,33 +857,83 @@ html[data-theme="dark"] .task-practice-banner {
 
 /* ── CAPACITOR SHELL ─────────────────────────────────────────────────────── */
 
-/* Hide nav/footer on login pages when running inside Capacitor */
+/* Hide web nav/footer on all pages inside Capacitor */
 html.cap-mode nav.navbar,
 html.cap-mode .footer { display: none !important; }
-html.cap-mode .section { padding-top: calc(env(safe-area-inset-top, 0px) + 2rem); }
 
-/* Floating home button — injected on all Django pages inside Capacitor */
-.cap-back-btn {
+/* Push section content below the fixed native header */
+html.cap-mode .section {
+  padding-top: calc(48px + env(safe-area-inset-top, 0px) + 1.5rem) !important;
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Smooth page transitions via HTMX boost + View Transitions API */
+html.cap-mode::view-transition-old(root) {
+  animation: 120ms ease-in cap-vt-out;
+}
+html.cap-mode::view-transition-new(root) {
+  animation: 200ms ease-out cap-vt-in;
+}
+@keyframes cap-vt-out {
+  to { opacity: 0; }
+}
+@keyframes cap-vt-in {
+  from { opacity: 0; }
+}
+
+/* Native teal header bar — injected on all base.html pages inside Capacitor */
+.cap-native-header {
   position: fixed;
-  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
-  left: 1.25rem;
-  z-index: 3000;
-  background: var(--bulma-scheme-main, #fff);
-  border: 1.5px solid var(--bulma-border, #dbdbdb);
-  border-radius: 2rem;
-  height: 2.75rem;
-  padding: 0 1rem;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+  background: #1a9e7a;
+  display: flex;
+  align-items: flex-end;
+  padding-top: env(safe-area-inset-top, 0px);
+  height: calc(48px + env(safe-area-inset-top, 0px));
+}
+
+.cap-native-header-side {
+  width: 56px;
+  height: 48px;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
-  color: var(--bulma-text, #363636);
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cap-native-header-title {
+  flex: 1;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  text-align: center;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0 0.25rem;
+}
+
+.cap-native-back {
+  color: #fff;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   text-decoration: none;
-  font-size: 0.9rem;
   -webkit-tap-highlight-color: transparent;
 }
 
-.cap-back-btn:active { transform: scale(.92); }
+.cap-native-back:active { background: rgba(255, 255, 255, 0.2); }
 
 
 /* Cancel the bulmaswatch/Bulma negative margin that collapses .title + .subtitle

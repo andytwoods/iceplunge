@@ -40,7 +40,8 @@
   <title>
     {% block title %}iceplunge{% endblock title %}
   </title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <script>if (window.Capacitor) document.documentElement.classList.add('cap-mode');</script>
   <meta name="description" content="Ice Plunge Cognitive Research Platform"/>
   <meta name="author" content="Andy T. Woods"/>
   <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}" sizes="any"/>
@@ -194,17 +195,59 @@
 <script>
   (function () {
     if (!window.Capacitor) return;
+
     // Rewrite all plain "/" links to "/app/" so navbar brand goes to native home
     document.querySelectorAll('a[href="/"]').forEach(function (a) {
       a.href = '/app/';
     });
-    if (window.location.pathname === '/app/') return;
-    var btn = document.createElement('a');
-    btn.href = '/app/';
-    btn.setAttribute('aria-label', 'Back to home');
-    btn.className = 'cap-back-btn';
-    btn.innerHTML = '<i class="fas fa-home"></i><span>Home</span>';
-    document.body.appendChild(btn);
+
+    // Inject native teal header bar
+    var header = document.createElement('div');
+    header.className = 'cap-native-header';
+
+    // Left: back button
+    var left = document.createElement('div');
+    left.className = 'cap-native-header-side';
+    var back = document.createElement('a');
+    back.href = '/app/';
+    back.className = 'cap-native-back';
+    back.setAttribute('aria-label', 'Home');
+    back.setAttribute('hx-boost', 'false');  // /app/ is standalone — must full-load
+    back.innerHTML = '<i class="fas fa-chevron-left"></i>';
+    left.appendChild(back);
+    header.appendChild(left);
+
+    // Centre: page title from <title>, strip site suffix
+    var centre = document.createElement('div');
+    centre.className = 'cap-native-header-title';
+    var raw = document.title || '';
+    var title = raw.replace(/\s*[—–\-]\s*(Ice Plunge|iceplunge).*/i, '').trim() || 'Ice Plunge';
+    centre.textContent = title;
+    header.appendChild(centre);
+
+    // Right: empty spacer (keeps title centred)
+    var right = document.createElement('div');
+    right.className = 'cap-native-header-side';
+    header.appendChild(right);
+
+    // hx-preserve keeps the header alive across HTMX boost swaps
+    header.id = 'cap-native-header';
+    header.setAttribute('hx-preserve', '');
+
+    document.body.insertBefore(header, document.body.firstChild);
+
+    // Enable HTMX boost (AJAX navigation — no full page reloads) +
+    // View Transitions for the smooth fade. Runs after deferred scripts load.
+    document.addEventListener('DOMContentLoaded', function () {
+      if (!window.htmx) return;
+      htmx.config.globalViewTransitions = true;
+      document.body.setAttribute('hx-boost', 'true');
+      // Exclude task session/try pages — JS timers and listeners won't survive a body swap
+      document.querySelectorAll('a[href*="/tasks/session/"], a[href*="/tasks/try/"]').forEach(function (a) {
+        a.setAttribute('hx-boost', 'false');
+      });
+      htmx.process(document.body);
+    });
   })();
 </script>
 <script>

@@ -7,4 +7,5 @@ def allauth_settings(request):
         "ACCOUNT_ALLOW_REGISTRATION": settings.ACCOUNT_ALLOW_REGISTRATION,
         "GITHUB_SPONSORS_URL": settings.GITHUB_SPONSORS_URL,
         "SPONSOR_CONTACT_EMAIL": settings.SPONSOR_CONTACT_EMAIL,
+        "CONTACT_EMAIL": settings.CONTACT_EMAIL,
     }
