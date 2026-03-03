@@ -7,14 +7,18 @@
 <div class="columns is-centered">
   <div class="column is-half">
     <h1 class="title is-clear">{% translate "Notification preferences" %}</h1>
-    {% if saved %}
-      <div class="notification is-success is-light">{% translate "Preferences saved." %}</div>
-    {% endif %}
-    <div class="box"
-         hx-post="{% url 'notifications:preferences' %}"
-         hx-target="this"
-         hx-swap="outerHTML">
-      <form method="post">
+    <p class="content is-small mb-4">
+      {% blocktranslate %}
+        We space your alerts evenly across your chosen time window, then add a random offset
+        of up to 90 minutes to each one. This natural variation helps us capture more
+        representative cognitive data throughout the day.
+      {% endblocktranslate %}
+    </p>
+    <div class="box">
+      <form method="post"
+            hx-post="{% url 'notifications:preferences' %}"
+            hx-target="closest .box"
+            hx-swap="outerHTML">
         {% csrf_token %}
         {% crispy form %}
       </form>

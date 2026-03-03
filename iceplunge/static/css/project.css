@@ -870,16 +870,16 @@ html.cap-mode .section { padding-top: calc(env(safe-area-inset-top, 0px) + 2rem)
   z-index: 3000;
   background: var(--bulma-scheme-main, #fff);
   border: 1.5px solid var(--bulma-border, #dbdbdb);
-  border-radius: 50%;
-  width: 2.75rem;
+  border-radius: 2rem;
   height: 2.75rem;
+  padding: 0 1rem;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.4rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
   color: var(--bulma-text, #363636);
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.9rem;
   -webkit-tap-highlight-color: transparent;
 }
 

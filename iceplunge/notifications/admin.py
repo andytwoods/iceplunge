@@ -14,6 +14,6 @@ class PromptEventAdmin(admin.ModelAdmin):
 
 @admin.register(NotificationProfile)
 class NotificationProfileAdmin(admin.ModelAdmin):
-    list_display = ["user", "push_enabled", "morning_window_start", "evening_window_start"]
+    list_display = ["user", "push_enabled", "notifications_per_day", "window_start", "window_end"]
     list_filter = ["push_enabled"]
     search_fields = ["user__email"]

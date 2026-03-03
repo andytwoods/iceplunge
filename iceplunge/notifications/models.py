@@ -40,8 +40,12 @@ class NotificationProfile(Model):
     user = models.OneToOneField(User, on_delete=CASCADE, related_name="notification_profile")
     onesignal_player_id = CharField(max_length=255, blank=True)
     push_enabled = models.BooleanField(default=True)
-    morning_window_start = models.TimeField(default=datetime.time(8, 0))
-    evening_window_start = models.TimeField(default=datetime.time(18, 0))
+    notifications_per_day = models.PositiveSmallIntegerField(
+        default=2,
+        choices=[(i, str(i)) for i in range(0, 7)],
+    )
+    window_start = models.TimeField(default=datetime.time(8, 0))
+    window_end = models.TimeField(default=datetime.time(22, 0))
 
     def __str__(self) -> str:
         return f"NotificationProfile \u2013 {self.user}"

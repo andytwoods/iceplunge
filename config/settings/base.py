@@ -211,6 +211,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "iceplunge.users.context_processors.allauth_settings",
+                "iceplunge.notifications.context_processors.onesignal",
             ],
         },
     },
@@ -253,6 +254,7 @@ EMAIL_TIMEOUT = 5
 ADMIN_URL = "admin/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#admins
 ADMINS = [("""Andy T. Woods""", "andytwoods@gmail.com")]
+CONTACT_EMAIL = ADMINS[0][1]
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
 # https://cookiecutter-django.readthedocs.io/en/latest/settings.html#other-environment-settings

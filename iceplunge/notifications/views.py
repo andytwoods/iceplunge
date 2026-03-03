@@ -3,6 +3,7 @@ import json
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils.translation import gettext as _
 from django.views import View
 
 from iceplunge.notifications.models import NotificationProfile
@@ -65,12 +66,16 @@ class NotificationPreferencesView(LoginRequiredMixin, View):
         if form.is_valid():
             form.save()
             if request.headers.get("HX-Request"):
-                return render(
+                response = render(
                     request,
                     self.partial_template_name,
-                    {"form": form, "profile": profile, "saved": True},
+                    {"form": form, "profile": profile},
                 )
-            return redirect("notifications:preferences")
+                response["HX-Trigger"] = json.dumps(
+                    {"prefsSaved": {"message": _("Notification preferences saved."), "type": "success"}}
+                )
+                return response
+            return redirect("settings")
         template = (
             self.partial_template_name
             if request.headers.get("HX-Request")

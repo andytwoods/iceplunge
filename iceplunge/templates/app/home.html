@@ -57,7 +57,7 @@
   <a href="{% url 'tasks:start' %}" class="app-card">
     <span class="app-card-icon"><i class="fas fa-brain fa-lg"></i></span>
     <span class="app-card-body">
-      <span class="app-card-label">{% trans "Start Cognitive Test" %}</span>
+      <span class="app-card-label">{% trans "Start Tests" %}</span>
       <span class="app-card-sub">{% trans "Test your focus and reaction time" %}</span>
     </span>
     <span class="app-card-chevron"><i class="fas fa-chevron-right"></i></span>
@@ -77,6 +77,15 @@
     <span class="app-card-body">
       <span class="app-card-label">{% trans "My Dashboard" %}</span>
       <span class="app-card-sub">{% trans "View your progress and stats" %}</span>
+    </span>
+    <span class="app-card-chevron"><i class="fas fa-chevron-right"></i></span>
+  </a>
+
+  <a href="{% url 'settings' %}" class="app-card">
+    <span class="app-card-icon"><i class="fas fa-cog fa-lg"></i></span>
+    <span class="app-card-body">
+      <span class="app-card-label">{% trans "Settings" %}</span>
+      <span class="app-card-sub">{% trans "Profile, tasks and notifications" %}</span>
     </span>
     <span class="app-card-chevron"><i class="fas fa-chevron-right"></i></span>
   </a>

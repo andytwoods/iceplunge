@@ -51,6 +51,10 @@ document.addEventListener('plungeLogged', function (e) {
   if (emptyState) emptyState.remove();
 });
 
+document.addEventListener('prefsSaved', function (e) {
+  window.showToast(e.detail.message, e.detail.type);
+});
+
 /* ── TOAST NOTIFICATION SYSTEM ────────────────────────────────────────────── */
 (function () {
   'use strict';

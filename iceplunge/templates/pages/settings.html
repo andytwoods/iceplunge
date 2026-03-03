@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags i18n %}
+
+{% block title %}{% translate "Settings" %}{% endblock title %}
+
+{% block content %}
+  <div class="columns is-centered">
+    <div class="column is-three-quarters-desktop is-full-mobile">
+
+      <h1 class="title is-3 is-clear mb-6">{% translate "Settings" %}</h1>
+
+      {# ── COGNITIVE TASK PREFERENCES ──────────────────────────────────────── #}
+      <div class="box mb-5">
+        <h2 class="title is-5 mb-1">{% translate "Cognitive task preferences" %}</h2>
+        <p class="content is-small mb-4">
+          {% translate "Choose which cognitive tasks appear in your sessions. Untick any task you'd prefer not to do — it will be left out of all future sessions." %}
+        </p>
+        <form method="post" action="{% url 'tasks:preferences' %}">
+          {% csrf_token %}
+          <div class="task-hub-list mb-4">
+            {% for t in task_list %}
+              <div class="task-hub-card{% if not t.is_enabled %} is-skipped{% endif %}">
+                <label class="task-hub-card-header" style="cursor:pointer;">
+                  <div class="task-hub-card-meta">
+                    <span class="task-hub-card-label">{{ t.label }}</span>
+                    <span class="task-hub-card-duration">{{ t.duration_display }}</span>
+                  </div>
+                  <div class="task-hub-card-badges">
+                    <input type="checkbox"
+                           name="task_types"
+                           value="{{ t.type }}"
+                           {% if t.is_enabled %}checked{% endif %}>
+                  </div>
+                </label>
+                <div class="task-hub-instructions" style="display:block; padding-top:0.25rem;">
+                  <p class="is-size-7 has-text-grey">{{ t.instructions }}</p>
+                </div>
+              </div>
+            {% empty %}
+              <div class="notification is-warning">
+                {% translate "No tasks are currently available." %}
+              </div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="button is-primary">
+            {% translate "Save task preferences" %}
+          </button>
+        </form>
+        <p class="has-text-grey is-size-7 mt-3">
+          {% translate "Changes apply to new sessions only." %}
+        </p>
+      </div>
+
+
+      {# ── PROFILE ─────────────────────────────────────────────────────────── #}
+      <div class="box mb-5">
+        <h2 class="title is-5 mb-3">{% translate "My profile" %}</h2>
+        <div class="content">
+          <p>
+            <strong>{% translate "Email" %}:</strong>
+            {{ request.user.email }}
+          </p>
+        </div>
+        <div class="buttons">
+          <a class="button is-primary"
+             href="{% url 'account_email' %}"
+             role="button">Edit E-Mail</a>
+          <a class="button is-primary"
+             href="{% url 'mfa_index' %}"
+             role="button">Edit Multifactor authentification</a>
+        </div>
+      </div>
+
+
+      {# ── NOTIFICATION PREFERENCES ────────────────────────────────────────── #}
+      <div class="mb-5">
+        <h2 class="title is-5 mb-1">{% translate "Notification preferences" %}</h2>
+        {% include "notifications/partials/_notification_prefs.html" with form=notif_form profile=notif_profile %}
+      </div>
+
+    </div>
+  </div>
+
+
+{% endblock content %}

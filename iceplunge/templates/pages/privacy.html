@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Privacy Policy – Cold Cognition Project{% endblock title %}
 
@@ -8,49 +9,153 @@
     <div class="column is-8 is-offset-2">
       <h1 class="title is-3 is-clear">Privacy Policy</h1>
       <div class="content">
-        <p>Last updated: February 21, 2026</p>
+        <p><em>Last updated: 3 March 2026</em></p>
 
-        <h2>1. Introduction</h2>
-        <p>The Cold Cognition Project ("we", "us", or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you participate in our community-led citizen science study.</p>
+        <h2>1. Who we are</h2>
+        <p>
+          The Cold Cognition Project ("we", "us", "our") is a community-led citizen-science
+          study run by Andy T. Woods. We operate the website at
+          <strong>coldcognition.org</strong> and the Cold Cognition iOS/Android app
+          (the "App"). Questions about this policy can be sent to
+          <a href="mailto:{{ CONTACT_EMAIL }}">{{ CONTACT_EMAIL }}</a>.
+        </p>
 
-        <h2>2. Information We Collect</h2>
-        <p>We collect several types of information from and about users of our project:</p>
+        <h2>2. What we collect</h2>
         <ul>
-          <li><strong>Personal Identifiers:</strong> Email address (used for account management and notifications).</li>
-          <li><strong>Demographic Data:</strong> Age, sex, years of cold-water experience (collected at sign-up).</li>
-          <li><strong>Cognitive Performance Data:</strong> Results from tasks measuring reaction time, attention, and processing speed.</li>
-          <li><strong>Contextual Data (Covariates):</strong> Information about your plunges (temperature, duration), sleep, caffeine/alcohol intake, and mood.</li>
+          <li><strong>Account data:</strong> email address, chosen display name.</li>
+          <li>
+            <strong>Demographic data:</strong> age range, sex, years of cold-water
+            experience — collected once during sign-up.
+          </li>
+          <li>
+            <strong>Cognitive performance data:</strong> response times, accuracy scores,
+            and mood ratings from the in-app cognitive tasks.
+          </li>
+          <li>
+            <strong>Plunge logs:</strong> water temperature, duration, immersion depth,
+            context, and perceived intensity that you choose to record.
+          </li>
+          <li>
+            <strong>Covariate data:</strong> optional self-reported information about
+            sleep, caffeine, and alcohol intake recorded before each session.
+          </li>
+          <li>
+            <strong>Device token:</strong> if you enable push notifications, we store a
+            device push token provided by OneSignal (see §6) to deliver reminders.
+          </li>
+          <li>
+            <strong>Usage data:</strong> standard server logs (IP address, browser/OS
+            type, pages visited) retained for up to 90 days for security purposes.
+          </li>
         </ul>
 
-        <h2>3. How We Use Your Information</h2>
-        <p>We use the information we collect to:</p>
+        <h2>3. How we use your data</h2>
         <ul>
-          <li>Provide you with a personal dashboard to track your performance.</li>
-          <li>Conduct pseudonymised research on the effects of cold-water immersion.</li>
-          <li>Generate aggregated, anonymised summaries for the community.</li>
-          <li>Improve the tasks and user experience of the project.</li>
+          <li>To operate your account and provide your personal dashboard.</li>
+          <li>
+            To conduct pseudonymised research on the effects of cold-water immersion on
+            cognition — your data is linked to a random participant ID, not your email,
+            in all analyses and exports.
+          </li>
+          <li>
+            To send scheduled cognitive-test reminders via push notification, if you
+            opt in.
+          </li>
+          <li>To generate aggregated, anonymised community-level findings.</li>
+          <li>To improve the tasks and user experience.</li>
         </ul>
 
-        <h2>4. Data Sharing and Disclosure</h2>
-        <p>We do not sell your personal data. We only share data in the following ways:</p>
+        <h2>4. Legal basis (GDPR)</h2>
+        <p>
+          We process your data on the basis of your <strong>explicit informed
+          consent</strong>, given during sign-up and recorded with a timestamp.
+          You may withdraw consent at any time (see §7).
+        </p>
+
+        <h2>5. Sharing and disclosure</h2>
         <ul>
-          <li><strong>Aggregated Results:</strong> We share anonymised, group-level findings with the community and in research publications.</li>
-          <li><strong>Legal Requirements:</strong> If required by law to comply with a legal obligation.</li>
+          <li>
+            <strong>Research outputs:</strong> only aggregated, anonymised group-level
+            findings are shared publicly or in publications. No individual records are
+            ever published.
+          </li>
+          <li>
+            <strong>Legal obligations:</strong> we may disclose data if required by
+            applicable law.
+          </li>
+          <li>We do not sell your data. We do not use it for advertising.</li>
         </ul>
 
-        <h2>5. Data Security</h2>
-        <p>We implement appropriate technical and organizational measures to protect your data. All data is stored and analysed against a random participant ID rather than your direct identifiers.</p>
+        <h2>6. Third-party services</h2>
+        <ul>
+          <li>
+            <strong>OneSignal</strong> — push notification delivery. If you enable
+            notifications, your device push token is transmitted to OneSignal's servers
+            in the United States.
+            <a href="https://onesignal.com/privacy_policy" target="_blank" rel="noopener noreferrer">
+              OneSignal Privacy Policy ↗
+            </a>
+          </li>
+          <li>
+            <strong>Hosting / infrastructure:</strong> the App and website are hosted on
+            servers in the EU/UK. Standard server logs are retained for 90 days.
+          </li>
+        </ul>
 
-        <h2>6. Your Rights</h2>
+        <h2>7. Your rights</h2>
         <p>You have the right to:</p>
         <ul>
-          <li>Access your data via your personal dashboard.</li>
-          <li>Withdraw your consent at any time.</li>
-          <li>Request the deletion of your account and raw data via your account settings.</li>
+          <li>
+            <strong>Access and export</strong> all your raw data at any time via
+            <a href="{% url 'export:download' %}">Account → Export my data</a>.
+          </li>
+          <li>
+            <strong>Delete</strong> your account and all associated raw data via
+            <a href="{% url 'users:delete' %}">Account → Delete my account</a>.
+            Deletion is irreversible and processed immediately; only anonymised
+            aggregate statistics derived before deletion may be retained.
+          </li>
+          <li>
+            <strong>Withdraw consent</strong> at any time by deleting your account.
+            This does not affect the lawfulness of processing before withdrawal.
+          </li>
+          <li>
+            <strong>Opt out of push notifications</strong> at any time via
+            <a href="{% url 'notifications:preferences' %}">Notification preferences</a>
+            or your device's system settings.
+          </li>
+          <li>
+            Lodge a complaint with your local data-protection authority (e.g. the ICO
+            in the UK: <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">ico.org.uk</a>).
+          </li>
         </ul>
 
-        <h2>7. Contact Us</h2>
-        <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:research@coldcognition.org">research@coldcognition.org</a>.</p>
+        <h2>8. Data retention</h2>
+        <p>
+          Your data is retained for as long as your account is active. If you delete
+          your account, all personally identifiable data is permanently removed within
+          24 hours. Anonymised aggregate statistics (no link back to any individual)
+          may be retained indefinitely for research continuity.
+        </p>
+
+        <h2>9. Children</h2>
+        <p>
+          This App is not directed at children under 16. We do not knowingly collect
+          data from anyone under 16. If you believe a child has provided us with
+          personal data, please contact us and we will delete it promptly.
+        </p>
+
+        <h2>10. Changes to this policy</h2>
+        <p>
+          We will notify registered users by email of any material changes. The
+          "Last updated" date at the top of this page will always reflect the current
+          version.
+        </p>
+
+        <h2>11. Contact</h2>
+        <p>
+          <a href="mailto:{{ CONTACT_EMAIL }}">{{ CONTACT_EMAIL }}</a>
+        </p>
       </div>
     </div>
   </div>

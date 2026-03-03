@@ -6,12 +6,13 @@ from django.urls import include
 from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
-from iceplunge.pages.views import AppHomeView, HomePageView
+from iceplunge.pages.views import AppHomeView, HomePageView, SettingsView
 from iceplunge.users.views import rate_limited_signup_view
 
 urlpatterns = [
     path("", HomePageView.as_view(), name="home"),
     path("app/", AppHomeView.as_view(), name="app_home"),
+    path("settings/", SettingsView.as_view(), name="settings"),
     path(
         "about/",
         TemplateView.as_view(template_name="pages/about.html"),

@@ -596,7 +596,7 @@ class TaskPreferenceView(LoginRequiredMixin, View):
         pref.save(update_fields=["disabled_task_types"])
 
         messages.success(request, "Your task preferences have been saved.")
-        return redirect("tasks:preferences")
+        return redirect("settings")
 
 
 session_start_view = SessionStartView.as_view()

@@ -9,7 +9,6 @@ from iceplunge.notifications.helpers.scheduling import (
     minutes_since_last_prompt,
     schedule_daily_prompts_for_user,
     schedule_reactive_prompts,
-    should_send_scheduled_prompt,
 )
 from iceplunge.notifications.models import NotificationProfile, PromptEvent
 from iceplunge.plunges.models import PlungeLog
@@ -34,9 +33,13 @@ def _make_plunge(user, timestamp=None):
     )
 
 
-def _make_profile(user, push_enabled=True):
+def _make_profile(user, push_enabled=True, notifications_per_day=2,
+                  window_start=None, window_end=None):
     profile, _ = NotificationProfile.objects.get_or_create(user=user)
     profile.push_enabled = push_enabled
+    profile.notifications_per_day = notifications_per_day
+    profile.window_start = window_start or datetime.time(8, 0)
+    profile.window_end = window_end or datetime.time(22, 0)
     profile.save()
     return profile
 
@@ -151,27 +154,6 @@ class TestScheduleReactivePrompts:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# should_send_scheduled_prompt
-# ─────────────────────────────────────────────────────────────────────────────
-
-@pytest.mark.django_db
-class TestShouldSendScheduledPrompt:
-    def test_returns_false_without_profile(self):
-        user = _consented_user()
-        assert should_send_scheduled_prompt(user, "scheduled") is False
-
-    def test_returns_false_when_push_disabled(self):
-        user = _consented_user()
-        _make_profile(user, push_enabled=False)
-        assert should_send_scheduled_prompt(user, "scheduled") is False
-
-    def test_returns_true_when_push_enabled_and_no_cap(self):
-        user = _consented_user()
-        _make_profile(user, push_enabled=True)
-        assert should_send_scheduled_prompt(user, "scheduled") is True
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 # schedule_daily_prompts_for_user
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -184,25 +166,55 @@ class TestScheduleDailyPromptsForUser:
         assert events == []
         assert PromptEvent.objects.filter(user=user).count() == 0
 
-    def test_creates_two_prompts_when_push_enabled(self):
+    def test_creates_n_prompts_matching_notifications_per_day(self):
         user = _consented_user()
-        _make_profile(user, push_enabled=True)
+        _make_profile(user, push_enabled=True, notifications_per_day=3)
+        today = timezone.now().date()
+        events = schedule_daily_prompts_for_user(user, today)
+        assert len(events) == 3
+
+    def test_default_two_prompts_when_push_enabled(self):
+        user = _consented_user()
+        _make_profile(user, push_enabled=True, notifications_per_day=2)
         today = timezone.now().date()
         events = schedule_daily_prompts_for_user(user, today)
         assert len(events) == 2
 
-    def test_morning_prompt_scheduled_at_morning_window(self):
+    def test_prompts_scheduled_within_window(self):
         user = _consented_user()
-        profile = _make_profile(user, push_enabled=True)
-        profile.morning_window_start = datetime.time(8, 0)
-        profile.save()
+        window_start = datetime.time(9, 0)
+        window_end = datetime.time(21, 0)
+        _make_profile(
+            user,
+            push_enabled=True,
+            notifications_per_day=4,
+            window_start=window_start,
+            window_end=window_end,
+        )
         today = timezone.now().date()
         events = schedule_daily_prompts_for_user(user, today)
-        morning_prompt = events[0]
-        assert morning_prompt.scheduled_at.hour == 8
-        assert morning_prompt.scheduled_at.minute == 0
+        assert len(events) == 4
+        start_minutes = window_start.hour * 60 + window_start.minute
+        end_minutes = window_end.hour * 60 + window_end.minute
+        for event in events:
+            event_minutes = event.scheduled_at.hour * 60 + event.scheduled_at.minute
+            assert start_minutes <= event_minutes <= end_minutes
 
     def test_no_prompts_without_profile(self):
         user = _consented_user()
         events = schedule_daily_prompts_for_user(user, timezone.now().date())
         assert events == []
+
+    def test_prompts_are_scheduled_type(self):
+        user = _consented_user()
+        _make_profile(user, push_enabled=True, notifications_per_day=2)
+        today = timezone.now().date()
+        events = schedule_daily_prompts_for_user(user, today)
+        assert all(e.prompt_type == PromptEvent.PromptType.SCHEDULED for e in events)
+
+    def test_prompts_have_null_sent_at(self):
+        user = _consented_user()
+        _make_profile(user, push_enabled=True, notifications_per_day=2)
+        today = timezone.now().date()
+        events = schedule_daily_prompts_for_user(user, today)
+        assert all(e.sent_at is None for e in events)

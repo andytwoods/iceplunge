@@ -38,6 +38,47 @@ class HomePageView(TemplateView):
         return context
 
 
+class SettingsView(LoginRequiredMixin, TemplateView):
+    template_name = "pages/settings.html"
+
+    def get_context_data(self, **kwargs):
+        from iceplunge.notifications.forms import NotificationPreferencesForm
+        from iceplunge.notifications.models import NotificationProfile
+        from iceplunge.tasks.models import TaskConfig, UserTaskPreference
+        from iceplunge.tasks.registry import TASK_REGISTRY
+
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        # Task preferences
+        globally_enabled = set(
+            TaskConfig.objects.filter(is_enabled=True).values_list("task_type", flat=True)
+        )
+        try:
+            pref = UserTaskPreference.objects.get(user=user)
+            user_disabled = set(pref.disabled_task_types)
+        except UserTaskPreference.DoesNotExist:
+            user_disabled = set()
+        context["task_list"] = [
+            {
+                "type": t,
+                "label": meta["label"],
+                "duration_display": meta["duration_display"],
+                "instructions": meta["instructions"],
+                "is_enabled": t not in user_disabled,
+            }
+            for t, meta in TASK_REGISTRY.items()
+            if t in globally_enabled
+        ]
+
+        # Notification preferences
+        profile, _ = NotificationProfile.objects.get_or_create(user=user)
+        context["notif_form"] = NotificationPreferencesForm(instance=profile)
+        context["notif_profile"] = profile
+
+        return context
+
+
 class AppHomeView(LoginRequiredMixin, TemplateView):
     template_name = "app/home.html"
 

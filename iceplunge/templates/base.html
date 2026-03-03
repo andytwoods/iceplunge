@@ -194,13 +194,47 @@
 <script>
   (function () {
     if (!window.Capacitor) return;
+    // Rewrite all plain "/" links to "/app/" so navbar brand goes to native home
+    document.querySelectorAll('a[href="/"]').forEach(function (a) {
+      a.href = '/app/';
+    });
     if (window.location.pathname === '/app/') return;
     var btn = document.createElement('a');
     btn.href = '/app/';
     btn.setAttribute('aria-label', 'Back to home');
     btn.className = 'cap-back-btn';
-    btn.innerHTML = '<i class="fas fa-home"></i>';
+    btn.innerHTML = '<i class="fas fa-home"></i><span>Home</span>';
     document.body.appendChild(btn);
+  })();
+</script>
+<script>
+  (function () {
+    if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+    var APP_ID = '{{ ONESIGNAL_APP_ID }}';
+    if (!APP_ID) return;
+
+    function getCsrf() {
+      var el = document.querySelector('[name=csrfmiddlewaretoken]');
+      return el ? el.value : '';
+    }
+
+    function registerPlayer(playerId) {
+      fetch('/notifications/register-device/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCsrf()},
+        body: JSON.stringify({player_id: playerId}),
+        credentials: 'same-origin'
+      });
+    }
+
+    var OneSignal = window.Capacitor.Plugins && window.Capacitor.Plugins.OneSignal;
+    if (!OneSignal) return;
+
+    OneSignal.setAppId({appId: APP_ID});
+    OneSignal.requestPermission().catch(function () {});
+    OneSignal.getDeviceState().then(function (state) {
+      if (state && state.userId) registerPlayer(state.userId);
+    });
   })();
 </script>
 </body>

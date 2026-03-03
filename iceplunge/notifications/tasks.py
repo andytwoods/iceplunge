@@ -46,14 +46,28 @@ def send_prompt_task(prompt_event_id: int) -> None:
         raise
 
 
+@periodic_task(crontab(minute="*"))
+def check_and_dispatch_due_prompts() -> None:
+    """
+    Runs every minute.
+    Queries for unsent PromptEvents whose scheduled_at has passed and enqueues
+    send_prompt_task for each.
+    """
+    from django.utils import timezone
+
+    due = PromptEvent.objects.filter(sent_at__isnull=True, scheduled_at__lte=timezone.now())
+    for prompt in due:
+        send_prompt_task(prompt.pk)
+
+
 @periodic_task(crontab(hour="0", minute="0"))
 def dispatch_daily_prompts_task() -> None:
     """
     Runs once at midnight UTC.
-    Iterates all users with push_enabled=True and schedules morning/evening prompts.
+    Iterates all users with push_enabled=True and pre-computes N jittered prompt
+    times within their window, creating PromptEvent rows for pick-up by
+    check_and_dispatch_due_prompts.
     """
-    import datetime
-
     from django.utils import timezone
 
     from iceplunge.notifications.helpers.scheduling import schedule_daily_prompts_for_user
@@ -62,9 +76,4 @@ def dispatch_daily_prompts_task() -> None:
     today = timezone.now().date()
     profiles = NotificationProfile.objects.filter(push_enabled=True).select_related("user")
     for profile in profiles:
-        try:
-            schedule_daily_prompts_for_user(profile.user, today)
-        except Exception:
-            logger.exception(
-                "dispatch_daily_prompts_task: error scheduling for user %s", profile.user_id
-            )
+        schedule_daily_prompts_for_user(profile.user, today)

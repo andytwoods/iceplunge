@@ -7,9 +7,7 @@ lives here; the Huey tasks in notifications/tasks.py are thin wrappers.
 import datetime
 import logging
 import random
-import zoneinfo
 
-from django.conf import settings
 from django.utils import timezone
 
 from iceplunge.notifications.models import NotificationProfile
@@ -20,6 +18,9 @@ logger = logging.getLogger(__name__)
 # Windows (in minutes) for reactive prompt delays after a plunge
 _REACTIVE_WINDOW_1 = (15, 30)   # 15–30 min post-plunge
 _REACTIVE_WINDOW_2 = (120, 180)  # 2–3 h post-plunge
+
+# Maximum jitter applied to each scheduled prompt slot (minutes)
+_JITTER_MINUTES = 90
 
 
 def daily_prompt_count(user, date: datetime.date) -> int:
@@ -51,6 +52,8 @@ def minutes_since_last_prompt(user) -> int | None:
 
 def _can_schedule_prompt(user) -> bool:
     """Return True if adding a prompt now would not violate cap or gap rules."""
+    from django.conf import settings
+
     today = timezone.now().date()
     cap = getattr(settings, "NOTIFICATIONS_DAILY_PROMPT_CAP", 4)
     if daily_prompt_count(user, today) >= cap:
@@ -99,37 +102,16 @@ def schedule_reactive_prompts(plunge_log) -> list[PromptEvent]:
     return created
 
 
-def should_send_scheduled_prompt(user, prompt_type: str) -> bool:
-    """
-    Return True if a scheduled prompt of the given type should be sent to the user.
-
-    Checks:
-    - push_enabled on NotificationProfile
-    - Daily cap not exceeded
-    - 45-minute gap since last sent prompt
-    """
-    try:
-        profile = user.notification_profile
-    except NotificationProfile.DoesNotExist:
-        return False
-
-    if not profile.push_enabled:
-        return False
-
-    return _can_schedule_prompt(user)
-
-
 def schedule_daily_prompts_for_user(user, date: datetime.date) -> list[PromptEvent]:
     """
-    Create morning and evening PromptEvent records for the given user and date.
+    Pre-compute N evenly-spaced prompt times within the user's window for the given date,
+    apply ±90 min jitter to each, and create PromptEvent rows (sent_at=NULL).
 
-    Uses the user's NotificationProfile time preferences. Falls back to UTC if
-    no timezone is known.
+    The per-minute `check_and_dispatch_due_prompts` task picks these up and
+    enqueues `send_prompt_task` when each scheduled_at time is reached.
 
     Returns the list of PromptEvent objects created.
     """
-    from iceplunge.notifications import tasks as notif_tasks  # avoid circular
-
     try:
         profile = user.notification_profile
     except NotificationProfile.DoesNotExist:
@@ -138,26 +120,33 @@ def schedule_daily_prompts_for_user(user, date: datetime.date) -> list[PromptEve
     if not profile.push_enabled:
         return []
 
-    created = []
-    for prompt_type, window_time in (
-        (PromptEvent.PromptType.SCHEDULED, profile.morning_window_start),
-        (PromptEvent.PromptType.SCHEDULED, profile.evening_window_start),
-    ):
-        if not should_send_scheduled_prompt(user, prompt_type):
-            break
+    window_start = profile.window_start
+    window_end = profile.window_end
+    n = profile.notifications_per_day
 
-        # Use UTC for scheduling (T6.3 acceptance test expects local time awareness)
-        # The morning_window_start / evening_window_start are interpreted as local times.
-        # Without a stored user timezone, we schedule in UTC.
-        naive_dt = datetime.datetime.combine(date, window_time)
+    start_minutes = window_start.hour * 60 + window_start.minute
+    end_minutes = window_end.hour * 60 + window_end.minute
+    window_minutes = end_minutes - start_minutes
+
+    if window_minutes <= 0 or n <= 0:
+        return []
+
+    slot_size = window_minutes / n
+    created = []
+
+    for i in range(n):
+        base_minutes = start_minutes + i * slot_size + slot_size / 2
+        jitter = random.randint(-_JITTER_MINUTES, _JITTER_MINUTES)
+        target_minutes = max(start_minutes, min(end_minutes, base_minutes + jitter))
+        target_time = datetime.time(int(target_minutes) // 60, int(target_minutes) % 60)
+        naive_dt = datetime.datetime.combine(date, target_time)
         scheduled_at = naive_dt.replace(tzinfo=datetime.timezone.utc)
 
         prompt = PromptEvent.objects.create(
             user=user,
             scheduled_at=scheduled_at,
-            prompt_type=prompt_type,
+            prompt_type=PromptEvent.PromptType.SCHEDULED,
         )
         created.append(prompt)
-        notif_tasks.send_prompt_task.schedule((prompt.pk,), eta=scheduled_at)
 
     return created

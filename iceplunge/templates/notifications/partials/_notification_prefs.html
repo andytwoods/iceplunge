@@ -1,12 +1,16 @@
 {% load crispy_forms_tags i18n %}
-{% if saved %}
-  <div class="notification is-success is-light">{% translate "Preferences saved." %}</div>
-{% endif %}
-<div class="box"
-     hx-post="{% url 'notifications:preferences' %}"
-     hx-target="this"
-     hx-swap="outerHTML">
-  <form method="post">
+<div class="box">
+  <p class="content is-small mb-4">
+    {% blocktranslate %}
+      We space your alerts evenly across your chosen time window, then add a random offset
+      of up to 90 minutes to each one. This natural variation helps us capture more
+      representative cognitive data throughout the day.
+    {% endblocktranslate %}
+  </p>
+  <form method="post"
+        hx-post="{% url 'notifications:preferences' %}"
+        hx-target="closest .box"
+        hx-swap="outerHTML">
     {% csrf_token %}
     {% crispy form %}
   </form>
