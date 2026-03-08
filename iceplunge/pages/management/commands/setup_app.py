@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.utils.crypto import get_random_string
 
@@ -14,8 +13,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         self._create_superuser()
-        self._seed_challenges()
-        self._seed_survey_questions()
         self._setup_strava_socialapp()
 
     def _create_superuser(self):
@@ -34,20 +31,6 @@ class Command(BaseCommand):
                 self.stdout.write("A superuser exists in the database. Skipping.")
         except Exception as e:
             self.stderr.write(f"There was an error creating superuser: {e}")
-
-    def _seed_challenges(self):
-        self.stdout.write("Seeding challenges...")
-        try:
-            call_command("seed_challenges", stdout=self.stdout, stderr=self.stderr)
-        except Exception as e:
-            self.stderr.write(f"There was an error seeding challenges: {e}")
-
-    def _seed_survey_questions(self):
-        self.stdout.write("Seeding survey questions...")
-        try:
-            call_command("seed_survey_questions", stdout=self.stdout, stderr=self.stderr)
-        except Exception as e:
-            self.stderr.write(f"There was an error seeding survey questions: {e}")
 
     def _setup_strava_socialapp(self):
         """Create the allauth SocialApp for Strava if it doesn't already exist."""
