@@ -10,7 +10,10 @@ from .base import env
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["example.com"])
+
+HOSTS = ["iceplunge.applikuapp.com"]
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=HOSTS)
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]
 
 # DATABASES
 # ------------------------------------------------------------------------------
