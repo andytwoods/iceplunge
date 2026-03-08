@@ -78,6 +78,7 @@ DJANGO_APPS = [
     "django.forms",
 ]
 THIRD_PARTY_APPS = [
+    "huey.contrib.djhuey",
     "crispy_forms",
     "crispy_bulma",
     "allauth",
