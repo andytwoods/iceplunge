@@ -162,5 +162,10 @@ LOGGING = {
 }
 
 
+# ACCOUNT REGISTRATION
+# ------------------------------------------------------------------------------
+# Disabled pending University Ethics approval.
+ACCOUNT_ALLOW_REGISTRATION = False
+
 # Your stuff...
 # ------------------------------------------------------------------------------

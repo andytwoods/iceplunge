@@ -127,6 +127,14 @@
                 Already a member? Sign in
               </a>
             </div>
+            {% if not ACCOUNT_ALLOW_REGISTRATION %}
+              <article class="message is-warning mt-4" style="max-width:38rem;">
+                <div class="message-body">
+                  <strong>Signups are currently disabled</strong> while we await University Ethics approval.
+                  Check back soon — we'll open registration once approval is granted.
+                </div>
+              </article>
+            {% endif %}
           {% else %}
             <a class="button is-link mt-4" href="{% url 'tasks:start' %}">
               Start a cognitive session
@@ -407,6 +415,14 @@
                 Sign in
               </a>
             </div>
+            {% if not ACCOUNT_ALLOW_REGISTRATION %}
+              <article class="message is-warning mt-4" style="max-width:34rem; margin:1.5rem auto 0;">
+                <div class="message-body">
+                  <strong>Signups are currently disabled</strong> while we await University Ethics approval.
+                  Check back soon — we'll open registration once approval is granted.
+                </div>
+              </article>
+            {% endif %}
           </div>
         </div>
       </div>
