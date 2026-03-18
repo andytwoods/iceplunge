@@ -12,6 +12,22 @@ body:not(.task-page) > footer {
   margin-top: auto;
 }
 
+/* ── ALTERNATING SECTION BACKGROUND ─────────────────────────────────────── */
+
+.section-alt {
+  background-color: #eef2f7;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"]) .section-alt {
+    background-color: #1b2030;
+  }
+}
+
+html[data-theme="dark"] .section-alt {
+  background-color: #1b2030;
+}
+
 /* ── MEMBER HOME ACTION CARDS ────────────────────────────────────────────── */
 
 .member-action-card {
