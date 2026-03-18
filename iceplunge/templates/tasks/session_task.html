@@ -18,6 +18,7 @@
     var TASK_COMPLETE_URL = "{% url 'tasks:complete' session_id=session.id %}";
     var TASK_HUB_URL = "{% url 'tasks:hub' session_id=session.id %}";
     var TASK_SKIP_URL = "{% url 'tasks:skip_task' %}";
+  var TASK_CANCEL_URL = "{% url 'tasks:cancel_task' %}";
     var TASK_CONFIG = {
       seed: "{{ session.random_seed }}",
       taskType: "{{ task_type }}",
@@ -69,7 +70,13 @@
     window.location.reload();
   });
   document.getElementById("task-cancel-btn").addEventListener("click", function () {
-    window.location.href = TASK_HUB_URL;
+    fetch(TASK_CANCEL_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+      body: JSON.stringify({ session_id: "{{ session.id }}", task_type: TASK_CONFIG.taskType }),
+    }).finally(function () {
+      window.location.href = TASK_HUB_URL;
+    });
   });
 </script>
 {% endblock inline_javascript %}
