@@ -213,6 +213,7 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
                 "iceplunge.users.context_processors.allauth_settings",
+                "iceplunge.users.context_processors.consent_modal",
                 "iceplunge.notifications.context_processors.onesignal",
             ],
         },
@@ -257,6 +258,13 @@ ADMIN_URL = "admin/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#admins
 ADMINS = [("""Andy T. Woods""", "andytwoods@gmail.com")]
 CONTACT_EMAIL = ADMINS[0][1]
+
+# CONSENT
+# ------------------------------------------------------------------------------
+# Increment this string whenever the privacy policy or consent form changes
+# in a material way.  Existing users whose ConsentProfile.consent_version does
+# not match will be redirected to re-consent before accessing the app.
+CURRENT_CONSENT_VERSION = "1.0"
 # https://docs.djangoproject.com/en/dev/ref/settings/#managers
 MANAGERS = ADMINS
 # https://cookiecutter-django.readthedocs.io/en/latest/settings.html#other-environment-settings
@@ -332,6 +340,9 @@ ACCOUNT_FORMS = {"signup": "iceplunge.users.forms.UserSignupForm"}
 SOCIALACCOUNT_ADAPTER = "iceplunge.users.adapters.SocialAccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_FORMS = {"signup": "iceplunge.users.forms.UserSocialSignupForm"}
+# https://docs.allauth.org/en/latest/mfa/webauthn.html
+MFA_PASSKEY_LOGIN_ENABLED = True
+MFA_PASSKEY_SIGNUP_ENABLED = True
 SOCIALACCOUNT_PROVIDERS = {
     "strava": {
         "SCOPE": ["activity:read"],

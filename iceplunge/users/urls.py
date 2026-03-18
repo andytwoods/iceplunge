@@ -4,6 +4,7 @@ from .views import baseline_profile_view
 from .views import consent_view
 from .views import data_deletion_complete_view
 from .views import data_deletion_view
+from .views import my_data_export_view
 from .views import user_detail_view
 from .views import user_redirect_view
 from .views import user_update_view
@@ -16,5 +17,6 @@ urlpatterns = [
     path("baseline/", view=baseline_profile_view, name="baseline_profile"),
     path("delete-my-data/", view=data_deletion_view, name="delete_data"),
     path("delete-my-data/done/", view=data_deletion_complete_view, name="deletion_complete"),
+    path("my-data.json", view=my_data_export_view, name="my_data"),
     path("<int:pk>/", view=user_detail_view, name="detail"),
 ]

@@ -26,6 +26,20 @@
           <li>{% translate "Device metadata (OS, screen size) for data quality modelling" %}</li>
         </ul>
 
+        <div class="notification is-warning is-light">
+          <p class="has-text-weight-bold">{% translate "Special category (health) data" %}</p>
+          <p>
+            {% blocktranslate %}
+            Some data we collect — including sleep quality, menstruation status, gastrointestinal
+            symptoms, illness, and demographic information such as age, gender, height, and weight —
+            constitutes <strong>special category health data</strong> under Article 9 of UK GDPR.
+            We process this data solely for scientific research purposes with your <strong>explicit
+            consent</strong>, which you are giving by completing this form.  You may withdraw at any
+            time by deleting your account.
+            {% endblocktranslate %}
+          </p>
+        </div>
+
         <h2 class="subtitle">{% translate "Risks and benefits" %}</h2>
         <p>
           {% blocktranslate %}
@@ -52,8 +66,14 @@
         {% csrf_token %}
         <div class="field">
           <label class="checkbox">
+            <input type="checkbox" id="age-checkbox" required />
+            {% translate "I confirm that I am 16 years of age or older." %}
+          </label>
+        </div>
+        <div class="field">
+          <label class="checkbox">
             <input type="checkbox" id="confirm-checkbox" required />
-            {% translate "I have read the above information and consent to participate." %}
+            {% translate "I have read the above information, including the special category health data notice, and I explicitly consent to participate and to the processing of my health data for research purposes." %}
           </label>
         </div>
         <div class="field">
@@ -70,9 +90,12 @@
 {% block inline_javascript %}
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const cb = document.getElementById('confirm-checkbox');
+      const ageCb = document.getElementById('age-checkbox');
+      const confirmCb = document.getElementById('confirm-checkbox');
       const btn = document.getElementById('consent-submit');
-      cb.addEventListener('change', () => { btn.disabled = !cb.checked; });
+      function updateBtn() { btn.disabled = !(ageCb.checked && confirmCb.checked); }
+      ageCb.addEventListener('change', updateBtn);
+      confirmCb.addEventListener('change', updateBtn);
     });
   </script>
 {% endblock inline_javascript %}

@@ -30,6 +30,16 @@
         </p>
       </div>
 
+      <div class="notification is-info is-light">
+        <p class="has-text-weight-bold">{% translate "Want a copy of your data first?" %}</p>
+        <p>
+          {% translate "Under UK GDPR Article 20, you have the right to receive all your personal data in a machine-readable format before deleting it." %}
+        </p>
+        <a href="{% url 'users:my_data' %}" class="button is-info is-light mt-2">
+          {% translate "Download my data (JSON)" %}
+        </a>
+      </div>
+
       <div class="box">
         <form method="post">
           {% csrf_token %}

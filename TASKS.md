@@ -781,7 +781,7 @@ Every acceptance criterion must be covered by an automated test **unless it is m
 
 ## Phase 11 — Capacitor Wrapper ✅
 
-### T11.1 Capacitor project setup
+### T11.1 Capacitor project setupit
 **Goal:** Wrap the Django web app in a Capacitor container for iOS and Android.
 
 **Spec refs:** §2 Mobile Delivery
