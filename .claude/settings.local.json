@@ -5,7 +5,9 @@
       "Bash(find /c/Users/andyt/PycharmProjects/iceplunge -type f -name *access* -o -name *toolbar* -o -name *theme*)",
       "Bash(uv add:*)",
       "Bash(uv remove:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Read(//mnt/c/Users/andyt/PycharmProjects/**)",
+      "Bash(gh pr:*)"
     ]
   }
 }
