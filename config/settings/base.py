@@ -341,8 +341,8 @@ SOCIALACCOUNT_ADAPTER = "iceplunge.users.adapters.SocialAccountAdapter"
 # https://docs.allauth.org/en/latest/socialaccount/configuration.html
 SOCIALACCOUNT_FORMS = {"signup": "iceplunge.users.forms.UserSocialSignupForm"}
 # https://docs.allauth.org/en/latest/mfa/webauthn.html
+MFA_SUPPORTED_TYPES = ["webauthn", "recovery_codes"]
 MFA_PASSKEY_LOGIN_ENABLED = True
-MFA_PASSKEY_SIGNUP_ENABLED = True
 SOCIALACCOUNT_PROVIDERS = {
     "strava": {
         "SCOPE": ["activity:read"],

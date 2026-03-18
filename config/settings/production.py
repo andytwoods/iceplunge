@@ -115,6 +115,11 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = True
 ANYMAIL = {}
 
+# MFA
+# ------------------------------------------------------------------------------
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
+MFA_PASSKEY_SIGNUP_ENABLED = True
+
 
 # LOGGING
 # ------------------------------------------------------------------------------
