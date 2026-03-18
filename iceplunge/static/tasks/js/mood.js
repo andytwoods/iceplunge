@@ -31,7 +31,7 @@
 
     var container = document.getElementById("task-container");
     container.innerHTML = "";
-    container.style.cssText = "max-width:600px;margin:0 auto;padding:1rem;";
+    container.style.cssText = "max-width:800px;margin:0 auto;padding:1rem;";
 
     var form = document.createElement("div");
 
@@ -45,7 +45,7 @@
       section.appendChild(label);
 
       var anchors = document.createElement("div");
-      anchors.style.cssText = "display:flex;justify-content:space-between;font-size:0.8rem;color:#888;margin-bottom:0.25rem;";
+      anchors.style.cssText = "display:flex;justify-content:space-between;font-size:0.85rem;color:#888;margin-bottom:0.25rem;gap:1rem;";
       anchors.innerHTML = "<span>" + scale.low + "</span><span>" + scale.high + "</span>";
       section.appendChild(anchors);
 
@@ -61,7 +61,7 @@
           btn.dataset.val = val;
           btn.style.cssText = (
             "flex:1;padding:0.75rem 0;border:2px solid #ccc;" +
-            "border-radius:6px;background:#fff;font-size:1.1rem;cursor:pointer;"
+            "border-radius:6px;background:#fff;font-size:1.2rem;font-weight:600;color:#222;cursor:pointer;"
           );
           btn.addEventListener("click", function () {
             // Deselect siblings

@@ -50,6 +50,11 @@
       </div>
     {% endif %}
   </div>
+
+  <div class="task-footer-bar">
+    <button id="task-cancel-btn" class="button is-small is-light" type="button">{% translate "Cancel" %}</button>
+    <button id="task-restart-btn" class="button is-small is-warning" type="button">{% translate "Restart" %}</button>
+  </div>
 </div>
 {% endblock body %}
 
@@ -59,6 +64,12 @@
 
   document.getElementById('skip-task-btn').addEventListener('click', function() {
     TaskCore.skipCurrentTask();
+  });
+  document.getElementById("task-restart-btn").addEventListener("click", function () {
+    window.location.reload();
+  });
+  document.getElementById("task-cancel-btn").addEventListener("click", function () {
+    window.location.href = TASK_HUB_URL;
   });
 </script>
 {% endblock inline_javascript %}

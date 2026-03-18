@@ -59,12 +59,14 @@
     var responded = false;
 
     var container = document.getElementById("task-container");
-    container.style.cssText = "background:#111;min-height:300px;user-select:none;-webkit-user-select:none;";
+    container.className = "task-stimulus-area";
+    container.style.cssText = "min-height:300px;user-select:none;-webkit-user-select:none;";
 
     var stimulusEl = document.createElement("div");
+    stimulusEl.className = "task-stimulus-text";
     stimulusEl.style.cssText = (
       "font-size:3rem;letter-spacing:0.3rem;text-align:center;" +
-      "color:#fff;padding:60px 0;min-height:180px;line-height:1;"
+      "padding:60px 0;min-height:180px;line-height:1;"
     );
     container.appendChild(stimulusEl);
 
@@ -80,22 +82,29 @@
     function makeBtn(label) {
       var btn = document.createElement("button");
       btn.textContent = label;
-      btn.style.cssText = (
-        "padding:1rem 2rem;font-size:1.2rem;border:2px solid #ccc;" +
-        "border-radius:6px;background:#222;color:#fff;cursor:pointer;"
-      );
+      btn.className = "flanker-btn";
+      btn.style.cssText = "padding:1rem 2rem;font-size:1.2rem;border:2px solid;border-radius:6px;cursor:pointer;";
       return btn;
     }
 
     leftBtn.addEventListener("click", function () { handleResponse("left"); });
     rightBtn.addEventListener("click", function () { handleResponse("right"); });
 
-    // Keyboard support
+    // Keyboard support (registered in startTask, not here)
     var keyHandler = function (e) {
       if (e.key === "ArrowLeft" || e.key === "z" || e.key === "Z") handleResponse("left");
       if (e.key === "ArrowRight" || e.key === "/") handleResponse("right");
     };
-    document.addEventListener("keydown", keyHandler);
+
+    var startOverlayEl = document.createElement("div");
+    startOverlayEl.className = "task-start-overlay";
+    startOverlayEl.style.cssText = (
+      "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);" +
+      "font-size:1.25rem;padding:1rem;"
+    );
+    startOverlayEl.textContent = "Click or press Space to start";
+    container.style.position = "relative";
+    container.appendChild(startOverlayEl);
 
     function showNextTrial() {
       if (!isRunning || isPaused || isStopped) return;
@@ -121,9 +130,21 @@
       }, RESPONSE_WINDOW_MS);
     }
 
+    function flashBtn(btn) {
+      btn.style.background = "#3273dc";
+      btn.style.borderColor = "#3273dc";
+      btn.style.color = "#fff";
+      setTimeout(function () {
+        btn.style.background = "";
+        btn.style.borderColor = "";
+        btn.style.color = "";
+      }, 150);
+    }
+
     function handleResponse(direction) {
       if (!isRunning || isPaused || isStopped || responded || currentTrial === null) return;
       responded = true;
+      flashBtn(direction === "left" ? leftBtn : rightBtn);
       var rtMs = Math.round(TaskCore.now() - currentTrialStart);
       trials.push({
         arrows: currentTrial.arrows,
@@ -163,9 +184,31 @@
       });
     }
 
-    isRunning = true;
-    showNextTrial();
-    taskEndTimer = setTimeout(endTask, durationMs);
+    function startTask() {
+      startOverlayEl.style.display = "none";
+      document.addEventListener("keydown", keyHandler);
+      isRunning = true;
+      showNextTrial();
+      taskEndTimer = setTimeout(endTask, durationMs);
+    }
+
+    function handleSpaceKey(e) {
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+        document.removeEventListener("keydown", handleSpaceKey);
+        container.removeEventListener("click", handleStartClick);
+        startTask();
+      }
+    }
+
+    function handleStartClick() {
+      document.removeEventListener("keydown", handleSpaceKey);
+      container.removeEventListener("click", handleStartClick);
+      startTask();
+    }
+
+    container.addEventListener("click", handleStartClick);
+    document.addEventListener("keydown", handleSpaceKey);
 
     TaskCore.registerTask({
       pause: function () {

@@ -74,5 +74,9 @@ DATABASES = {
     }
 }
 
+# WebAuthn — allow non-HTTPS origins in local dev
+# https://docs.allauth.org/en/latest/mfa/webauthn.html
+MFA_WEBAUTHN_ALLOW_INSECURE_ORIGIN = True
+
 # Your stuff...
 # ------------------------------------------------------------------------------

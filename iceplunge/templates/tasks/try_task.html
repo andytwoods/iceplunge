@@ -53,11 +53,22 @@
       </div>
     {% endif %}
   </div>
+
+  <div class="task-footer-bar">
+    <button id="task-cancel-btn" class="button is-small is-light" type="button">{% translate "Cancel" %}</button>
+    <button id="task-restart-btn" class="button is-small is-warning" type="button">{% translate "Restart" %}</button>
+  </div>
 </div>
 {% endblock body %}
 
 {% block inline_javascript %}
 <script>
   TaskCore.init("{% if session %}{{ session.id }}{% endif %}", "{{ csrf_token }}");
+  document.getElementById("task-restart-btn").addEventListener("click", function () {
+    window.location.reload();
+  });
+  document.getElementById("task-cancel-btn").addEventListener("click", function () {
+    window.history.back();
+  });
 </script>
 {% endblock inline_javascript %}

@@ -511,6 +511,42 @@ class SessionTaskSkipView(LoginRequiredMixin, View):
         return JsonResponse({"ok": True, "next_task": next_task_type})
 
 
+class TaskCancelView(LoginRequiredMixin, View):
+    """
+    Deletes any TaskResult for the given task_type in the given session,
+    ensuring no data persists if the user cancels mid-task.
+
+    Also removes MoodRating if the cancelled task is "mood".
+
+    POST body: { session_id, task_type }
+    Returns:   { ok: true }
+    """
+
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, ValueError):
+            return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+        session_id = data.get("session_id")
+        task_type = data.get("task_type")
+
+        if not session_id or not task_type:
+            return JsonResponse({"error": "session_id and task_type are required"}, status=422)
+
+        try:
+            session = CognitiveSession.objects.get(id=session_id, user=request.user)
+        except (CognitiveSession.DoesNotExist, ValueError):
+            return JsonResponse({"error": "Session not found"}, status=422)
+
+        TaskResult.objects.filter(session=session, task_type=task_type).delete()
+
+        if task_type == "mood":
+            MoodRating.objects.filter(session=session).delete()
+
+        return JsonResponse({"ok": True})
+
+
 class SessionTaskUnskipView(LoginRequiredMixin, View):
     """
     Removes a previously skipped task from device_meta['skipped_tasks'],
@@ -606,6 +642,7 @@ session_task_view = SessionTaskView.as_view()
 session_complete_view = SessionCompleteView.as_view()
 session_meta_view = SessionMetaView.as_view()
 task_result_submit_view = TaskResultSubmitView.as_view()
+task_cancel_view = TaskCancelView.as_view()
 session_task_skip_view = SessionTaskSkipView.as_view()
 session_task_unskip_view = SessionTaskUnskipView.as_view()
 task_preference_view = TaskPreferenceView.as_view()

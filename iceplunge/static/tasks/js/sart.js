@@ -69,19 +69,31 @@
     var responded = false;
 
     var container = document.getElementById("task-container");
-    container.style.cssText = "background:#111;min-height:300px;cursor:pointer;user-select:none;-webkit-user-select:none;";
+    container.className = "task-stimulus-area";
+    container.style.cssText = "min-height:300px;cursor:pointer;user-select:none;-webkit-user-select:none;";
 
     var digitEl = document.createElement("div");
+    digitEl.className = "task-stimulus-text";
     digitEl.style.cssText = (
-      "font-size:6rem;font-weight:bold;color:#fff;text-align:center;" +
+      "font-size:6rem;font-weight:bold;text-align:center;" +
       "padding-top:60px;min-height:200px;line-height:1;"
     );
     container.appendChild(digitEl);
 
     var instrEl = document.createElement("p");
-    instrEl.style.cssText = "color:#aaa;text-align:center;font-size:0.9rem;margin-top:1rem;";
+    instrEl.style.cssText = "text-align:center;font-size:0.9rem;margin-top:1rem;color:var(--bulma-text-weak,#888);";
     instrEl.textContent = "Tap for every digit except 3";
     container.appendChild(instrEl);
+
+    var startOverlayEl = document.createElement("div");
+    startOverlayEl.className = "task-start-overlay";
+    startOverlayEl.style.cssText = (
+      "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);" +
+      "font-size:1.25rem;padding:1rem;"
+    );
+    startOverlayEl.textContent = "Click or press Space to start";
+    container.style.position = "relative";
+    container.appendChild(startOverlayEl);
 
     function showNextTrial() {
       if (!isRunning || isPaused || seqIndex >= sequence.length) {
@@ -159,11 +171,32 @@
       });
     }
 
-    isRunning = true;
-    container.addEventListener("click", handleInteraction);
-    container.addEventListener("touchend", handleInteraction);
-    showNextTrial();
-    taskEndTimer = setTimeout(endTask, durationMs);
+    function startTask() {
+      startOverlayEl.style.display = "none";
+      isRunning = true;
+      container.addEventListener("click", handleInteraction);
+      container.addEventListener("touchend", handleInteraction);
+      showNextTrial();
+      taskEndTimer = setTimeout(endTask, durationMs);
+    }
+
+    function handleSpaceKey(e) {
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+        document.removeEventListener("keydown", handleSpaceKey);
+        container.removeEventListener("click", handleStartClick);
+        startTask();
+      }
+    }
+
+    function handleStartClick() {
+      document.removeEventListener("keydown", handleSpaceKey);
+      container.removeEventListener("click", handleStartClick);
+      startTask();
+    }
+
+    container.addEventListener("click", handleStartClick);
+    document.addEventListener("keydown", handleSpaceKey);
 
     TaskCore.registerTask({
       pause: function () {

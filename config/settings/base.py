@@ -84,6 +84,7 @@ THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.mfa",
+    "allauth.mfa.webauthn",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.github",
@@ -346,6 +347,7 @@ SOCIALACCOUNT_PROVIDERS = {
 # Sponsorship
 # ------------------------------------------------------------------------------
 GITHUB_SPONSORS_URL = env("GITHUB_SPONSORS_URL", default="https://github.com/sponsors/andytwoods")
+GITHUB_REPO_URL = env("GITHUB_REPO_URL", default="https://github.com/andytwoods/iceplunge")
 SPONSOR_CONTACT_EMAIL = env("SPONSOR_CONTACT_EMAIL", default="andytwoods@gmail.com")
 
 # Your stuff...

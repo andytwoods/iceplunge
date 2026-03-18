@@ -16,7 +16,7 @@
   var TASK_VERSION = "1.0";
   var DURATION_MS = 60000;
   var ISI_MIN = 2000;
-  var ISI_MAX = 10000;
+  var ISI_MAX = 5000; // Reduced from standard 10 000 ms to keep gaps feeling responsive
   var LAPSE_THRESHOLD = 500;
   var ANTICIPATION_THRESHOLD = 100;
   var NO_RESPONSE_THRESHOLD = 2000;
@@ -54,7 +54,8 @@
     var isStopped = false;
 
     var container = document.getElementById("task-container");
-    container.style.cssText = "background:#000;min-height:300px;cursor:pointer;user-select:none;-webkit-user-select:none;";
+    container.className = "task-stimulus-area";
+    container.style.cssText = "min-height:300px;cursor:pointer;user-select:none;-webkit-user-select:none;";
 
     var displayEl = document.createElement("div");
     displayEl.style.cssText = (
@@ -63,6 +64,18 @@
       "padding:2rem;letter-spacing:2px;"
     );
     container.appendChild(displayEl);
+
+    var reducedMotion = document.documentElement.getAttribute("data-a11y-motion") === "reduced";
+
+    var instructionsEl = document.createElement("div");
+    instructionsEl.className = "task-start-overlay";
+    instructionsEl.style.cssText = (
+      "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);" +
+      "font-size:1.25rem;padding:1rem;"
+    );
+    instructionsEl.textContent = "Click or press Space to start";
+    container.style.position = "relative";
+    container.appendChild(instructionsEl);
 
     function randomISI() {
       return ISI_MIN + rng() * (ISI_MAX - ISI_MIN);
@@ -87,14 +100,18 @@
       if (!isRunning || isPaused) return;
       stimulusStartMs = TaskCore.now();
 
-      // Animate counter
-      function animate() {
-        if (stimulusStartMs === null || !isRunning) return;
-        var elapsed = Math.round(TaskCore.now() - stimulusStartMs);
-        displayEl.textContent = elapsed;
+      // Animate counter (or show static prompt when motion is reduced)
+      if (reducedMotion) {
+        displayEl.textContent = "TAP!";
+      } else {
+        function animate() {
+          if (stimulusStartMs === null || !isRunning) return;
+          var elapsed = Math.round(TaskCore.now() - stimulusStartMs);
+          displayEl.textContent = elapsed;
+          animTimer = requestAnimationFrame(animate);
+        }
         animTimer = requestAnimationFrame(animate);
       }
-      animTimer = requestAnimationFrame(animate);
 
       // Auto-record non-response after NO_RESPONSE_THRESHOLD
       noResponseTimer = setTimeout(function () {
@@ -159,7 +176,7 @@
       container.removeEventListener("click", handleInteraction);
       container.removeEventListener("touchend", handleInteraction);
 
-      displayEl.style.color = "#fff";
+      displayEl.style.color = "var(--bulma-text, #fff)";
       displayEl.textContent = "Submitting\u2026";
 
       var endedAt = TaskCore.wallClock();
@@ -179,12 +196,33 @@
       });
     }
 
-    // Start running
-    isRunning = true;
-    container.addEventListener("click", handleInteraction);
-    container.addEventListener("touchend", handleInteraction);
-    startISI();
-    taskEndTimer = setTimeout(endTask, durationMs);
+    function startTask() {
+      instructionsEl.style.display = "none";
+      isRunning = true;
+      container.addEventListener("click", handleInteraction);
+      container.addEventListener("touchend", handleInteraction);
+      startISI();
+      taskEndTimer = setTimeout(endTask, durationMs);
+    }
+
+    function handleSpaceKey(e) {
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+        document.removeEventListener("keydown", handleSpaceKey);
+        container.removeEventListener("click", handleStartClick);
+        startTask();
+      }
+    }
+
+    function handleStartClick() {
+      document.removeEventListener("keydown", handleSpaceKey);
+      container.removeEventListener("click", handleStartClick);
+      startTask();
+    }
+
+    // Wait for user to start
+    container.addEventListener("click", handleStartClick);
+    document.addEventListener("keydown", handleSpaceKey);
 
     TaskCore.registerTask({
       pause: function () {

@@ -97,8 +97,24 @@
   {# ── 1. HERO ─────────────────────────────────────────────────────────────── #}
   <section class="section" style="padding-top:3.5rem; padding-bottom:3.5rem;">
     <div class="container">
+
+      {# Image shown above text on mobile only #}
+      <figure class="image is-hidden-tablet mb-5" style="border-radius:1rem; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,.18);">
+        <img src="{% static 'images/social/og-home.png' %}"
+             alt="Person stepping into cold water at dawn"
+             width="1200" height="630"
+             style="display:block; width:100%; height:auto;">
+      </figure>
+
       <div class="columns is-vcentered">
         <div class="column is-6">
+
+          <div class="tags mb-3">
+            <span class="tag is-success is-medium">Free forever</span>
+            <span class="tag is-info is-medium">Citizen science</span>
+            <span class="tag is-warning is-medium">Anonymous</span>
+            <span class="tag is-light is-medium">Open source</span>
+          </div>
 
           <h1 class="title is- is-clear mb-4 is-clear" style="line-height:1.2;">
             Plunge. Test. Discover.
@@ -309,10 +325,17 @@
           <h2 class="title is-4 mb-4 is-clear">Community-led and transparent</h2>
           <div class="content">
             <ul>
+              <li><strong>Free, always</strong> – no subscriptions, no paywalls, no hidden costs.</li>
               <li><strong>Consent first</strong> – no data collected until you agree; withdraw any time.</li>
               <li><strong>Anonymised analysis</strong> – no direct identifiers in any exports or publications.</li>
               <li><strong>No commercial use</strong> – your data will never be sold or used for advertising.</li>
               <li><strong>Results</strong> shared as aggregated, anonymised summaries, openly with the community.</li>
+              <li>
+                <strong>Open source</strong> – MIT licensed.
+                {% if GITHUB_REPO_URL %}
+                  <a href="{{ GITHUB_REPO_URL }}" target="_blank" rel="noopener noreferrer">View the source on GitHub &rarr;</a>
+                {% endif %}
+              </li>
             </ul>
             <p>
               The dataset belongs to the community. Participation strengthens both your
@@ -325,7 +348,52 @@
   </section>
 
 
-  {# ── 5. SPONSOR THIS RESEARCH ─────────────────────────────────────────────── #}
+  {# ── 5. ABOUT THE RESEARCHER ──────────────────────────────────────────────── #}
+  <section class="section has-background-scheme-main-bis">
+    <div class="container">
+      <div class="columns">
+        <div class="column is-8 is-offset-2">
+          <h2 class="title is-4 mb-4 is-clear">About the researcher</h2>
+          <div class="media">
+            <div class="media-content">
+              <div class="content">
+                <p>
+                  <strong>Dr Andy Woods</strong> is a psychologist at
+                  <strong>Royal Holloway, University of London</strong>, specialising in
+                  perception and online cognitive research methodology. His published work
+                  includes a peer-reviewed tutorial on running perception studies over the
+                  internet, and he has designed and validated cognitive tasks across dozens
+                  of large-scale online studies.
+                </p>
+                <p>
+                  This project applies that same rigorous, open methodology to cold-water
+                  immersion — a subject with a passionate community (which includes Andy!) but still relatively
+                  sparse controlled evidence.
+                </p>
+                <div class="buttons">
+                  <a class="button is-light is-small"
+                     href="https://scholar.google.co.uk/citations?user=p5dUkQIAAAAJ&hl=en"
+                     target="_blank" rel="noopener noreferrer">
+                    <span class="icon"><i class="fas fa-graduation-cap"></i></span>
+                    <span>Google Scholar</span>
+                  </a>
+                  <a class="button is-light is-small"
+                     href="https://pure.royalholloway.ac.uk/en/persons/andrew-woods/"
+                     target="_blank" rel="noopener noreferrer">
+                    <span class="icon"><i class="fas fa-university"></i></span>
+                    <span>Royal Holloway profile</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  {# ── 7. SPONSOR THIS RESEARCH ─────────────────────────────────────────────── #}
   <section class="section has-background-scheme-main-bis">
     <div class="container">
       <div class="columns">
@@ -333,10 +401,7 @@
 
           <h2 class="title is-4">Sponsor this research</h2>
           <p class="mb-2">
-            Sponsorship helps cover the costs associated with this app, such as servers, storage, and ongoing
-            development.
-            With additional support, this would allow me to bring in researchers and developers to add new features
-            and boost the science.
+            Please help cover the costs of this app, including servers, storage, and ongoing development. With your support, I’d be able to bring in researchers and developers to add new features and further advance the science.
           </p>
 
           {# Org logos #}
@@ -394,7 +459,7 @@
   </section>
 
 
-  {# ── 6. JOIN CTA ──────────────────────────────────────────────────────────── #}
+  {# ── 8. JOIN CTA ──────────────────────────────────────────────────────────── #}
   {% if not request.user.is_authenticated %}
     <section class="section">
       <div class="container">

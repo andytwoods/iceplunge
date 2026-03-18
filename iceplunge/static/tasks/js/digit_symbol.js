@@ -45,7 +45,7 @@
   function init(config) {
     var rng = makeRng((config.seed || "") + "_ds");
     var durationMs = config.durationMs || DURATION_MS;
-    var startedAt = TaskCore.wallClock();
+    var startedAt = null;
 
     // Build per-session symbol mapping (digit 1–9 → symbol)
     var symbolMap = {};  // digit → symbol
@@ -64,30 +64,33 @@
     container.innerHTML = "";
     container.style.cssText = "padding:1rem;";
 
-    // --- Key display (fixed at top) ---
+    // --- Key display (always visible, even before start) ---
     var keyTable = document.createElement("div");
     keyTable.style.cssText = "display:flex;gap:0.5rem;margin-bottom:1.5rem;justify-content:center;flex-wrap:wrap;";
     for (var digit = 1; digit <= 9; digit++) {
       var cell = document.createElement("div");
-      cell.style.cssText = (
-        "border:1px solid #ccc;border-radius:4px;padding:0.25rem 0.5rem;" +
-        "text-align:center;min-width:3rem;background:#f5f5f5;"
-      );
-      cell.innerHTML = "<div style='font-size:1rem;color:#888;'>" + digit + "</div>" +
+      cell.className = "digit-symbol-key-cell";
+      cell.style.cssText = "border:1px solid;border-radius:4px;padding:0.25rem 0.5rem;text-align:center;min-width:3rem;";
+      cell.innerHTML = "<div class='digit-symbol-key-digit' style='font-size:1rem;'>" + digit + "</div>" +
                        "<div style='font-size:1.5rem;'>" + symbolMap[digit] + "</div>";
       keyTable.appendChild(cell);
     }
     container.appendChild(keyTable);
 
-    // --- Current stimulus ---
+    // --- Start prompt (shown in place of stimulus until user starts) ---
+    var startPromptEl = document.createElement("div");
+    startPromptEl.className = "task-start-overlay";
+    startPromptEl.style.cssText = "font-size:1.25rem;text-align:center;padding:2rem 1rem;";
+    startPromptEl.textContent = "Study the key above, then click or press Space to start";
+    container.appendChild(startPromptEl);
+
+    // --- Current stimulus (built now, appended on start) ---
     var stimulusEl = document.createElement("div");
     stimulusEl.style.cssText = "font-size:4rem;text-align:center;margin:1rem 0;min-height:80px;";
-    container.appendChild(stimulusEl);
 
-    // --- Option buttons ---
+    // --- Option buttons (built now, appended on start) ---
     var optionRow = document.createElement("div");
     optionRow.style.cssText = "display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;";
-    container.appendChild(optionRow);
 
     function showNextTrial() {
       if (!isRunning || isPaused || isStopped) return;
@@ -110,10 +113,8 @@
         var btn = document.createElement("button");
         btn.type = "button";
         btn.textContent = symbolMap[optDigit];
-        btn.style.cssText = (
-          "font-size:2rem;padding:0.75rem 1.5rem;border:2px solid #ccc;" +
-          "border-radius:8px;background:#fff;cursor:pointer;min-width:4rem;"
-        );
+        btn.className = "digit-symbol-option-btn";
+        btn.style.cssText = "font-size:2rem;padding:0.75rem 1.5rem;border:2px solid;border-radius:8px;cursor:pointer;min-width:4rem;";
         btn.addEventListener("click", function () {
           if (!isRunning || isPaused || isStopped) return;
           var rtMs = Math.round(TaskCore.now() - trialStartMs);
@@ -160,9 +161,33 @@
       });
     }
 
-    isRunning = true;
-    showNextTrial();
-    taskEndTimer = setTimeout(endTask, durationMs);
+    function startTask() {
+      startedAt = TaskCore.wallClock();
+      container.removeChild(startPromptEl);
+      container.appendChild(stimulusEl);
+      container.appendChild(optionRow);
+      isRunning = true;
+      showNextTrial();
+      taskEndTimer = setTimeout(endTask, durationMs);
+    }
+
+    function handleSpaceKey(e) {
+      if (e.code === "Space" || e.key === " ") {
+        e.preventDefault();
+        document.removeEventListener("keydown", handleSpaceKey);
+        container.removeEventListener("click", handleStartClick);
+        startTask();
+      }
+    }
+
+    function handleStartClick() {
+      document.removeEventListener("keydown", handleSpaceKey);
+      container.removeEventListener("click", handleStartClick);
+      startTask();
+    }
+
+    container.addEventListener("click", handleStartClick);
+    document.addEventListener("keydown", handleSpaceKey);
 
     TaskCore.registerTask({
       pause: function () {
