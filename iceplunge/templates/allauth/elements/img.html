@@ -1,0 +1,8 @@
+{% if 'qr' in attrs.tags %}
+<img src="{{ attrs.src }}"
+     {% if attrs.alt %}alt="{{ attrs.alt }}"{% endif %}
+     style="background-color: #ffffff; padding: 8px;">
+{% else %}
+<img src="{{ attrs.src }}"
+     {% if attrs.alt %}alt="{{ attrs.alt }}"{% endif %}>
+{% endif %}

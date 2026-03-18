@@ -1,0 +1,119 @@
+{% load i18n %}
+{# Non-dismissible consent modal — rendered by base.html when show_consent_modal is True #}
+<div class="modal is-active" id="consentModal" role="dialog" aria-modal="true"
+     aria-labelledby="consentModalTitle">
+  {# No modal-background click-to-close — intentionally omitted #}
+  <div class="modal-background" style="cursor:not-allowed;"></div>
+
+  <form method="post" action="{% url 'users:consent' %}" style="z-index:1001;width:100%;max-width:680px;margin:0 auto;">
+    {% csrf_token %}
+    <div class="modal-card" style="width:100%;max-height:90vh;">
+
+      <header class="modal-card-head">
+        <p class="modal-card-title" id="consentModalTitle">
+          {% if consent_version_outdated %}
+            {% translate "Our consent form has been updated — please review and re-agree" %}
+          {% else %}
+            {% translate "Research Participation Consent" %}
+          {% endif %}
+        </p>
+        {# No close button — participant must agree or delete their account #}
+      </header>
+
+      <section class="modal-card-body" style="overflow-y:auto;">
+        <div class="content">
+
+          <h3>{% translate "Purpose" %}</h3>
+          <p>
+            {% blocktranslate %}
+            This study investigates how cold plunging affects cognitive performance.
+            You will be asked to complete brief cognitive tasks and log your cold plunge activity.
+            {% endblocktranslate %}
+          </p>
+
+          <h3>{% translate "What data we collect" %}</h3>
+          <ul>
+            <li>{% translate "Cognitive task responses (reaction times, accuracy)" %}</li>
+            <li>{% translate "Cold plunge logs (timing, duration, temperature)" %}</li>
+            <li>{% translate "Self-reported mood and health covariates" %}</li>
+            <li>{% translate "Device metadata (OS, screen size) for data quality modelling" %}</li>
+          </ul>
+
+          <div class="notification is-warning is-light">
+            <p class="has-text-weight-bold">{% translate "Special category (health) data — Article 9 UK GDPR" %}</p>
+            <p>
+              {% blocktranslate %}
+              Some data we collect — including sleep quality, menstruation status, gastrointestinal
+              symptoms, illness, and demographic information such as age, gender, height, and weight —
+              constitutes <strong>special category health data</strong> under Article 9 of UK GDPR.
+              We process this data solely for scientific research purposes with your explicit consent.
+              {% endblocktranslate %}
+            </p>
+          </div>
+
+          <h3>{% translate "Risks and benefits" %}</h3>
+          <p>
+            {% blocktranslate %}
+            There are no known risks from participation. You will be able to view your own
+            performance data on your personal dashboard throughout the study.
+            {% endblocktranslate %}
+          </p>
+
+          <h3>{% translate "Withdrawal" %}</h3>
+          <p>
+            {% blocktranslate %}
+            You may withdraw at any time by deleting your account. Aggregate or anonymised results
+            already included in published analyses cannot be retroactively removed, in line with
+            standard research ethics practice.
+            {% endblocktranslate %}
+          </p>
+
+          <h3>{% translate "Contact" %}</h3>
+          <p>{{ CONTACT_EMAIL }}</p>
+
+        </div>
+
+        <hr>
+
+        <div class="field">
+          <label class="checkbox">
+            <input type="checkbox" id="modal-age-cb" />
+            {% translate "I confirm that I am 16 years of age or older." %}
+          </label>
+        </div>
+        <div class="field">
+          <label class="checkbox">
+            <input type="checkbox" id="modal-consent-cb" />
+            {% blocktranslate %}
+            I have read the above information, including the special category health data notice,
+            and I <strong>explicitly consent</strong> to participate and to the processing of my
+            health data for scientific research purposes.
+            {% endblocktranslate %}
+          </label>
+        </div>
+
+      </section>
+
+      <footer class="modal-card-foot" style="justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+        <button type="submit" class="button is-primary" id="modal-consent-submit" disabled>
+          {% translate "I agree — continue" %}
+        </button>
+        <a href="{% url 'users:delete_data' %}" class="button is-danger is-outlined">
+          {% translate "Delete my account instead" %}
+        </a>
+      </footer>
+
+    </div>
+  </form>
+</div>
+
+<script>
+  (function () {
+    var ageCb = document.getElementById('modal-age-cb');
+    var consentCb = document.getElementById('modal-consent-cb');
+    var submitBtn = document.getElementById('modal-consent-submit');
+    function update() { submitBtn.disabled = !(ageCb.checked && consentCb.checked); }
+    ageCb.addEventListener('change', update);
+    consentCb.addEventListener('change', update);
+  })();
+</script>
