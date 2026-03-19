@@ -22,28 +22,32 @@
         {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
     {% endif %}
     {% if not SOCIALACCOUNT_ONLY %}
-        {% element hr %}
-        {% endelement %}
-        <p class="has-text-grey has-text-centered is-size-7 mb-3">{% trans "Or sign in with email and password" %}</p>
-        {% url 'account_login' as login_url %}
-        {% element form form=form method="post" action=login_url tags="entrance,login" %}
-            {% slot body %}
-                {% csrf_token %}
-                {% element fields form=form unlabeled=True %}
+        <details class="mt-4">
+            <summary class="has-text-grey has-text-centered is-size-7" style="cursor:pointer;list-style:none;">
+                {% trans "Or sign in with email and password" %}
+            </summary>
+            <div class="mt-3">
+                {% url 'account_login' as login_url %}
+                {% element form form=form method="post" action=login_url tags="entrance,login" %}
+                    {% slot body %}
+                        {% csrf_token %}
+                        {% element fields form=form unlabeled=True %}
+                        {% endelement %}
+                        {{ redirect_field }}
+                    {% endslot %}
+                    {% slot actions %}
+                        {% element button type="submit" tags="login,secondary" %}
+                            {% trans "Sign In" %}
+                        {% endelement %}
+                    {% endslot %}
                 {% endelement %}
-                {{ redirect_field }}
-            {% endslot %}
-            {% slot actions %}
-                {% element button type="submit" tags="login,secondary" %}
-                    {% trans "Sign In" %}
+                {% setvar link %}<a href="{{ signup_url }}">{% endsetvar %}
+                {% setvar end_link %}</a>{% endsetvar %}
+                {% element p %}
+                    {% blocktranslate %}No account yet? {{ link }}Sign up{{ end_link }}.{% endblocktranslate %}
                 {% endelement %}
-            {% endslot %}
-        {% endelement %}
-        {% setvar link %}<a href="{{ signup_url }}">{% endsetvar %}
-        {% setvar end_link %}</a>{% endsetvar %}
-        {% element p %}
-            {% blocktranslate %}No account yet? {{ link }}Sign up{{ end_link }}.{% endblocktranslate %}
-        {% endelement %}
+            </div>
+        </details>
     {% endif %}
 {% endblock content %}
 {% block extra_body %}
@@ -56,7 +60,6 @@
             const available = await PublicKeyCredential.isConditionalMediationAvailable();
             if (!available) return;
 
-            // Tell the email input to surface passkeys in browser autofill
             const emailInput = document.querySelector('input[name="login"]');
             if (emailInput) emailInput.setAttribute('autocomplete', 'username webauthn');
 
@@ -64,17 +67,27 @@
             const credentialInput = document.getElementById('mfa_credential');
             if (!form || !credentialInput) return;
 
+            const abortController = new AbortController();
+
+            // Abort the background conditional request before allauth's click handler fires
+            const passkeyBtn = document.getElementById('passkey_login');
+            if (passkeyBtn) {
+                passkeyBtn.addEventListener('click', function () { abortController.abort(); }, { capture: true });
+            }
+
             try {
                 const resp = await fetch(form.action, { method: 'GET', headers: { Accept: 'application/json' } });
                 if (!resp.ok) return;
                 const data = await resp.json();
-                // mediation: 'conditional' silently waits; resolves when user picks from autofill
-                const credential = await webauthnJSON.get({ ...data.request_options, mediation: 'conditional' });
+                const credential = await webauthnJSON.get({
+                    ...data.request_options,
+                    mediation: 'conditional',
+                    signal: abortController.signal,
+                });
                 credentialInput.value = JSON.stringify(credential);
                 form.submit();
             } catch (e) {
-                // NotAllowedError means user dismissed or typed password instead — perfectly fine
-                if (e.name !== 'NotAllowedError') console.error('Passkey conditional UI:', e);
+                if (e.name !== 'NotAllowedError' && e.name !== 'AbortError') console.error('Passkey conditional UI:', e);
             }
         })();
         </script>
