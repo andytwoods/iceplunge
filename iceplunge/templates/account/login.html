@@ -1,0 +1,82 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth account %}
+{% block head_title %}
+    {% trans "Sign In" %}
+{% endblock head_title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Sign In" %}
+    {% endelement %}
+    {% if PASSKEY_LOGIN_ENABLED %}
+        {% element button type="submit" form="mfa_login" id="passkey_login" tags="prominent,login,primary" %}
+            {% trans "Sign in with passkey (fingerprint / device PIN)" %}
+        {% endelement %}
+    {% endif %}
+    {% if LOGIN_BY_CODE_ENABLED %}
+        {% element button href=request_login_code_url tags="prominent,login,outline,primary" %}
+            {% trans "Send me a sign-in code" %}
+        {% endelement %}
+    {% endif %}
+    {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+    {% endif %}
+    {% if not SOCIALACCOUNT_ONLY %}
+        {% element hr %}
+        {% endelement %}
+        <p class="has-text-grey has-text-centered is-size-7 mb-3">{% trans "Or sign in with email and password" %}</p>
+        {% url 'account_login' as login_url %}
+        {% element form form=form method="post" action=login_url tags="entrance,login" %}
+            {% slot body %}
+                {% csrf_token %}
+                {% element fields form=form unlabeled=True %}
+                {% endelement %}
+                {{ redirect_field }}
+            {% endslot %}
+            {% slot actions %}
+                {% element button type="submit" tags="login,secondary" %}
+                    {% trans "Sign In" %}
+                {% endelement %}
+            {% endslot %}
+        {% endelement %}
+        {% setvar link %}<a href="{{ signup_url }}">{% endsetvar %}
+        {% setvar end_link %}</a>{% endsetvar %}
+        {% element p %}
+            {% blocktranslate %}No account yet? {{ link }}Sign up{{ end_link }}.{% endblocktranslate %}
+        {% endelement %}
+    {% endif %}
+{% endblock content %}
+{% block extra_body %}
+    {{ block.super }}
+    {% if PASSKEY_LOGIN_ENABLED %}
+        {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+        <script>
+        (async function () {
+            if (!window.PublicKeyCredential || !PublicKeyCredential.isConditionalMediationAvailable) return;
+            const available = await PublicKeyCredential.isConditionalMediationAvailable();
+            if (!available) return;
+
+            // Tell the email input to surface passkeys in browser autofill
+            const emailInput = document.querySelector('input[name="login"]');
+            if (emailInput) emailInput.setAttribute('autocomplete', 'username webauthn');
+
+            const form = document.getElementById('mfa_login');
+            const credentialInput = document.getElementById('mfa_credential');
+            if (!form || !credentialInput) return;
+
+            try {
+                const resp = await fetch(form.action, { method: 'GET', headers: { Accept: 'application/json' } });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                // mediation: 'conditional' silently waits; resolves when user picks from autofill
+                const credential = await webauthnJSON.get({ ...data.request_options, mediation: 'conditional' });
+                credentialInput.value = JSON.stringify(credential);
+                form.submit();
+            } catch (e) {
+                // NotAllowedError means user dismissed or typed password instead — perfectly fine
+                if (e.name !== 'NotAllowedError') console.error('Passkey conditional UI:', e);
+            }
+        })();
+        </script>
+    {% endif %}
+{% endblock %}
