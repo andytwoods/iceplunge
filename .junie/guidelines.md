@@ -55,6 +55,18 @@ You are an expert in Python, Django, and scalable web apps. Write secure, mainta
 - Keep email/password registration as a fallback.
 - Configure allauth to require email verification.
 
+### Passkey (WebAuthn) login — UX preferences
+- Passkey login is the **primary** sign-in method. Email/password is secondary.
+- The login page (`iceplunge/templates/account/login.html`) overrides allauth's default and must:
+  - Show a prominent "Sign in with passkey (fingerprint / device PIN)" button **first**.
+  - Hide the email/password form inside a native `<details>`/`<summary>` element labelled "Or sign in with email and password" — collapsed by default.
+- Use **WebAuthn Conditional UI** (`mediation: "conditional"`) so the browser surfaces stored passkeys in the email-field autofill without requiring a button click:
+  - On page load, check `PublicKeyCredential.isConditionalMediationAvailable()`.
+  - If available, add `autocomplete="username webauthn"` to the email input via JS and start a background conditional credential request using allauth's `mfa_login_webauthn` endpoint.
+  - Use an `AbortController` and abort it in a **capture-phase** click listener on the passkey button — this prevents the "A request is already pending" error when the user clicks the button explicitly (allauth's handler runs in the bubble phase).
+  - Swallow `AbortError` and `NotAllowedError` silently; log anything else.
+- The server cannot know whether a visitor has a passkey before they identify themselves — conditional UI relies on the **browser/OS** knowing, not the server. Do not attempt server-side passkey detection on the login page.
+
 ## User Impersonation
 - Use **django-hijack** to allow admins to impersonate any user.
 - Configure hijack to appear in the Django admin (hijack button on user list/detail).
