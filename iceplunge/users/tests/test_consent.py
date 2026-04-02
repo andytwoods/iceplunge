@@ -27,20 +27,21 @@ class TestConsentMiddleware:
         response = client.get(reverse("home"))
         assert response.status_code == 200
 
-    def test_unconsented_user_redirected(self, client):
+    def test_unconsented_user_sees_modal(self, client):
+        """GET requests let through with consent modal injected rather than redirected."""
         user = UserFactory()
         ConsentProfile.objects.create(user=user, consented_at=None)
         client.force_login(user)
         response = client.get(reverse("home"))
-        assert response.status_code == 302
-        assert response["Location"] == reverse("users:consent")
+        assert response.status_code == 200
+        assert b"consentModal" in response.content
 
-    def test_user_with_no_consent_profile_redirected(self, client):
+    def test_user_with_no_consent_profile_sees_modal(self, client):
         user = UserFactory()
         client.force_login(user)
         response = client.get(reverse("home"))
-        assert response.status_code == 302
-        assert response["Location"] == reverse("users:consent")
+        assert response.status_code == 200
+        assert b"consentModal" in response.content
 
     def test_consent_view_is_exempt(self, client):
         """Accessing the consent view itself must not cause an infinite redirect loop."""
@@ -64,6 +65,34 @@ class TestConsentMiddleware:
         client.post(reverse("users:consent"))
         profile = ConsentProfile.objects.get(user=user)
         assert profile.consented_at is not None
+
+    def test_outdated_consent_version_sees_modal(self, client, settings):
+        """A user whose consent version is outdated sees the re-consent modal."""
+        settings.CURRENT_CONSENT_VERSION = "2.0"
+        user = UserFactory()
+        ConsentProfile.objects.create(user=user, consented_at="2024-01-01T00:00:00Z", consent_version="1.0")
+        client.force_login(user)
+        response = client.get(reverse("home"))
+        assert response.status_code == 200
+        assert b"consentModal" in response.content
+        assert b"updated" in response.content  # updated-version message shown
+
+    def test_post_consent_saves_current_version(self, client, settings):
+        """Consenting saves the current consent version from settings."""
+        settings.CURRENT_CONSENT_VERSION = "2.0"
+        user = UserFactory()
+        client.force_login(user)
+        client.post(reverse("users:consent"))
+        profile = ConsentProfile.objects.get(user=user)
+        assert profile.consent_version == "2.0"
+
+    def test_my_data_exempt_from_consent_middleware(self, client):
+        """my-data download is accessible even when consent is pending (Article 20)."""
+        user = UserFactory()
+        ConsentProfile.objects.create(user=user, consented_at=None)
+        client.force_login(user)
+        response = client.get(reverse("users:my_data"))
+        assert response.status_code == 200
 
 
 @pytest.mark.django_db

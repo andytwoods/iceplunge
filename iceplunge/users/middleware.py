@@ -1,8 +1,10 @@
 from django.conf import settings
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import resolve
 from django.urls import reverse
 from django.urls import Resolver404
+
 
 
 CONSENT_EXEMPT_URL_NAMES = {
@@ -17,6 +19,7 @@ CONSENT_EXEMPT_URL_NAMES = {
     "account_reset_password_from_key_done",
     "users:consent",
     "users:deletion_complete",
+    "users:my_data",  # Article 20 — data portability always accessible
 }
 
 CONSENT_EXEMPT_URL_NAMESPACES = {"hijack", "admin", "account", "socialaccount"}
@@ -31,8 +34,23 @@ class ConsentRequiredMiddleware:
     def __call__(self, request):
         if request.user.is_authenticated and not self._is_exempt(request):
             profile = getattr(request.user, "consent_profile", None)
-            if profile is None or profile.consented_at is None:
-                return redirect(reverse("users:consent"))
+            current_version = getattr(settings, "CURRENT_CONSENT_VERSION", "1.0")
+            needs_consent = (
+                profile is None
+                or profile.consented_at is None
+                or profile.consent_version != current_version
+            )
+            if needs_consent:
+                if request.method == "GET":
+                    # Full-page GET: let through — base.html renders the consent modal overlay
+                    pass
+                elif request.headers.get("HX-Request"):
+                    # HTMX non-GET: force a full page reload so the modal appears
+                    response = HttpResponse()
+                    response["HX-Redirect"] = "/"
+                    return response
+                else:
+                    return redirect(reverse("users:consent"))
         return self.get_response(request)
 
     def _is_exempt(self, request) -> bool:

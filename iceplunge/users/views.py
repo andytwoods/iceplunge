@@ -1,9 +1,13 @@
+import json
+
 from allauth.account.views import SignupView
+from django.conf import settings
 from django.contrib.auth import get_user_model, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.mail import send_mail
 from django.db.models import QuerySet
+from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -65,7 +69,8 @@ class ConsentView(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         profile, _ = ConsentProfile.objects.get_or_create(user=request.user)
         profile.consented_at = timezone.now()
-        profile.save(update_fields=["consented_at"])
+        profile.consent_version = getattr(settings, "CURRENT_CONSENT_VERSION", "1.0")
+        profile.save(update_fields=["consented_at", "consent_version"])
         return redirect(reverse("home"))
 
 
@@ -145,6 +150,129 @@ class DataDeletionCompleteView(TemplateView):
 
 data_deletion_view = DataDeletionView.as_view()
 data_deletion_complete_view = DataDeletionCompleteView.as_view()
+
+
+class MyDataExportView(LoginRequiredMixin, View):
+    """
+    Article 20 UK GDPR — Right to data portability.
+
+    Returns all personal data held for the authenticated user as a
+    machine-readable JSON file.  Always accessible regardless of consent
+    version so users can retrieve their data even before re-consenting.
+    """
+
+    def get(self, request):
+        from iceplunge.covariates.models import DailyCovariate, WeeklyCovariate
+        from iceplunge.plunges.models import PlungeLog
+        from iceplunge.tasks.models import CognitiveSession
+
+        user = request.user
+
+        baseline = None
+        if hasattr(user, "baseline_profile"):
+            bp = user.baseline_profile
+            baseline = {
+                "age": bp.age,
+                "gender": bp.gender,
+                "height_cm": str(bp.height_cm),
+                "weight_kg": str(bp.weight_kg),
+                "bmi": str(bp.bmi),
+                "handedness": bp.handedness,
+                "plunge_years": str(bp.plunge_years),
+            }
+
+        consent = None
+        if hasattr(user, "consent_profile"):
+            cp = user.consent_profile
+            consent = {
+                "consented_at": cp.consented_at.isoformat() if cp.consented_at else None,
+                "consent_version": cp.consent_version,
+            }
+
+        plunge_logs = [
+            {
+                "id": pl.id,
+                "timestamp": pl.timestamp.isoformat(),
+                "duration_minutes": pl.duration_minutes,
+                "water_temp_celsius": str(pl.water_temp_celsius) if pl.water_temp_celsius is not None else None,
+                "temp_measured": pl.temp_measured,
+                "immersion_depth": pl.immersion_depth,
+                "context": pl.context,
+                "breathing_technique": pl.breathing_technique,
+                "perceived_intensity": pl.perceived_intensity,
+                "head_submerged": pl.head_submerged,
+                "pre_hot_treatment": pl.pre_hot_treatment,
+                "pre_hot_treatment_minutes": pl.pre_hot_treatment_minutes,
+                "exercise_timing": pl.exercise_timing,
+                "exercise_type": pl.exercise_type,
+                "exercise_minutes": pl.exercise_minutes,
+            }
+            for pl in PlungeLog.objects.filter(user=user).order_by("timestamp")
+        ]
+
+        cognitive_sessions = [
+            {
+                "id": str(cs.id),
+                "started_at": cs.started_at.isoformat() if cs.started_at else None,
+                "completed_at": cs.completed_at.isoformat() if cs.completed_at else None,
+                "completion_status": cs.completion_status,
+                "is_practice": cs.is_practice,
+                "quality_flags": cs.quality_flags or [],
+                "task_order": cs.task_order or [],
+                "device_meta": cs.device_meta,
+            }
+            for cs in CognitiveSession.objects.filter(user=user).order_by("started_at")
+        ]
+
+        daily_covariates = [
+            {
+                "date": str(dc.date),
+                "sleep_duration_hours": str(dc.sleep_duration_hours) if dc.sleep_duration_hours is not None else None,
+                "sleep_quality": dc.sleep_quality,
+                "alcohol_last_24h": dc.alcohol_last_24h,
+                "exercise_today": dc.exercise_today,
+                "menstruation_today": dc.menstruation_today,
+            }
+            for dc in DailyCovariate.objects.filter(user=user).order_by("date")
+        ]
+
+        weekly_covariates = [
+            {
+                "week_start": str(wc.week_start),
+                "gi_severity": wc.gi_severity,
+                "gi_symptoms": wc.gi_symptoms,
+                "illness_status": wc.illness_status,
+            }
+            for wc in WeeklyCovariate.objects.filter(user=user).order_by("week_start")
+        ]
+
+        payload = {
+            "exported_at": timezone.now().isoformat(),
+            "account": {
+                "email": user.email,
+                "name": user.name,
+                "date_joined": user.date_joined.isoformat(),
+                "pseudonymised_id": str(user.pseudonymised_id),
+            },
+            "consent": consent,
+            "baseline_profile": baseline,
+            "plunge_logs": plunge_logs,
+            "cognitive_sessions": cognitive_sessions,
+            "daily_covariates": daily_covariates,
+            "weekly_covariates": weekly_covariates,
+        }
+
+        response = HttpResponse(
+            json.dumps(payload, indent=2),
+            content_type="application/json",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="my_data_{timezone.now().date().isoformat()}.json"'
+        )
+        return response
+
+
+my_data_export_view = MyDataExportView.as_view()
 
 
 @method_decorator(

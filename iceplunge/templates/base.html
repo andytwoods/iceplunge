@@ -177,6 +177,7 @@
   </button>
 </div>
 
+{% if show_consent_modal %}{% include "users/partials/_consent_modal.html" %}{% endif %}
 {% block modal %}{% endblock modal %}
 {% block inline_javascript %}{% endblock inline_javascript %}
 

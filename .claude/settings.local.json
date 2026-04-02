@@ -7,7 +7,11 @@
       "Bash(uv remove:*)",
       "Bash(python:*)",
       "Read(//mnt/c/Users/andyt/PycharmProjects/**)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(grep:*)",
+      "Bash(uv pip:*)",
+      "Bash(.venv/bin/python manage.py create_mock_data)",
+      "Bash(.venv/bin/python manage.py create_mock_data --clear)"
     ]
   }
 }

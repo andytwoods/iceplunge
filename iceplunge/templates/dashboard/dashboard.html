@@ -37,6 +37,19 @@
         <canvas id="moodChart" height="120"></canvas>
       </div>
 
+      <!-- Plunge-relative charts (only shown if plunge data exists) -->
+      <div id="plungeRelativeSection" style="display:none;">
+        <div class="box mb-5">
+          <h2 class="title is-5 is-clear">{% translate "Reaction Time vs. Hours Since Last Plunge" %}</h2>
+          <p class="is-size-7 has-text-grey mb-3">{% translate "Each point is one session. Lower is better." %}</p>
+          <canvas id="rtPlungeChart" height="120"></canvas>
+        </div>
+        <div class="box mb-5">
+          <h2 class="title is-5 is-clear">{% translate "Mood vs. Hours Since Last Plunge" %}</h2>
+          <canvas id="moodPlungeChart" height="120"></canvas>
+        </div>
+      </div>
+
     {% endif %}
   </div>
 </section>
@@ -56,6 +69,12 @@
     buildRtChart(data.rt_trend || []);
     buildLapseChart(data.rt_trend || []);
     buildMoodChart(data.mood_trend || []);
+    var plungePoints = data.plunge_relative || [];
+    if (plungePoints.length > 0) {
+      document.getElementById("plungeRelativeSection").style.display = "";
+      buildRtPlungeChart(plungePoints);
+      buildMoodPlungeChart(plungePoints);
+    }
   });
 
   function buildRtChart(points) {
@@ -125,6 +144,65 @@
         scales: {
           y: {min: 1, max: 5, title: {display: true, text: "Score (1–5)"}},
           x: {title: {display: true, text: "Date"}},
+        },
+      },
+    });
+  }
+  function buildRtPlungeChart(points) {
+    var rtData = points.filter(function (p) { return p.median_rt != null; })
+      .map(function (p) { return {x: p.hours_since_plunge, y: p.median_rt}; });
+    var lapseData = points.map(function (p) { return {x: p.hours_since_plunge, y: p.lapse_count}; });
+    new Chart(document.getElementById("rtPlungeChart"), {
+      type: "scatter",
+      data: {
+        datasets: [
+          {
+            label: "Median RT (ms)",
+            data: rtData,
+            backgroundColor: "rgba(54, 162, 235, 0.7)",
+            yAxisID: "yRT",
+          },
+          {
+            label: "Lapses",
+            data: lapseData,
+            backgroundColor: "rgba(255, 99, 132, 0.7)",
+            yAxisID: "yLapse",
+          },
+        ],
+      },
+      options: {
+        scales: {
+          x: {title: {display: true, text: "Hours since last plunge"}},
+          yRT: {position: "left", title: {display: true, text: "Median RT (ms)"}},
+          yLapse: {position: "right", title: {display: true, text: "Lapses"}, beginAtZero: true, grid: {drawOnChartArea: false}},
+        },
+      },
+    });
+  }
+
+  function buildMoodPlungeChart(points) {
+    var keys = ["valence", "arousal", "stress", "sharpness"];
+    var colors = {
+      valence: "rgb(75, 192, 192)",
+      arousal: "rgb(255, 159, 64)",
+      stress: "rgb(255, 99, 132)",
+      sharpness: "rgb(153, 102, 255)",
+    };
+    var datasets = keys.map(function (k) {
+      return {
+        label: k.charAt(0).toUpperCase() + k.slice(1),
+        data: points.filter(function (p) { return p[k] != null; })
+          .map(function (p) { return {x: p.hours_since_plunge, y: p[k]}; }),
+        backgroundColor: colors[k],
+      };
+    });
+    new Chart(document.getElementById("moodPlungeChart"), {
+      type: "scatter",
+      data: {datasets: datasets},
+      options: {
+        scales: {
+          x: {title: {display: true, text: "Hours since last plunge"}},
+          y: {min: 1, max: 5, title: {display: true, text: "Score (1–5)"}},
         },
       },
     });

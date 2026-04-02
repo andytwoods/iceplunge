@@ -1,4 +1,5 @@
 """Participant dashboard views."""
+import bisect
 import statistics
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,6 +8,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views import View
 
+from iceplunge.plunges.models import PlungeLog
 from iceplunge.tasks.models import CognitiveSession, MoodRating, TaskResult
 
 
@@ -38,7 +40,8 @@ class ChartDataView(LoginRequiredMixin, View):
         user = request.user
         rt_trend = self._rt_trend(user)
         mood_trend = self._mood_trend(user)
-        return JsonResponse({"rt_trend": rt_trend, "mood_trend": mood_trend})
+        plunge_relative = self._plunge_relative_data(user)
+        return JsonResponse({"rt_trend": rt_trend, "mood_trend": mood_trend, "plunge_relative": plunge_relative})
 
     # ─── helpers ──────────────────────────────────────────────────────────────
 
@@ -95,6 +98,72 @@ class ChartDataView(LoginRequiredMixin, View):
                     "sharpness": rating.sharpness,
                 }
             )
+        return points
+
+
+    def _plunge_relative_data(self, user):
+        """
+        For each session that has both a PVT result and a mood rating, find the
+        most recent prior plunge and compute hours elapsed since it.
+
+        Two queries: one for plunge timestamps, one for sessions+results+ratings.
+        """
+        plunge_times = list(
+            PlungeLog.objects.filter(user=user)
+            .order_by("timestamp")
+            .values_list("timestamp", flat=True)
+        )
+        if not plunge_times:
+            return []
+
+        # Build a lookup: session_id -> PVT metrics
+        pvt_by_session = {}
+        for result in TaskResult.objects.filter(
+            session__user=user, task_type="pvt", is_partial=False
+        ).select_related("session"):
+            pvt_by_session[result.session_id] = result.summary_metrics or {}
+
+        # Build a lookup: session_id -> mood
+        mood_by_session = {}
+        for rating in MoodRating.objects.filter(session__user=user).select_related("session"):
+            mood_by_session[rating.session_id] = rating
+
+        points = []
+        for session_id, metrics in pvt_by_session.items():
+            mood = mood_by_session.get(session_id)
+            session_time = None
+            # Retrieve started_at via the already-fetched related session
+            try:
+                session = CognitiveSession.objects.only("started_at").get(pk=session_id)
+                session_time = session.started_at
+            except CognitiveSession.DoesNotExist:
+                continue
+
+            if session_time is None:
+                continue
+
+            # Binary search for the latest plunge strictly before this session
+            idx = bisect.bisect_left(plunge_times, session_time) - 1
+            if idx < 0:
+                continue  # no plunge before this session
+
+            hours_since = (session_time - plunge_times[idx]).total_seconds() / 3600
+
+            point = {
+                "hours_since_plunge": round(hours_since, 1),
+                "median_rt": metrics.get("median_rt"),
+                "lapse_count": metrics.get("lapse_count", 0),
+            }
+            if mood:
+                point.update({
+                    "valence": mood.valence,
+                    "arousal": mood.arousal,
+                    "stress": mood.stress,
+                    "sharpness": mood.sharpness,
+                })
+            points.append(point)
+
+        points.sort(key=lambda p: p["hours_since_plunge"])
         return points
 
 

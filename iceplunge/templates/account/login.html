@@ -1,0 +1,95 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth account %}
+{% block head_title %}
+    {% trans "Sign In" %}
+{% endblock head_title %}
+{% block content %}
+    {% element h1 %}
+        {% trans "Sign In" %}
+    {% endelement %}
+    {% if PASSKEY_LOGIN_ENABLED %}
+        {% element button type="submit" form="mfa_login" id="passkey_login" tags="prominent,login,primary" %}
+            {% trans "Sign in with passkey (fingerprint / device PIN)" %}
+        {% endelement %}
+    {% endif %}
+    {% if LOGIN_BY_CODE_ENABLED %}
+        {% element button href=request_login_code_url tags="prominent,login,outline,primary" %}
+            {% trans "Send me a sign-in code" %}
+        {% endelement %}
+    {% endif %}
+    {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+    {% endif %}
+    {% if not SOCIALACCOUNT_ONLY %}
+        <details class="mt-4">
+            <summary class="has-text-grey has-text-centered is-size-7" style="cursor:pointer;list-style:none;">
+                {% trans "Or sign in with email and password" %}
+            </summary>
+            <div class="mt-3">
+                {% url 'account_login' as login_url %}
+                {% element form form=form method="post" action=login_url tags="entrance,login" %}
+                    {% slot body %}
+                        {% csrf_token %}
+                        {% element fields form=form unlabeled=True %}
+                        {% endelement %}
+                        {{ redirect_field }}
+                    {% endslot %}
+                    {% slot actions %}
+                        {% element button type="submit" tags="login,secondary" %}
+                            {% trans "Sign In" %}
+                        {% endelement %}
+                    {% endslot %}
+                {% endelement %}
+                {% setvar link %}<a href="{{ signup_url }}">{% endsetvar %}
+                {% setvar end_link %}</a>{% endsetvar %}
+                {% element p %}
+                    {% blocktranslate %}No account yet? {{ link }}Sign up{{ end_link }}.{% endblocktranslate %}
+                {% endelement %}
+            </div>
+        </details>
+    {% endif %}
+{% endblock content %}
+{% block extra_body %}
+    {{ block.super }}
+    {% if PASSKEY_LOGIN_ENABLED %}
+        {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+        <script>
+        (async function () {
+            if (!window.PublicKeyCredential || !PublicKeyCredential.isConditionalMediationAvailable) return;
+            const available = await PublicKeyCredential.isConditionalMediationAvailable();
+            if (!available) return;
+
+            const emailInput = document.querySelector('input[name="login"]');
+            if (emailInput) emailInput.setAttribute('autocomplete', 'username webauthn');
+
+            const form = document.getElementById('mfa_login');
+            const credentialInput = document.getElementById('mfa_credential');
+            if (!form || !credentialInput) return;
+
+            const abortController = new AbortController();
+
+            // Abort the background conditional request before allauth's click handler fires
+            const passkeyBtn = document.getElementById('passkey_login');
+            if (passkeyBtn) {
+                passkeyBtn.addEventListener('click', function () { abortController.abort(); }, { capture: true });
+            }
+
+            try {
+                const resp = await fetch(form.action, { method: 'GET', headers: { Accept: 'application/json' } });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const credential = await webauthnJSON.get({
+                    ...data.request_options,
+                    mediation: 'conditional',
+                    signal: abortController.signal,
+                });
+                credentialInput.value = JSON.stringify(credential);
+                form.submit();
+            } catch (e) {
+                if (e.name !== 'NotAllowedError' && e.name !== 'AbortError') console.error('Passkey conditional UI:', e);
+            }
+        })();
+        </script>
+    {% endif %}
+{% endblock %}
